@@ -1,5 +1,9 @@
 # Eval Lab: LLM Evals & Observability by Experiment — course plan
 
+> **Course guidelines (binding):** before writing or changing any course content, read
+> `C:\Users\TalGiladi\OneDrive\repos\tals-academy\docs\new-course-instructions.md`. It wins over
+> anything in this file or the course plan unless Tal says otherwise in chat.
+
 Written 2026-09-30. First draft, not yet reviewed.
 
 **Status**
