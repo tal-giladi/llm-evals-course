@@ -25,3 +25,6 @@ synced folder: git cannot read them, so never try to track them.
 
 # Measurements the agents leave behind when drafting lessons.
 build/m1*.py
+
+# Cache and gate outputs the labs write while you are working through them.
+build/m13*.json
