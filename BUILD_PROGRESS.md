@@ -47,8 +47,9 @@ Modules 11–15 (production path: Python, Docker, tracing UI, CI, online monitor
 - [x] Module quizzes M1–M10 (`assessments/`)
 - [x] Final QA — `npm run check-course` reports 0 problems
 
-**COMPLETE.** 43 lessons, 53 quiz files, 292 questions, 9 simulations. The Academy dry-run
-import check reports `0 problems`. All four build commands pass.
+**COMPLETE.** 13 modules, 47 lessons, 58 quiz files, 321 questions, 9 simulations. The Academy dry-run
+import check reports `0 problems`. All five build commands pass (erify, ix-quiz-yaml,
+check-lessons, smoke, and `pytest`).
 
 ## Who is working on what right now
 
@@ -79,6 +80,7 @@ import check reports `0 problems`. All four build commands pass.
 - Plan §12.5 (who labels our datasets) — our educational-model labels are synthetic; real labelling pass is Tal's call.
 - Plan §12.9 (Hebrew judging set) — not in this pass.
 - Plan §12.2/§12.3 (shared lab kit with rag-course, Academy network access) — this pass vendors a standalone copy into `simulations/common/`; sharing is not decided.
+
 
 
 

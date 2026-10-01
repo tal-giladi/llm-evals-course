@@ -7,8 +7,8 @@ Open decisions and handoff items. Working file — not imported.
 **Ready to import.** The Academy's own dry-run checker reports `0 problems`:
 
 ```
-Eval Lab: LLM Evals & Observability by Experiment: 12 modules, 43 lessons,
-53 quiz files, 292 questions (A-D 67/79/77/69), 0 problems
+Eval Lab: LLM Evals & Observability by Experiment: 13 modules, 47 lessons,
+58 quiz files, 321 questions (A-D 75/86/84/76), 0 problems
 ```
 
 - Repo: `tal-giladi/llm-evals-course` (suggested; public, hidden until launch)
@@ -25,6 +25,7 @@ All four build checks pass:
 | `node build/fix-quiz-yaml.mjs` | No quiz file contains a scalar that will silently break the importer |
 | `node build/check-lessons.mjs` | 43 lessons, no problems: front matter, section template, links, simulation presets, prerequisites, and every quiz rule including the importer's option-length rule |
 | `node build/smoke.mjs` | All 9 simulations load in a real browser with no console errors and no network requests |
+| `py -m pytest` | 47 Python tests: parity with the browser engine, the three labs, and the CLI |
 
 ## Decisions taken with you (2026-10-01)
 
@@ -134,3 +135,22 @@ Recommended defaults, all easy to change:
 - **`ab-gates` flip-list naming is asymmetric** — `paired.fixed`/`broke` are named from A's side
   while the panel's list is named from B's. Left in place deliberately: lesson 10.1 teaches it as
   a real trap in reporting.
+
+### From Module 11
+
+- **The CLI's run line does not name the variant it scored.** Deliberate: lesson 11.1 makes
+  fixing it the learner's exercise, and lab 1 now tests for it. If you would rather the shipped
+  CLI be correct out of the box, add the field and re-read 11.1's `## Break it`, which depends on
+  its absence.
+- **`v1padded` is a variant with recorded verdicts but no human labels.** It is the failure lesson
+  11.1 keeps on screen, because the variant-name guard cannot catch it. Lab 1 teaches the refusal.
+- **Lesson 11.4 is a mapping table, not a result.** No eval framework was installed or executed:
+  the file sandbox denies pip's wheel-metadata extraction. The lesson says so above the table, and
+  all three doc URLs and the API names were verified against the projects' own documentation. If
+  you want a real comparison, installing promptfoo or Inspect and running both against
+  `datasets/support.json` is the obvious next piece of work.
+- **No live Ollama run exists anywhere in this repo.** Lesson 11.3 therefore quotes no latency, no
+  cost and no download size, and tells the learner to measure it. The `qwen3:1.7b` tag is mutable,
+  not a content digest; the lesson says that is a real gap rather than a subtlety.
+- **`labs/common/docker-compose.yml` pins the Ollama image tag but not a model digest.** Also
+  called out in the lesson.
