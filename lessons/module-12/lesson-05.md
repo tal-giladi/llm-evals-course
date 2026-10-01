@@ -146,10 +146,25 @@ two rows are close and why "it is the database" would be wrong on this trace.
 > rather than mislabelling a live app. Never quote a latency from this repository as a measurement of a named
 > system, and never quote one at all until you have measured it on your own hardware.
 
-The structural trap, carried over from lesson 12.4: `latency()` defines "end-to-end" as
-`max(spans, key=duration)`. That is correct only if the longest span is the root you opened. In a trace
-where the only spans are model calls, the two columns become the same two numbers — **1229** and **2318** —
-under different headings, and nothing raises.
+The third trap is a code-reading one, and it is worth the paragraph because the wrong version of it is
+easy to ship. `latency()` defines "end-to-end" as **the span with no `parent_id`** — `TraceStore._roots()` —
+and not as the longest span in the trace. On this data the two definitions agree on every number, so nothing
+in the run below depends on the difference. That is exactly what makes it worth arguing about: *a heuristic
+that happens to work is not a definition.*
+
+They agree only because of an invariant this particular tracer maintains. `Tracer.span()` rewrites a root's
+duration to be its own time plus the sum of its children, so "longest span" and "root" are the same span
+here, on every trace, for ever. Take the invariant away — a span that does not enclose the work inside it, a
+trace assembled from spans recorded in different processes, a model call whose parent is an HTTP server span
+— and "longest" starts answering a question nobody asked, with no exception and no number to notice it by.
+
+The parent pointer cannot fail that way. It is set when the span is opened, from the enclosing `with` block,
+and it is never recomputed from a duration afterwards. The case the test pins down is the chat-only trace: a
+`chat` span with no parent **is** the root, so end-to-end and the model call are literally the same span, and
+`test_latency_uses_the_root_not_the_longest_span` asserts the two columns are equal rather than asserting
+that one of them is broken. That is the correct reading — with nothing enclosing the call, the call is the
+whole of the trace — and it is also why an end-to-end number taken from a model-only trace is a model number.
+The column is accurate about the trace it has. Your request is simply not in it.
 
 ### 3. Sessions — a join key is an identifier
 
@@ -160,6 +175,13 @@ and tokens per group:
 root = max((Span.from_dict(s) for s in t["spans"]), key=lambda x: x.duration_ms)
 sid = root.attributes.get(GEN_AI_CONVERSATION_ID, "unknown")
 ```
+
+Read that first line next to the paragraph above it. `latency()` was fixed to use the spans with no
+`parent_id`; `sessions()` still reaches for the longest one. On these traces the two are the same span, so
+the bug is invisible — which is exactly the shape of the mistake, and exactly why "it gives the right number
+today" is the worst possible reason to leave a heuristic in place. If you take one thing from this section
+into your own code, it is that one: **find the heuristic, then ask what invariant is holding it up, then write
+the invariant down as an assertion before you rely on it.**
 
 The CLI's `--session` defaults to `s-demo`, so all 20 dev traces land in one bucket. That is the *shape* of
 the feature and it is genuinely useful: per-conversation cost is the question a support team asks first, and
@@ -255,13 +277,34 @@ trace, same decision, forever:
 | 25% | **9** |
 
 This is the whole reason the sampler is a hash rather than a coin flip. **A coin flip means the trace you
-wanted may be missing and you cannot tell which.** With a hash, "we do not trace errors" is a rule you can
-state and a claim you can audit: the same twenty requests drop the same five traces on every run, forever,
-so a gap in the data is a fact about the trace set rather than a fact about the day you looked.
+wanted may be missing and you cannot tell which.** With a hash, "we drop the volume, never the errors" is a
+rule you can state and a claim you can audit: the same requests drop the same traces on every run, forever, so
+a gap in the data is a fact about the trace set rather than a fact about the day you looked.
 
-**And here is the part that makes it a real lesson: the shipped sampler still drops errors.** In `record()`,
-`should_sample` is evaluated *before* the failure is planted, so the decision is made before the outcome is
-known. The same twenty requests with the same planted 10% failure rate, sampled and unsampled:
+`record()` keeps that rule with one line: it decides `fail_on` *before* it samples, and a request that will
+fail is kept at any rate. The same twenty requests with the same planted 10% failure rate:
+
+```console
+$ py -c "from evallab import TraceStore, load, record; d = load('support'); [print(r, len(s), s.error_rate()['chat']) for r in (1.0, 0.5, 0.25) for s in [TraceStore.from_traces(record(d, n=20, split='dev', fail_rate=0.10, sample_rate=r, seed=1))]]"
+1.0  20 {'errors': 2, 'spans': 20, 'rate': 0.1}
+0.5  10 {'errors': 2, 'spans': 10, 'rate': 0.2}
+0.25 7 {'errors': 2, 'spans': 7, 'rate': 0.2857142857142857}
+```
+
+Read the numerator, then read the rate. **The numerator holds at two and the rate nearly triples.** Both
+failures survive at 25%, which is the rule working. But the denominator is now the sample, so the same two
+failures are being reported at 28.6% against 10.0% — and neither figure is wrong, because neither is
+estimating the other. `2/20` estimates the failure rate of the traffic. `2/7` is a count over a set that was
+*selected* because it contains the failures.
+
+So the honest statement about sampling for cost takes two sentences, not one: **sampling must never make
+errors disappear, and it will always leave your error rate noisy and biased upward.** Errors are the one
+thing a rate is least able to survive thinning — two failures in seven traces is not the information two
+failures in twenty is, and no interval closes that gap. And if a dashboard's failure rate moves when you
+change the sample rate, the dashboard is reporting the sample rate. That is the bill for keeping the errors,
+and it is worth paying: the alternative is a number that improves because you stopped looking.
+
+The same run through the CLI, where the effect is in the summary line as well:
 
 ```console
 $ py -m evallab.cli trace --n 20 --fail-rate 0.1 --out traces.jsonl
@@ -269,20 +312,20 @@ $ py -m evallab.cli trace --n 20 --fail-rate 0.1 --out traces.jsonl
   errors    9 span(s) with an error.type
 
 $ py -m evallab.cli trace --n 20 --fail-rate 0.1 --sample-rate 0.25 --out traces.jsonl
-5 traces, 20 spans
-  errors    2 span(s) with an error.type
+7 traces, 26 spans
+  errors    6 span(s) with an error.type
 ```
 
-Break that second run down by span kind and the model-call row reads `chat 0 / 5`. Against the unsampled
-`chat 2 / 20`, **both** planted failures were sampled out. The model-call error rate went from 10.0% to 0.0%
-and the product did not change by one request. The two errors that survived are `chain` errors, which happen
-to sit on traces that were sampled in.
+Six error spans out of 26 reads as a *worse* run than nine out of 78, and the bot did not change by one
+request.
 
-So: **sampling at 25% did not make the bot better; it removed the evidence.** The fix is not a better rate
-and not a better hash — it is to make the decision *after* you know the outcome. Export errored traces
-unconditionally, sample the rest, and the deterministic hash is what makes the resulting sample reproducible
-and the resulting claim checkable. That is the rule that costs you almost nothing and that a coin flip would
-have made impossible to keep.
+One thing to be exact about, because it is the part that needs design rather than a hash. The keep rule
+fires on `fail_on` — the planted **model-call** failure — and it is why the `chat` row holds. The `chain`
+row is not protected: it falls from 5 of 18 to 3 of 8 to 2 of 5 across the sweep, because `record()` cannot
+know a post-check will fail before it runs it. In a live exporter the equivalent signal is `error.type` on a
+finished span, which is known before the trace is written, so the same rule applies there. **Whatever you
+cannot know at capture time, you cannot sample around** — and that is the reason to decide the rule while
+writing the exporter rather than after a dashboard has been green for a month.
 
 ## Show me
 
@@ -359,7 +402,7 @@ And the package's own tests, which encode the four properties this lesson is abo
 
 ```console
 $ py -m pytest tests/test_tracing.py -q
-22 passed in 0.05s
+24 passed in 0.06s
 ```
 
 `test_cost_is_the_sum_of_the_model_spans` asserts the total equals the hand sum. `test_sessions_group_traces`
@@ -367,8 +410,11 @@ asserts the per-session trace counts sum to the number of traces — a join key 
 no join key. `test_redaction_removes_pii_but_keeps_the_measurement` and
 `test_local_copy_still_has_the_text_for_debugging` are the two layers and the export-time decision.
 `test_sampling_is_deterministic` compares two 200-element decisions and asserts they are identical lists.
-`test_errors_are_kept_at_a_low_sample_rate` asserts that a 25% sample is genuinely smaller than 40 traces —
-and, read honestly, it asserts that the sampling **happened**, not that the errors survived it.
+`test_errors_survive_a_low_sample_rate` asserts all three halves of the rule at once: the 25% sample is
+genuinely smaller, the `chat` error **count** is identical to the unsampled run, and the `chat` error **rate**
+is strictly higher — which is the bias, written as an assertion.
+`test_latency_uses_the_root_not_the_longest_span` pins the chat-only case: one parentless span is one root,
+and end-to-end equals the model call because they are the same span.
 
 > [!IMPORTANT]
 > Two numbers in this lesson are not measurements and are labelled as such everywhere they appear. The
@@ -390,8 +436,8 @@ and, read honestly, it asserts that the sampling **happened**, not that the erro
    number would a "tokens per request" dashboard have told you about?
 3. You plant a 10% model-call failure rate and the cost panel drops. Write the two sentences you would send
    to whoever is asking whether the outage saved money.
-4. `should_sample` hashes the trace id, so the sample is stable. The shipped `record()` still drops errors at
-   25%. Name the one-line change that keeps the stability and loses the failures.
+4. You sample 25% and keep every error. The failure *count* is unchanged and the failure *rate* nearly
+   triples. Explain why both numbers are true, and say which one you would put on the dashboard.
 5. `gen_ai.conversation.id` is not in `Redactor.KEYS`. Write down what happens to the session id `cus_8f21a`
    when `--redact` is on, and what happens to `a.customer@example.com`.
 
@@ -409,16 +455,20 @@ and, read honestly, it asserts that the sampling **happened**, not that the erro
    the error count, and the span count (78 rather than 80, because the two failed requests never reach the
    post-check). Write the sentence for the finance ticket that explains why the spend fell during an
    incident.
-4. **Read a percentile properly.** Write down p50 and p95 end-to-end and p50 and p95 model call. Then find
-   one trace where the two rows are far apart rather than close, and say what would have to be slow for that
-   to be the normal case.
+4. **Read a percentile properly.** Write down p50 and p95 end-to-end and p50 and p95 model call, then find
+   `TraceStore._roots()` in [`evallab/observe.py`](../../labs/common/evallab/observe.py) and say in one
+   sentence what the end-to-end column would have to assume to compute it any other way. Finish by building
+   a one-span trace — a `chat` span with no parent — and confirming that end-to-end and the model call are
+   the same number, and that this is the right answer rather than a bug.
 5. **Do the redaction twice, for two different reasons.** Once with `--pii-rate 1.0 --redact` and count the
    values removed. Then take `traces.jsonl`, load it with `TraceStore.load(...)`, and confirm the token
    counts and `error.type` values survived. Write the sentence you would use to get a security reviewer's
    sign-off on shipping the file.
-6. **Break the sampler.** Run the same `--fail-rate 0.1` command at `--sample-rate 1.0`, `0.5` and `0.25`, and
-   print `error_rate()` for each. Write down at which rate the model-call error row goes to zero, and what
-   you would have to change so it never does.
+6. **Watch the sampler work.** Run the same `--fail-rate 0.1` command at `--sample-rate 1.0`, `0.5` and
+   `0.25`, and print `error_rate()` for each. Write the `chat` **count** and the `chat` **rate** in a row, and
+   then the `chain` row beside them. The first pair is the rule holding and the bias that follows from it;
+   the second pair is the errors `record()` could not know about in advance. Say which of the two you would
+   have to design for in an exporter you were writing from scratch.
 
 ## Break it
 
@@ -444,9 +494,10 @@ problem is the one that gets the tracing switched off.
 whether it was dropped, dropped by whom, or never created. The lie: **a sample you cannot reproduce is not a
 sample, it is an anecdote**, and you cannot compute a rate over a set whose membership you cannot name.
 
-**Sample, and keep only the sample.** Even hashed, the shipped sampler decides before it knows the outcome, so
-errors drop with the volume. The lie: **"we sample 25%" is not a statement about cost, it is a statement about
-which failures you will never see**, and nobody reading the dashboard can tell those two apart.
+**Sample, and keep only the sample.** Drop the volume and the failures go with it — at 25% the `chat` row
+reads `0 / 5` where the unsampled run reads `2 / 20`, and the dashboard says the bot has never failed. The
+lie: **"we sample 25%" is not a statement about cost, it is a statement about which failures you will never
+see**, and nothing on a dashboard distinguishes the two.
 
 **Install one backend and trust the numbers.** Once OTLP succeeds, `export()` stops printing the skip line —
 correctly, because it wrote. The hazard is the run where it does not, and where the trace count on the
@@ -466,17 +517,19 @@ is worse than no trace store, because it looks like evidence.**
 4. **Redact at export, always, and always run the exporter.** `Redactor` inside `export()` gives you a
    debuggable local copy and a safe exported one. Running the export even when the only backend is JSONL
    costs nothing and keeps the skip list honest, which is the only way to notice the day a write stops.
-5. **Make the sampler error-aware and keep it hashed.** Decide after the outcome: trace every error, sample
-   the successes at the rate you can afford. The hash is what lets you state the rule and audit it; the
-   ordering is what makes the rule true.
+5. **Keep every error, hash the volume, and report the bias.** `record()` decides the outcome before it
+   samples, and a failing request is kept at any rate. The hash is what lets you state that rule and audit
+   it. The bill is that your rate is then computed over a selected set: **2 / 7** at 25% against **2 / 20**
+   unsampled, both true, neither an estimate of the other. Put the sample rate next to the rate on the
+   dashboard, so the reader can see which one moved when they changed it.
 6. **Write the four numbers down with their definitions.** *Cost: chat-span tokens at the price sheet for the
-   variant under test. Latency: p50 and p95 of the root span, n traces. Sessions: root spans grouped by
-   `gen_ai.conversation.id`. PII: redacted at export, dropped keys enumerated in `Redactor.KEYS`.* A number
-   whose definition is not written down will be re-used with a different one inside a month.
+   variant under test. Latency: p50 and p95 of the spans with no `parent_id`, n traces. Sessions: root spans
+   grouped by `gen_ai.conversation.id`. PII: redacted at export, dropped keys enumerated in `Redactor.KEYS`.*
+   A number whose definition is not written down will be re-used with a different one inside a month.
 
 ## How do I know it works?
 
-**Challenge, on dev.** The 20 dev traces, and five checks before any of these four numbers goes on a
+**Challenge, on dev.** The 20 dev traces, and six checks before any of these four numbers goes on a
 dashboard:
 
 - **The cost figure reconciles with the token counts by hand.** `656 × 0.03 + 436 × 0.09 = 58.92` per
@@ -491,6 +544,10 @@ dashboard:
   is correct and also says the feature is untested, because one bucket exercises nothing.
 - **Redaction removes personal data and keeps the measurement.** **40 values** at `--pii-rate 1.0`, token
   counts and `error.type` intact, and the in-memory span still readable after the export.
+- **The sampler drops volume and nothing else.** Run the same twenty requests at `--sample-rate 1.0`, `0.5`
+  and `0.25`: the `chat` error **count** must read **2** every time, and the rate will read 10.0%, 20.0% and
+  **28.6%**. If the count moves, the exporter is sampling failures; if the rate moves and nobody noticed,
+  the dashboard is reporting the sample rate.
 
 **Then one held-out validation**, on `test_ids` — the remaining **37 items**, run once:
 
@@ -545,9 +602,15 @@ customer, and it will outlive the dashboard that needed it.
 is somebody else's data. Redacting at capture trades a compliance problem for an observability problem and
 loses.
 
-**Do sample — but trace every error.** The cost of a trace is real and a hash makes the sample reproducible;
-what is not affordable is not knowing which failures you threw away. Errors are rare, they are the ones you
-will need, and they are a rounding error against the volume.
+**Do sample — but trace every error, and show the rate.** The cost of a trace is real and a hash makes the
+sample reproducible; what is not affordable is not knowing which failures you threw away. Keep the failures,
+accept that the rate over the sample is biased upward, and print the sample rate beside it so the reader can
+tell the two apart.
+
+**Don't read an error rate without its sample rate.** `2 / 7` at a 25% sample is not a smaller version of
+`2 / 20`; it is a rate over a set chosen because it contains failures, and it moves when you change the rate
+even though nothing about the product changed. The lie: **a rate over a selected set looks exactly like a rate
+until you change the sampling.**
 
 **Don't quote this repository's costs as anyone's bill.** `PRICE_PER_MTOK` is a teaching price list. The
 arithmetic is real; the prices are not a quote, and the ratio between your variants is the number worth
@@ -557,12 +620,13 @@ carrying to your own price sheet.
 only honest latency figure is the one you measured on your own hardware with your own model. The shape is
 useful; the milliseconds are not evidence.
 
-What teams actually do: a trace store with three rules. **Errors are always traced**; everything else is
-sampled at a rate chosen from the bill, hashed so the sample is reproducible and the drop list is computable.
-**The session key is a hash**, generated at the edge, never an email and never a name. **Redaction runs at
-export**, with the key list reviewed like any other schema, because that list is the only thing standing
-between a conversation and a shared backend. None of those three rules requires a sophisticated tool. They
-require deciding them before the first trace ships, which is why this lesson is the last one in module 12.
+What teams actually do: a trace store with four rules. **Errors are always traced**; everything else is
+sampled at a rate chosen from the bill, hashed so the sample is reproducible and the drop list is computable,
+with the sample rate printed next to every rate computed over it. **The session key is a hash**, generated at
+the edge, never an email and never a name. **Redaction runs at export**, with the key list reviewed like any
+other schema, because that list is the only thing standing between a conversation and a shared backend. None
+of those four rules requires a sophisticated tool. They require deciding them before the first trace ships,
+which is why this lesson is the last one in module 12.
 
 ## Reflect
 
@@ -571,9 +635,9 @@ require deciding them before the first trace ships, which is why this lesson is 
    would have stopped it.
 2. Your run's cost panel fell by about a tenth during a model outage. Write the message to the person who
    noticed, and say what you would add to the panel so that the drop cannot be read as a saving.
-3. `should_sample` hashes the trace id, and the shipped sampler still drops errors because it decides first.
-   Write the one-line change, and the one sentence that would let you prove next quarter that no errored
-   trace was dropped.
+3. You sample 25%, keep both failures, and the failure rate reads 28.6% against 10.0% unsampled. Write the
+   two sentences that would stop a reader treating the first number as a regression, and say what one extra
+   field on the dashboard would make the point for you.
 4. You are adding `gen_ai.conversation.id` to every span next sprint. Write the decision you would record —
    hash, drop, or keep, and why — in the two sentences that would survive you leaving the team.
 

@@ -41,6 +41,7 @@ from .tracing import (
     model_price, should_sample, token_cost,
 )
 from .observe import TraceStore, instrumented_run, record, summary
+from .gate import Budget, GateResult, Quarantine, run_gate
 
 __version__ = "1.1.0"
 
@@ -62,5 +63,8 @@ __all__ = [
     "GEN_AI_RESPONSE_MODEL", "GEN_AI_TOOL_CALL_ID",
     "ERROR_TYPE",
     "TraceStore", "instrumented_run", "record", "summary",
+    # release gate, module 13
+    "run_gate", "GateResult", "Budget", "Quarantine",
 ]
+
 

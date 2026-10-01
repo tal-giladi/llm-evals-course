@@ -1,0 +1,256 @@
+- id: q1
+  question: >-
+    A team changes one line so the exporter only returns the trace when the function returns normally,
+    then re-runs the same 20 support requests with 10% of the model calls planted to fail. Tokens stay
+    at 977, cost stays $0.00005289, p50 stays 1296.8 ms, and the `chat` error rate now reads 0.0% over
+    18 traces. What is that number?
+  options:
+    - >-
+      A real improvement: the two failures never reached the model, so the traffic that actually
+      produced spend has no model errors on it at all.
+    - >-
+      A resolution artefact of the smaller denominator: 0 of 18 and 0 of 20 both print as 0.0%, so the
+      rate simply lost precision when two traces went missing.
+    - >-
+      A true proportion over a filtered population: the two missing traces are the two that failed,
+      which is why the token and cost totals never moved.
+    - >-
+      Evidence that the planted faults sat below your own code, so the exporter is the more faithful
+      record of what the production service writes.
+  correct: 2
+  explanation: >-
+    A request that raised never reaches the return, so the numerator and the denominator are both drawn
+    from the requests that worked — the rate is 0.0% at every planted rate, 50% included. Failed calls
+    set output tokens to zero and omit input tokens, so tokens and cost are identical by construction,
+    and a request that raised is a short request, so p95 improves as the model gets worse. The
+    improvement reading is tempting because the number really did fall; it fell because the population
+    no longer contains the thing you were measuring.
+
+- id: q2
+  question: >-
+    The GenAI semantic conventions are marked Development upstream, and `gen_ai.operation.name` was
+    itself introduced as a rename. Your team prices its cost panel off `gen_ai.usage.input_tokens`. What
+    does that status oblige you to do before the next dependency bump?
+  options:
+    - >-
+      Nothing, because a Development status only governs additions: an upgrade can put new keys in the
+      registry but cannot move a key you already read.
+    - >-
+      Fork the convention names into your own namespace, so that no upstream rename can ever change
+      what the traces you ship mean to whoever reads them.
+    - >-
+      Treat it as a refactor and fix the constants in your tracing module, since every test in the
+      suite reads the names through those same constants.
+    - >-
+      Pin the version you wrote against, read the changelog on every upgrade, and budget the cost
+      against the dashboards and saved views that read the key.
+  correct: 3
+  explanation: >-
+    A rename does not break the code that writes the attribute — the constants still resolve — and it
+    breaks every query, dashboard and saved view that reads it, which is exactly where no test and no
+    code review looks. Development status means expect renames, so the discipline is pin, diff the
+    registry, and change one thing at a time. "Just fix the constants" feels sufficient precisely
+    because your own suite keeps passing.
+
+- id: q3
+  question: >-
+    A team attaches a vendor auto-instrumenter to its support bot on Monday. On Friday the eval suite
+    reports that a quarter of the answers ship with no citation to the handbook. Opening the trace
+    backend, one of those requests has a single span in it: a `POST /v1/chat/completions` that returned
+    200. Which reading is defensible?
+  options:
+    - >-
+      The trace is accurate about the model and blind to your app: no model call failed, and the span
+      that recorded the missing citation was never created by anything.
+    - >-
+      The instrumenter is filtering spans it cannot classify, so raising it to debug level should bring
+      the citation check back on the next run of the same items.
+    - >-
+      The defect rate belongs to the eval suite rather than the dashboard until somebody reconciles the
+      two numbers against a single run of the same items.
+    - >-
+      The bot is answering from evidence the model never saw, so widening the retrieval set is the fix
+      and the one-span trace was right about it all along.
+  correct: 0
+  explanation: >-
+    Nothing crossed a library boundary: the retrieval and the post-check are your code, so no patch can
+    emit a span for either, and the `chain` row is absent from the error table rather than zero. The
+    instrumenter is not broken, it is narrower, and it is reporting faithfully about a model that never
+    failed — on a denominator that excludes the defect the team actually has.
+
+- id: q4
+  question: >-
+    You sample at 25% and the shipped rule keeps every request that will fail. The failure count is 2 in
+    both runs, and the failure rate moves from 10.0% to 28.6%. What is the defensible reading of the pair?
+  options:
+    - >-
+      The sampler is leaking: a rule that keeps every error should hold the rate at 10.0%, so a 28.6%
+      reading means the hash is not as deterministic as it claims.
+    - >-
+      Both numbers are true and neither estimates the other: 2 of 7 counts a set selected because it
+      holds the failures, and that is the price of keeping them.
+    - >-
+      The rate is the figure to publish and the count is the artefact: 2 of 7 is a noisy estimate at
+      this size, and 2 of 20 is the one nobody should trust so far.
+    - >-
+      The rate tripled, so the smaller sample is measuring a genuinely worse week; keep the rule and
+      alert on the rate so the regression surfaces earlier than it would have.
+  correct: 1
+  explanation: >-
+    The keep rule fires before the outcome is known, so both failures survive at 25% and the numerator
+    holds at two — that is the rule working. What moves is the denominator, which is now a set that was
+    chosen because it contains them. Keeping errors therefore buys a rate that moves when you change
+    the sample rate, and that bill is worth paying against the alternative of a number that improves
+    because you stopped looking.
+
+- id: q5
+  question: >-
+    Your spans carry `user.email` and a `question` attribute, and the exporter can scrub both. Where does
+    redaction belong, and what should it cover?
+  options:
+    - >-
+      At capture, inside the tracer, so no code path anywhere can hold customer text — including the
+      in-memory span, since that copy is what a bug report will quote.
+    - >-
+      At capture for the keys known to carry a conversation and at export for the rest, since only the
+      exported copy ever leaves your process or reaches a backend.
+    - >-
+      At export, pattern-scrubbing any string that looks like an email, phone, card or IBAN and keeping
+      every value that happens to match none of the four patterns.
+    - >-
+      At export, dropping the keys known to hold a conversation whole and pattern-scrubbing everything
+      else, so your local span keeps its text for the middle of the night.
+  correct: 3
+  explanation: >-
+    The redactor is passed to `export()`, not to the tracer, so the local span keeps the text you debug
+    with and the exported copy does not — redact at capture and you solve compliance by creating the
+    2 a.m. problem. The split is deliberate too: a key known to hold a conversation is dropped and only
+    its length kept, because scrubbing a conversation is guessing, while an incidental attribute is
+    pattern-scrubbed on the chance that somebody forgot it was there. All of it leaves the measurement
+    intact.
+
+- id: q6
+  question: >-
+    `TraceStore.latency()` defines end-to-end as the span with no `parent_id`. On your data the longest
+    span and the root are always the same span, so the two definitions give identical columns. Why keep
+    the parent pointer?
+  options:
+    - >-
+      Because the root span is the only one carrying `gen_ai.conversation.id`, so the end-to-end column
+      can be grouped by session without a second join over every span.
+    - >-
+      Because these durations are simulated, so the longest span is whichever draw came out biggest and
+      the root is the only span whose duration is stable by construction.
+    - >-
+      Because the two agree only while the tracer rewrites a root to enclose its children; take that
+      invariant away and the longest span answers a question nobody asked, silently.
+    - >-
+      Because the tracing API requires exactly one root per trace, so any other definition would draw
+      a waterfall that disagrees with what a hosted backend renders.
+  correct: 2
+  explanation: >-
+    The parent pointer is set when the span opens and never recomputed from a duration afterwards, so it
+    cannot drift; "longest" is a statistic over whatever the data happens to say. A heuristic that
+    happens to work is not a definition, and the trace that breaks it — spans from several processes, or
+    a model call parented to an HTTP server span — raises nothing and prints nothing unusual.
+
+- id: q7
+  question: >-
+    The shipped CLI has two known defects: `--tree` with an id that is not there prints the first trace
+    with no warning, and `summary()` prints cost to four decimal places. You have time to fix one before
+    the release. Which one, and why?
+  options:
+    - >-
+      The `--tree` fallback: a tool that answers a question you did not ask is worse than one that
+      refuses, because its output is indistinguishable from success.
+    - >-
+      The rounding: a precision chosen for one scale deletes the measurement at another, printing
+      `$0.0000` exactly when failures rise, where a falling bill reads as a saving.
+    - >-
+      The rounding: four places cannot hold `$0.00005892`, so the stored figure is what needs repair
+      and the print format is a display decision made downstream.
+    - >-
+      Neither yet: print the unmatched id and the unrounded total side by side, so a reader who spots
+      one defect has the other one standing next to it as a cross-check.
+  correct: 1
+  explanation: >-
+    A display precision chosen for a hosted API deletes the measurement at the scale of a local model: a
+    50%-failure run really cost $0.00002409 and prints `$0.0000`, which reads as free at the exact moment
+    the product is breaking. The `--tree` fallback is the more seductive fix because it hands you a
+    different request's real trace — but it damages one debugging step, and the id you typed sits right
+    there to check against, whereas a panel reading free corroborates the lie.
+
+- id: q8
+  question: >-
+    Twenty dev requests produce 78 spans, where a run with no planted failures produces 80. Which account
+    of the two missing spans is right?
+  options:
+    - >-
+      Two `execute_tool` spans went missing, because a retrieval that finds nothing has no tool span to
+      record and the omission is the expected shape of that answer.
+    - >-
+      Two `agent` spans went missing, because the root is written only once the request completes and the
+      two unfinished requests never got as far as writing one.
+    - >-
+      Two `chain` spans went missing more or less at random, because the post-check is the longest step
+      and the exporter gives up on it when the run gets long.
+    - >-
+      Two `chain` spans went missing on the requests that raised, because the exception unwound before
+      the post-check ran, so the shortfall equals the failure count.
+  correct: 3
+  explanation: >-
+    A request that raised inside the chat span never reaches the post-check, so the check did not run and
+    emitted no span at all: 78 over 20, with the shortfall equal to the number of failures. That is a
+    fact about control flow, not about volume, and it is the arithmetic to check — if you cannot name
+    the missing spans, your tracer is losing spans somewhere the failure did not come from.
+
+- id: q9
+  question: >-
+    On the 10%-failure run, the `chain` row reads 5/18 = 27.8% with the failing traces kept and 5/18 =
+    27.8% with them dropped, while the `chat` row moves from 10.0% to 0.0%. What follows?
+  options:
+    - >-
+      The check is not degrading: the numerator is five either way, and the gap to the clean run's
+      25.0% is two requests that never reached the check at all.
+    - >-
+      The check is degrading by nearly three points, because the failed requests were the easy ones and
+      dropping them leaves a harder set of answers behind to reject.
+    - >-
+      The check is degrading slightly but not materially, since 5 rejections out of the answers that
+      reached it is much the same quantity on either run.
+    - >-
+      No rate whose denominator can move should be quoted once traces go missing, so the defensible move
+      is to drop the row and keep only the cost and latency tiles.
+  correct: 0
+  explanation: >-
+    The numerator is identical and only the denominator moves, which means the bug does not under-report
+    uniformly — it re-ranks, driving the model row to zero while pushing the check up by nearly three
+    points against a clean run. An unchanged number is not a stable number, and the effect is to send
+    you to investigate the component that is working.
+
+- id: q10
+  question: >-
+    With `--redact` on, an email-shaped session id comes out of the export as `[redacted:email]`, and
+    `cus_8f21a` comes out of it unchanged. The same export dropped 412 characters of answer text and
+    kept every token count. What does the asymmetry tell you?
+  options:
+    - >-
+      The id escaped because `cus_8f21a` holds no personal data, so the asymmetry is a gap in the
+      pattern list and the fix is one more pattern for customer-style ids.
+    - >-
+      The id escaped because no pattern matches it, and a key that is stable and unique per person is
+      an identifier whether or not it looks like one, which is a decision made at capture.
+    - >-
+      The id escaped on purpose, because leaving `gen_ai.conversation.id` out of the drop list is what
+      lets sessions still be joined across services on a shared backend.
+    - >-
+      The id escaped because redaction runs at export rather than at capture, so the scrubber never saw
+      a value that the tracer had not marked as personal in the first place.
+  correct: 1
+  explanation: >-
+    The two layers are not the same operation: a key known to hold a conversation is dropped whole and
+    only its length kept, because scrubbing a conversation is guessing, and that is why the token counts
+    survive. A join key that is stable and unique per person is then an identifier whether or not it
+    looks like one — `cus_8f21a` matches none of the four patterns precisely because it is not an email —
+    so the answer is a decision recorded in the same commit that adds the attribute, not another line in
+    the pattern list.

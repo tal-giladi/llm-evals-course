@@ -24,25 +24,25 @@
 - id: q2
   question: >-
     A trace contains only `chat` spans, and `latency()` still returns two columns that both report a p95 of
-    2318 ms. What is the end-to-end column actually measuring?
+    2318 ms. Nothing raised and no test failed. What is the end-to-end column actually reporting?
   options:
     - >-
       The offset from process start to the first span, which is the only end-to-end figure available without
-      a root span.
+      a request span around it.
     - >-
-      The longest span in each trace, which here is the model call, because there is no root span to be the
-      longest one.
+      The one span with no `parent_id`, which is the `chat` span itself, so end-to-end and the model call are
+      the same measurement here.
     - >-
       The sum of the durations of every span, so with exactly one span per trace the sum and the maximum are
       the same number.
     - >-
-      Nothing at all; the function should refuse to return an end-to-end figure when it cannot find a span of
-      kind `agent`.
+      The longest span in the trace, which happens to be the model call because nothing else was recorded
+      alongside it.
   correct: 1
   explanation: >-
-    `latency()` takes `max(spans, key=duration)` as the root. With only model spans the model call is the
-    longest, so the end-to-end column silently becomes the model column and nothing raises. The heading is
-    what makes it wrong.
+    A span with no parent is a root by definition, so with one span per trace the two columns are the same
+    measurement and the equality is the correct reading rather than a defect. The problem is the question
+    rather than the arithmetic: your request is not in that trace, so its end-to-end figure is a model figure.
 
 - id: q3
   question: >-

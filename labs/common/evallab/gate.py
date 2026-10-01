@@ -24,7 +24,7 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .stats import paired_comparison, percentile_ci, wilson
+from .stats import paired_comparison
 
 
 @dataclass
@@ -104,52 +104,76 @@ class GateResult:
 
 
 def run_gate(baseline_pairs, candidate_pairs, tolerance: float = 0.05,
-             repeats: int = 3, min_ci_width: float | None = None,
-             quarantine: Quarantine | None = None) -> GateResult:
+             repeats: int = 3, cost_per_call: float = 0.0,
+             quarantine: Quarantine | None = None,
+             quarantined_ids: list | None = None) -> GateResult:
     """Decide whether the candidate ships.
 
     ``baseline_pairs`` and ``candidate_pairs`` are ``(human, judge)`` pairs
     over the *same* items, which is what makes the comparison paired and the
     interval mean something.
 
-    The gate is deliberately conservative in one direction only. It blocks on
-    a drop it is confident about, and it says so when it is not confident,
-    rather than treating "no evidence of a regression" as "evidence of no
-    regression". A gate that blocks on noise gets switched off within a month,
-    and a gate that is switched off protects nothing.
+    **The decision is a point estimate, and that is the whole point.** A gate
+    fires when the candidate's pass rate is more than ``tolerance`` points
+    below the current build's — that is the rule lesson 10.3 prices, and it
+    is the rule ``stats.simulate_gate`` already implements. The bootstrap
+    interval is *reported next to the decision*, not the decision itself.
+
+    An earlier version of this function gated on the interval instead. It
+    looked more rigorous and was worse: a percentile bootstrap of a sample
+    mean puts its 2.5th percentile below the point estimate almost always,
+    so the gate fired on nearly every drop and the tolerance stopped mattering.
+    Sweeping 192 configurations of the real data, that version blocked a
+    ten-point regression at every tolerance from 2 to 15 points.
+
+    ``drop`` here is *baseline minus candidate*, so **positive means the
+    candidate is worse**. It is computed from the pass rates directly rather
+    than from ``paired_comparison``'s delta, because that function returns
+    ``A - B`` and an earlier version of this file passed baseline first,
+    which inverted every branch. The reason strings use ``abs`` nowhere on a
+    signed quantity for that reason.
+
+    Three outcomes, because "not blocked" and "fine" are different claims:
+
+    * ``drop > tolerance`` — blocked
+    * ``0 < drop <= tolerance`` — passes, with a warning naming the drop
+    * ``drop <= 0`` — passes
     """
     q = quarantine or Quarantine()
     if len(baseline_pairs) != len(candidate_pairs):
         return GateResult(False, "SKIP: baseline and candidate must cover the same items")
 
-    cmp = paired_comparison(baseline_pairs, candidate_pairs, resamples=1000, seed=1)
-    if cmp is None or cmp.n == 0:
+    n = len(baseline_pairs)
+    if n == 0:
         return GateResult(False, "SKIP: nothing to compare")
 
-    n = cmp.n
-    a_pass = sum(1 for _, j in baseline_pairs if j == 1) / n
-    b_pass = sum(1 for _, j in candidate_pairs if j == 1) / n
-    ci = (cmp.ci.lo, cmp.ci.hi) if cmp.ci else None
+    base_rate = sum(1 for _, j in baseline_pairs if j == 1) / n
+    cand_rate = sum(1 for _, j in candidate_pairs if j == 1) / n
+    drop = base_rate - cand_rate                     # positive = candidate worse
     calls = n * repeats
+    usd = calls * cost_per_call
+    quarantined = [t for t in (quarantined_ids or []) if q.is_quarantined(t)]
 
-    quarantined = [i for i in q.items if i in {f"item-{k}" for k in range(n)}]
+    # The interval is reported, not obeyed. Candidate first, so a worse
+    # candidate gives a negative delta and the sign reads the same way.
+    cmp = paired_comparison(candidate_pairs, baseline_pairs, resamples=1000, seed=1)
+    ci = (cmp.ci.lo, cmp.ci.hi) if (cmp and cmp.ci) else None
+    width = None if ci is None else round((ci[1] - ci[0]) * 50, 1)   # half-width, points
 
-    if cmp.ci and cmp.ci.hi < -tolerance:
-        return GateResult(True, f"blocked: candidate is {abs(cmp.delta) * 100:.1f} points "
-                                f"worse, interval {cmp.ci.lo * 100:.1f} to {cmp.ci.hi * 100:.1f}",
-                          cmp.delta, ci, calls, 0.0, quarantined)
+    def result(blocked: bool, reason: str) -> GateResult:
+        return GateResult(blocked, reason, -drop, ci, calls, usd, quarantined)
 
-    if cmp.ci and cmp.ci.lo < -tolerance:
-        return GateResult(True, f"blocked: drop of {abs(cmp.delta) * 100:.1f} points, and the "
-                                f"interval reaches {cmp.ci.lo * 100:.1f}",
-                          cmp.delta, ci, calls, 0.0, quarantined)
+    ci_text = (f"; paired 95% interval {ci[0] * 100:+.1f} to {ci[1] * 100:+.1f} points "
+               f"(half-width {width:+.1f})" if ci else "")
 
-    if cmp.delta < -tolerance:
-        return GateResult(
-            False, f"passes, but the drop of {abs(cmp.delta) * 100:.1f} points is inside the "
-                   f"interval ({cmp.ci.lo * 100:.1f} to {cmp.ci.hi * 100:.1f}). Not evidence of a "
-                   f"regression and not evidence against one - widen the suite or raise the repeats.",
-            cmp.delta, ci, calls, 0.0, quarantined)
+    if drop > tolerance:
+        return result(True, f"blocked: candidate is {drop * 100:.1f} points below the current "
+                             f"build, over the {tolerance * 100:.0f}-point tolerance{ci_text}")
 
-    return GateResult(False, f"passes: {cmp.delta * 100:+.1f} points", cmp.delta, ci,
-                      calls, 0.0, quarantined)
+    if drop > 0:
+        return result(False, f"passes, but the candidate is {drop * 100:.1f} points worse, inside "
+                             f"the {tolerance * 100:.0f}-point tolerance. A real drop that you have "
+                             f"chosen to allow{ci_text}")
+
+    return result(False, f"passes: {abs(drop) * 100:.1f} points "
+                         f"{'better' if drop < 0 else 'level'}{ci_text}")

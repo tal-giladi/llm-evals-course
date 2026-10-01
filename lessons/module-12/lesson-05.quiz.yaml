@@ -91,12 +91,12 @@
 
 - id: q5
   question: >-
-    `should_sample` hashes the trace id, so a 25% sample is byte-identical on every run. Yet the shipped
-    sampler does drop errored traces. Why?
+    `should_sample` hashes the trace id, so a 25% sample is byte-identical on every run. At that rate the
+    model-call error *count* stays at 2 while the reported *rate* goes from 10.0% to 28.6%. Why?
   options:
     - >-
-      The sampling decision is taken before the outcome is known, so a request that is about to fail is
-      sampled out like any other.
+      The failing requests are kept unconditionally, and the denominator is now the sample, so the same two
+      failures are being reported over seven traces instead of twenty.
     - >-
       The hash only covers successful traces, because a trace id is not generated until the call returns a
       response.
@@ -107,6 +107,6 @@
       the sampler.
   correct: 0
   explanation: >-
-    In `record()` the `should_sample` call comes before the failure is planted, so a trace that will fail is
-    judged on its id alone. At 25% the run drops from 9 error spans to 2 and the `chat` row goes to 0 of 5,
-    which is the evidence disappearing rather than the bot improving.
+    `record()` decides `fail_on` before it samples and keeps a request that will fail at any rate, so the
+    numerator holds. The rate is then computed over a set chosen because it contains the failures, which is
+    why it is biased upward and why the sample rate belongs next to it on the dashboard.

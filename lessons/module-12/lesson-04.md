@@ -127,18 +127,20 @@ trace UI. Ask each one what it has to read:
 |---|---|---|
 | `total_cost()`, `total_tokens()` | `spans("chat")` | **yes, completely** |
 | `p50_model_call`, `p95_model_call` | `spans("chat")` | **yes, completely** |
-| `p50_end_to_end`, `p95_end_to_end` | the longest span in each trace | **only if there is a root span** |
+| `p50_end_to_end`, `p95_end_to_end` | the span with no `parent_id` | **no — it will report the model call** |
 | `error_rate()` | all four span kinds | **no** |
 | `sessions()` | `gen_ai.conversation.id` | **no** |
 
-The third row is the subtle one, and it is a silent failure rather than an error. `latency()` takes
-`max(spans, key=duration)` as the root. With only `chat` spans in the trace, the longest span *is* the model
-call, so the end-to-end column reports **1229 ms** at p50 and **2318 ms** at p95 — the same two numbers as
-the model-call column, under a heading that says "end-to-end". Nothing raises. The dashboard is wrong by
-exactly the part you did not measure, and it looks like a dashboard.
+The third row is the subtle one, because nothing goes wrong. `latency()` takes the spans with no parent as
+the roots, and a patched model client opens its span at the top of a context that usually has no enclosing
+request in it — so the model span *is* the root, and the end-to-end column reads the model call: **1229 ms**
+at p50 and **2318 ms** at p95, the same two numbers as the model-call column, under a heading that says
+"end-to-end". That is the **correct** reading of the trace you have. It is simply not a measurement of your
+request, because your request is not in it. A dashboard built this way is not broken; it is answering a
+question nobody asked, and it looks exactly like a dashboard.
 
-The last row is quieter still: with no root span there is no `gen_ai.conversation.id`, so every trace groups
-under `unknown` and `sessions()` returns one bucket that means nothing.
+The last row is quieter still: with no span carrying `gen_ai.conversation.id`, every trace groups under
+`unknown` and `sessions()` returns one bucket that means nothing.
 
 ### The rule
 
@@ -228,12 +230,15 @@ And the package's own tests, which encode the properties rather than the numbers
 
 ```console
 $ py -m pytest tests/test_tracing.py -q
-22 passed in 0.05s
+24 passed in 0.06s
 ```
 
 `test_error_rate_is_reported_by_span_kind` is the one this lesson is about: it asserts that `chain` and `chat`
 are both present in `error_rate()` and that the `chain` rate is above zero. A trace with no `chain` spans
 cannot pass it — which is the executable form of "one of four".
+`test_latency_uses_the_root_not_the_longest_span` is the counterexample the table above predicts: build a
+trace with one parentless `chat` span and the test asserts end-to-end equals the model call, because they are
+the same span. Nothing is broken and nothing raises — the number is simply a measurement of the model.
 
 > [!NOTE]
 > The durations above are **simulated**, and every span says so: the app answers from recorded outputs, so a
@@ -249,7 +254,7 @@ cannot pass it — which is the executable form of "one of four".
 1. The auto-instrumented dashboard says the model error rate is 0.0%. The eval suite says 25% of answers are
    uncited. Name the one number you would put on the incident page and the one you would delete.
 2. A model-only trace reports a p95 end-to-end of **2318 ms**. The shipped app's p95 model call is also
-   **2318 ms**. What has gone wrong, and why does nothing crash?
+   **2318 ms**. Is anything wrong, and if not, why is the heading a lie?
 3. `retrieve_handbook` never fires `no_matching_section` on the first twenty dev traces. Is that the span
    being useless, the retrieval being perfect, or something about the item set?
 4. You have written all four spans by hand. A vendor SDK arrives that also emits agent spans. Name one thing
@@ -265,9 +270,10 @@ cannot pass it — which is the executable form of "one of four".
    `chain` span from the first five traces, and load them back with
    `TraceStore.load(...)`. The `error_rate()` you get is exactly what the auto-instrumented team would have
    seen. Write down the question you would no longer be able to ask that trace.
-3. **Remove the root and watch the heading change.** Same trick with the `agent` span, then call
-   `.latency()`. Confirm for yourself that `p50_end_to_end` becomes `p50_model_call`, and write the sentence
-   you would put in a dashboard's tooltip if you shipped the first number under the second heading.
+3. **Remove the root and read the headings again.** Same trick with the `agent` span, then call `.latency()`.
+   The `chat` spans have no parent left, so each one *is* the root and `p50_end_to_end` becomes
+   `p50_model_call`. Confirm it, then write the tooltip you would put on a dashboard if you shipped the
+   first number under the second heading — and say whether the tooltip is a fix or a confession.
 4. **Run the split the defect lives on.** `py -m evallab.cli trace --n 57`, then find the five
    `out_of_scope` items on the dev split in `datasets/support.json` and confirm each one produces
    `retrieved: 0`. Ask the question from prediction 3 again with the answer in hand.
@@ -332,7 +338,8 @@ to be the only trace:
   25.0%` and `chat 0/20 = 0.0%` on the clean run. A dashboard that prints one of them as *the* error rate has
   already failed this condition.
 - **`p50_end_to_end` and `p50_model_call` are different numbers.** **1297 ms** against **1229 ms** on the
-  clean run. If your two columns agree, you have no root span and your end-to-end number is a model number.
+  clean run. If your two columns agree, nothing is broken — you have no enclosing request span, so the model
+  call is the root and your end-to-end number is a model number wearing an end-to-end heading.
 - **The retrieval span fires on the items that are out of scope.** It does not fire on the first twenty dev
   items at all; over the full **57** it fires on five, and `execute_tool` reports **5 / 57**. A span that
   never fires is either a bug or an item set that does not contain the case, and you cannot tell which
@@ -400,9 +407,9 @@ question nobody had thought of yet.
 1. The clean 20-trace run reports a 0.0% model error rate and a 25.0% citation-defect rate. Write the two
    sentences you would put on the incident page, and say which one belongs in a dashboard tile and which
    belongs in the eval suite.
-2. `p95_end_to_end` and `p95_model_call` both read 2318 ms in a model-only trace. Write the sentence that
-   would stop a reviewer treating the first as a latency SLO, and name the single span whose absence causes
-   it.
+2. `p95_end_to_end` and `p95_model_call` both read 2318 ms in a model-only trace, and nothing is broken.
+   Write the sentence that would stop a reviewer treating the first as a latency SLO, and name the single span
+   whose absence causes it.
 3. You are about to add auto-instrumentation to a service that already has hand-written spans from a previous
    team. Write the rule you would put in the pull-request description, in one sentence, that a reviewer could
    disagree with.
