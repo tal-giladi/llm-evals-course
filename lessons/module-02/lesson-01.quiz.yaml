@@ -1,0 +1,75 @@
+- id: q1
+  question: >-
+    A support-bot trace shows an `execute_tool` span named `retrieve_handbook`, 39 ms long,
+    with no other attributes recorded. What can you conclude from that span?
+  options:
+    - The retrieval step was skipped, so the model answered from memory.
+    - The retrieval step ran and returned the wrong handbook section.
+    - The retrieval step ran, and the trace says nothing about what it returned.
+    - The retrieval step ran and returned an empty result set the model could not use.
+  correct: 2
+  explanation: >-
+    The span proves the tool ran and how long it took. It records no result count and no
+    section identifier, so retrieval returning the wrong section is not visible here — if you
+    need to see that, record it on the span.
+
+- id: q2
+  question: >-
+    You are debugging a RAG assistant and start by searching the user-facing answers for wrong
+    wording. Which failure class is least likely to turn up in that search?
+  options:
+    - Answers that state a fact the handbook does not contain.
+    - Answers produced by a code path that skipped the retrieval step.
+    - Answers that refuse a question the handbook answers directly.
+    - Answers that give the right figure with no source named.
+  correct: 1
+  explanation: >-
+    Text shows what the user was shown, not what produced it. An answer produced without
+    retrieval still reads fluently, so that class is invisible to a search over answer text and
+    can only be found by reading the span tree.
+
+- id: q3
+  question: >-
+    The citation check in your lab reports an error on 27 of 94 traces and nothing on the other 67.
+    Shipped human labels for the same system say 47 of 94 answers failed. What does that tell you?
+  options:
+    - The check misses failures it was never written to look for — here, anything but a missing citation.
+    - The labels were written by someone else, so at least one of the two numbers is wrong.
+    - The two sources disagree about 27 answers, so both need redoing before you trust either.
+    - Most of the 67 unflagged answers are probably fine, since the check passed them.
+  correct: 0
+  explanation: >-
+    The check flagged 27 of the 47 failures; the other 20 — wrong facts, refusals, invented
+    policies — produced a clean post-check. A check that tests one property is an alarm for that
+    property, not a measurement of quality.
+
+- id: q4
+  question: >-
+    You read 20 random traces and your largest category covers 6 of them. You then read 20 traces
+    filtered to "only traces with a span error" and one category covers all 20. Which sample
+    should your failure taxonomy be based on?
+  options:
+    - The error-filtered set, because every trace in it is a confirmed failure.
+    - The error-filtered set, because uniform data is much easier to categorise.
+    - Neither set, because no category should ever cover more than half a sample.
+    - The random set, because it was not chosen by the check you already trust.
+  correct: 3
+  explanation: >-
+    A batch filtered by your own check contains only what that check found, so its homogeneity
+    feels like clarity and is actually the absence of information. The random batch is the one
+    that tells you how often things happen, not just that they happen.
+
+- id: q5
+  question: >-
+    A trace's root span reports 1112 ms and its three child spans report 39, 691 and 312 ms.
+    What accounts for the remaining 70 ms?
+  options:
+    - The gaps between spans, plus the padding the root span adds to close itself out.
+    - Retries inside the model call that were never exported as their own spans.
+    - Network time between your service and the tracing backend receiving the spans.
+    - The time the post-check spent waiting for the model's answer to arrive.
+  correct: 0
+  explanation: >-
+    39 + 691 + 312 = 1042 ms of work inside a 1112 ms request. The remainder is the 10 ms gaps
+    the trace records between spans plus 50 ms on the root span. Always add the children up
+    before suspecting hidden work.

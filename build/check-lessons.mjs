@@ -93,8 +93,8 @@ for (const rel of lessonFiles) {
   for (const key of ["id", "module", "minutes", "prerequisites", "objectives", "volatility", "sources", "last_verified"]) {
     if (meta[key] === undefined) fail(rel, `front matter is missing "${key}"`);
   }
-  if (!/^"(module-)?\d\d(\.\d)?$/.test(String(meta.id || ""))) {
-    fail(rel, `id "${meta.id}" is not in the expected form`);
+  if (!/^\d\d\.\d+$/.test(String(meta.id || ""))) {
+    fail(rel, `id "${meta.id}" is not in the expected form "NN.M"`);
   }
   if (seenIds.has(meta.id)) fail(rel, `id "${meta.id}" is used more than once`);
   seenIds.add(meta.id);
@@ -167,9 +167,10 @@ for (const rel of lessonFiles) {
     if (!used) notes.push(`${rel}: ${sim} link has no ?preset= — check the lesson says which view it wants`);
   }
 
-  // Relative links must resolve.
+  // Relative links must resolve. Strip any query string or fragment first —
+  // a simulation link carries ?preset=… and that is not part of the path.
   for (const m of body.matchAll(/\]\((\.\.\/[^)#][^)]*)\)/g)) {
-    const target = join(ROOT, dirname(rel), m[1]);
+    const target = join(ROOT, dirname(rel), m[1].split(/[?#]/)[0]);
     if (!existsSync(target)) fail(rel, `broken relative link "${m[1]}"`);
   }
 

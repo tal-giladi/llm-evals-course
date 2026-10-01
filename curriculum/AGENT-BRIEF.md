@@ -135,3 +135,27 @@ lab, it must be one the lab actually produces on the items described.
 ## When you finish a lesson
 
 Append `lesson-MM done` to `curriculum/status/module-NN.log`.
+
+## Verify before you report done
+
+**Run these two commands from the repo root, and make sure neither reports a problem in your files.**
+
+```bash
+node build/fix-quiz-yaml.mjs
+node build/check-lessons.mjs
+```
+
+- `fix-quiz-yaml.mjs` repairs the most common silent failure here: a plain YAML scalar containing
+  `": "` or `" #"`. A quiz file that does not parse is **dropped whole on import**, taking every
+  question in it with it, and the only symptom is a missing quiz. Run it first, always.
+- `check-lessons.mjs` checks front matter, the section template, relative links, simulation presets,
+  prerequisites and every quiz rule above. It reports problems for *all* modules, so ignore lines
+  about files that are not yours.
+
+`check-lessons.mjs` will list `_sidebar.md: "…" does not exist yet` for lessons other agents have not
+written yet. Those are not yours. What must be clean is every line naming a file inside your own
+module.
+
+If you would rather check by hand: every `.quiz.yaml` parses; exactly 4 options each; `correct` in
+0–3; an `explanation` present; `correct` spread across 0–3; and every simulation link uses a preset
+that exists in that simulation's `app.js`.

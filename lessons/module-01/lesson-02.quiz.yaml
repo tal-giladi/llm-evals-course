@@ -1,0 +1,79 @@
+- id: q1
+  question: >-
+    Your eval brief says "mark the answers that are good". Three engineers label the same 20 items and
+    pass 14, 11 and 9 respectively. What is the actual problem, and what fixes it?
+  options:
+    - Label more items per engineer so each one settles on a more stable rate before you compare.
+    - Replace pass/fail with a 1-to-5 score so small differences between labelers stop mattering.
+    - Write a criterion specific enough that the three engineers reach the same verdict on the same item.
+    - Average the three labelers item by item, which removes the disagreement from the eval set.
+  correct: 2
+  explanation: >-
+    The disagreement is in the definition of good, not in the labelers or the sample size. A criterion
+    decidable by two people who never meet is the only thing that fixes it; more items just multiply the
+    noise, a finer scale multiplies the definitions, and averaging produces a number none of the three
+    believes.
+
+- id: q2
+  question: >-
+    Your criterion for the support bot is "states the handbook fact correctly AND cites the handbook
+    section". On the 57 dev items the humans fail the tuned system on 27 answers. What does the breakdown
+    of those 27 tell you to work on first?
+  options:
+    - Retrieval, because 15 of the failures are wrong facts the model recalled from memory.
+    - The citation instruction, because 15 of the 27 failures are right answers with no section named.
+    - The refusal policy, because the bot declines questions the handbook answers directly.
+    - Nothing, because the two clauses produce the same failures and splitting them changes no number.
+  correct: 1
+  explanation: >-
+    Fifteen of the 27 failures are labelled as having the right fact and no citation, seven are wrong
+    facts, three are over-refusals and two answer something the handbook is silent on. A team that assumed
+    the accuracy clause was the hard one would spend the quarter tuning retrieval and leave the largest
+    bucket untouched.
+
+- id: q3
+  question: >-
+    The same 40 answers are graded by three checkers: a vague judge reports 67.5%, a rubric judge
+    59.6%, and the people who labelled by hand 55.0%. The fix made the scoreboard number worse. Why is
+    that the expected outcome?
+  options:
+    - The rubric judge is stricter than the humans, so its lower number is a conservative correction.
+    - Pass rates drift downward as an eval set ages, and this one has been running for a month.
+    - The pass rate of an unvalidated check partly measures the check, so making it honest lowers it.
+    - The humans were shown the rubric too, so their labels and the judge's are no longer independent.
+  correct: 2
+  explanation: >-
+    The vague judge was 12.5 points optimistic on these answers, so writing the rules down removes the
+    part of its score that came from its own generosity and moves the number toward the humans. A score
+    that goes down when you fix the measurement was probably measuring the measurement.
+
+- id: q4
+  question: >-
+    You type one extra word into the judge prompt box and the page warns that no recorded run exists for
+    this exact judge, while the scoreboard tiles above still show numbers. What is the correct response?
+  options:
+    - Keep the tiles, because they are from the closest prompt and the difference is one word.
+    - Ignore the warning, since the items and the human labels did not change underneath the judge.
+    - Treat those numbers as this prompt's result, because the data file and the arithmetic are unchanged.
+    - Stop quoting the tiles and run the edited prompt, or revert to the prompt that produced them.
+  correct: 3
+  explanation: >-
+    A judge is the prompt, the model and the decoding settings together, so one changed word makes a
+    different judge whose verdicts on these items nobody has observed. Reporting another prompt's verdicts
+    under this prompt's name is how a confident wrong number gets into a planning meeting; revert, or run
+    the prompt for real.
+
+- id: q5
+  question: >-
+    On 37 held-out items, the vague judge reports a 73.0% pass rate and the humans report 45.9%. You had
+    tuned the vague judge on dev. Why did validation not rescue it?
+  options:
+    - The held-out items are harder, so the gap is the item difficulty rather than the judge.
+    - Validation only checks sample size, and 37 items is below the threshold the page requires.
+    - Nothing you tune makes an undecidable criterion decidable; the fix was in the criterion itself.
+    - You should have re-tuned on test, which would have closed the gap by the second validation run.
+  correct: 2
+  explanation: >-
+    Held-out data can tell you that a number does not travel; it cannot repair a check that was never told
+    what it is measuring. The vague judge was 27 points optimistic on data it had never seen, and the only
+    thing that moved it toward the humans was writing the criteria into the prompt in the first place.

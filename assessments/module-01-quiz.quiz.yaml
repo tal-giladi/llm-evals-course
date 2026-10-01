@@ -1,0 +1,145 @@
+- id: q1
+  question: >-
+    A prompt change takes your eval from 62% to 71% on 40 items, with no interval reported. A second run
+    of the unchanged previous prompt reads 75%. What is the strongest conclusion these runs support?
+  options:
+    - >-
+      Nothing yet: the 9-point gain is inside the spread runs of the same system produce, so it is noise.
+    - The new prompt is better, because 71% beats 62% and the second run only confirms the old one.
+    - The new prompt is better, but only for items like these, so the fix is to grow the eval set.
+    - The old prompt was better, since 75% is the highest pass rate any configuration has reached.
+  correct: 0
+  explanation: >-
+    Three numbers from one system, with nothing changed between them except luck, is exactly the situation
+    an interval is for. Until you can quote a pass rate with the width of its interval, the 9-point gain is
+    indistinguishable from the difference between two draws of 40 items.
+
+- id: q2
+  question: >-
+    A judge's pass rate is 72.5% and its accuracy against human labels is also 72.5%. Your team's rule is
+    "quote kappa, not accuracy". What is the strongest reason for that rule?
+  options:
+    - Accuracy is harder to compute by hand, so quoting kappa keeps the scoreboard honest and cheap.
+    - Kappa and accuracy are computed on the same sample, so they can never disagree about a run.
+    - >-
+      Kappa and accuracy measure different things: one is a statement about the system, one about the
+      check that scored it.
+    - Accuracy rises with the sample size, so a wide interval makes the number look artificially high.
+  correct: 3
+  explanation: >-
+    The pass rate and the accuracy are statements about the judge unless you have shown the judge matches
+    the humans, and accuracy alone is easy to win by being generous on a set where most answers are good.
+    Kappa corrects agreement for what the majority label would have scored by chance, so it survives a
+    generous judge and an imbalanced set where raw accuracy does not.
+
+- id: q3
+  question: >-
+    Three engineers each label 20 support answers against the brief "mark the answers that are good", and
+    they pass 14, 11 and 9. What does this tell you about the eval set, and what do you do about it?
+  options:
+    - The sample is too small to label consistently, so label 200 items and the disagreement will shrink.
+    - Three labelers is the wrong number, so reduce it to one expert and the criterion becomes reliable.
+    - The criterion is undecidable, so write one specific enough that two people reach the same verdict.
+    - The answers are borderline, so split every borderline case into its own item and label it again.
+  correct: 2
+  explanation: >-
+    Disagreement between capable people on the same items is a property of the instruction, not of the
+    sample or the team size. Until the criterion says what good means in terms two strangers can apply, a
+    bigger set or a smaller labelling panel only produces the same disagreement at a larger volume.
+
+- id: q4
+  question: >-
+    Your support bot's criterion is "states the handbook fact correctly AND cites the handbook section".
+    On the 57 dev items, 15 of the 27 answers the humans failed are correct but uncited. What follows?
+  options:
+    - Tighten the accuracy clause, since a wrong fact is what a support user complains about first.
+    - Keep the criterion and accept a 52.6% pass rate, because that is what the handbook requires.
+    - Drop the citation clause, since uncited answers are still factually correct for the user.
+    - Add the citation instruction to the prompt first, since most of the loss is grounding, not recall.
+  correct: 3
+  explanation: >-
+    More than half the failures are answers with the right fact and no section named, so a citation
+    instruction is the cheapest large win available. Dropping the clause would raise the score and remove
+    the measurability that the criterion exists to provide, which is how an eval set becomes a vibe check
+    with extra steps.
+
+- id: q5
+  question: >-
+    Someone changes the prompt, the retrieval setting and the model in one pull request. The pass rate
+    moves from 66.7% to 71.2%. What makes that number unactable, rather than merely noisy?
+  options:
+    - The three changes are not additive, so the 4.5 points belong to a mixture you cannot price or revert.
+    - Three changes in one pull request are harder to review, so the result is late rather than useless.
+    - The 4.5 points are inside the 12.5-point spread, so the run is indistinguishable from noise anyway.
+    - The eval set was pinned to dev items, so a number from one run cannot be compared with the last.
+  correct: 0
+  explanation: >-
+    The problem is attribution, not size. A number that is too small to resolve is fixed with more items or
+    a better design; a number with three causes attached cannot be split, so you can neither keep the good
+    part nor revert the bad one without re-running everything one change at a time.
+
+- id: q6
+  question: >-
+    You changed one thing and the pass rate moved 3 points on 40 items. Ten seeds of the unchanged
+    baseline produce 62.5% to 75.0%. What is the correct response?
+  options:
+    - Ship it, because a measured movement is still a movement, whatever its size next to the spread.
+    - Pin the new run as the baseline, so the next comparison is against the improved configuration.
+    - Add a second change now, so the pair moves the number further and the trend becomes visible.
+    - Treat it as unproven and either enlarge the sample or make the change large enough to resolve.
+  correct: 3
+  explanation: >-
+    Three points against a 12.5-point noise floor is a rumour, and re-pinning it as the baseline would
+    quietly promote the rumour to the reference everyone else is measured against. The honest options are
+    to buy resolution with more items, or to make a change big enough to see, or to keep the change and say
+    that the current eval cannot demonstrate it.
+
+- id: q7
+  question: >-
+    A lab scoreboard reports "Llama 3.2 3B · Plain · 0 shots — kappa 0.43, TNR 55.6%" and you want to
+    quote it in a work chat. Which sentence is defensible?
+  options:
+    - "Llama 3.2 3B as a judge catches only 55.6% of real failures for this kind of task."
+    - "A recorded run of that configuration scored kappa 0.43 and TNR 55.6% against hand labels."
+    - "Plain prompts are worse than rubric prompts, by 0.36 kappa on this eval set."
+    - "Rubric judges are the right default for any open-ended task, since plain judges score too low."
+  correct: 1
+  explanation: >-
+    The verdicts are generated by a seeded model of judge behaviour and replayed, so the run, not the model
+    named on the menu, is the subject of every number on the page. The statistics are computed for real in
+    your browser, which is what makes them worth studying, and it is exactly why none of them is a published
+    measurement of a model in the wild.
+
+- id: q8
+  question: >-
+    You switch to a stricter judge. Its true-positive rate rises from 86.4% to 95.8% and its true-negative
+    rate falls from 81.3% to 60.0%. How should you read that trade?
+  options:
+    - As an improvement on both counts, because the judge now passes more of the answers people passed.
+    - >-
+      As a trade you must price: it waves through more real failures, so it cannot gate a release as it is.
+    - As a tuning problem with no effect on quality, since the pass rate is what gates a release anyway.
+    - As a reason to revert, since a judge that misses more failures is worse than the one it replaced.
+  correct: 1
+  explanation: >-
+    A higher true-positive rate means fewer good answers are wrongly rejected, and a lower true-negative
+    rate means more real problems are waved through. The second is what a gate is for, so a judge at TNR
+    0.60 is not a release gate however well it treats the good answers; the fix is a more specific
+    criterion, not a verdict on the tuning.
+
+- id: q9
+  question: >-
+    You tuned a judge on dev, where it reports kappa 0.79 and a pass rate 7 points above the human rate.
+    The held-out button reveals kappa 0.73 and a pass rate 2.7 points from the human rate. What does this
+    tell you about the tuning?
+  options:
+    - The tuning generalised, because the held-out kappa stayed within 0.06 of the dev kappa.
+    - The check is still usable, since any drop from dev to test is what a split is expected to cause.
+    - The judge is overfitted to dev, and the size of the drop is the price of having tuned on it.
+    - The dev set is too small, so rerun the whole tuning with all 94 items and the gap will close.
+  correct: 2
+  explanation: >-
+    A held-out run that stays close to the human labels is the outcome you want, and the kappa falling from
+    0.79 to 0.73 is the honest cost of having looked at dev while tuning. Treating a small drop as
+    automatic would miss the real signal here, which is that the pass rate moved from 7 points of
+    optimism to 2.7 without any change to the judge.

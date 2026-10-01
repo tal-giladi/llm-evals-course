@@ -1,0 +1,59 @@
+- id: q1
+  question: >-
+    A judge passes 15 of 20 support answers and its true-negative rate is 16.7%. Your team wants to put it
+    in front of a release gate. What do you say?
+  options:
+    - Raise the sample to 200 items so the pass rate settles before the judge is trusted.
+    - Do not gate on it yet: it fails only one real failure in six, so most regressions would ship anyway.
+    - Lower the pass threshold until the judge's rate matches the human rate on the same items.
+    - Gate on the kappa instead, because a negative kappa is still a number and a number can be a gate.
+  correct: 1
+  explanation: >-
+    A gate is only as good as its true-negative rate. At 16.7%, five of the six real failures in the demo
+    pass the judge, so the gate would block almost nothing that matters. More items narrow the interval but
+    do not change what the judge decides, and kappa is a report of the same weakness, not a fix for it.
+
+- id: q2
+  question: >-
+    Two systems score 67.5% and 71.0% on the same 40 items, and each score carries an interval of roughly
+    52% to 80%. What does that let you conclude?
+  options:
+    - The second system is worse, because a smaller point estimate usually means a stricter check.
+    - You must collect at least 500 more items before either number may be quoted at all.
+    - The two systems are indistinguishable on this run: 3.5 points is inside both intervals.
+    - The intervals overlap, so the better system is the one whose author wrote the eval set.
+  correct: 2
+  explanation: >-
+    Each interval is the range this same system could plausibly produce from a different sample of the same
+    size, so a 3.5-point gap sits comfortably inside both. The fix is more items or a paired comparison on
+    the same items, not a different conclusion from the numbers you already have.
+
+- id: q3
+  question: >-
+    A judge and a human agree on 11 of 20 items. Humans pass 14 of the 20 and the judge passes 15. Kappa
+    comes out at -0.125. What is the honest reading?
+  options:
+    - The judge agrees with the humans less often than a coin guessing the majority label would.
+    - The judge disagrees with the humans more often than a coin guessing the majority label would.
+    - The judge is fine, because 11 of 20 is more than half and half is the bar for a usable check.
+    - The negative sign only means the sample was too small to compute kappa reliably on 20 items.
+  correct: 1
+  explanation: >-
+    Chance agreement here is 0.70 times 0.75 plus 0.30 times 0.25, which is 0.60, while the judge actually
+    agreed 0.55 of the time. Below chance agreement means the judge is actively worse than a coin on the
+    items that matter, which is exactly what a true-negative rate of 16.7% looks like.
+
+- id: q4
+  question: >-
+    One fixed system, one fixed judge, ten different random draws of 40 items produce pass rates between
+    62.5% and 75.0%. Nothing else changed between the runs. What does that spread tell you?
+  options:
+    - The judge is unstable, so a larger judge model is the only way to get a repeatable score.
+    - The system improved and regressed ten times, and the scoreboard recorded each transition.
+    - Most of a 40-item score is which items you drew, so differences under about 12 points are noise.
+    - The runs disagree, so the correct response is to average them and report the midpoint as the result.
+  correct: 2
+  explanation: >-
+    Nothing in the system or the judge changed, so the whole 12.5-point spread is sampling luck. That is
+    the reason every number in this course ships with an interval, and the reason a change worth less than
+    the spread cannot be acted on. Averaging hides the spread instead of reporting it.

@@ -1,0 +1,78 @@
+- id: q1
+  question: >-
+    One fixed system, one fixed judge, ten different random draws of 40 dev items give pass rates from
+    62.5% to 75.0%. A colleague reports a 9-point improvement from a prompt change. What do you conclude?
+  options:
+    - The 9 points are smaller than the 12.5-point spread from luck alone, so it is not yet evidence.
+    - The 9 points are real, because the spread came from changing the sample and the prompt did not.
+    - Report it as a 9-point gain and note the seed as a caveat in the pull request description.
+    - Average the ten runs and report the midpoint, since averaging removes the sampling luck.
+  correct: 0
+  explanation: >-
+    Nothing changed between those ten runs except which items were drawn, so the whole 12.5-point range is
+    the measurement's own noise. A 9-point gain fits inside it comfortably, which means the run is
+    consistent with the system being unchanged. The fix is more items or a paired comparison, not a
+    different reading of the same numbers.
+
+- id: q2
+  question: >-
+    A pull request changes the prompt, enables retrieval and moves to a bigger model at once. The pass
+    rate rises 9 points. Why is that number useless even though it is real and reproducible?
+  options:
+    - Nine points is below the noise floor, so the change would not survive a different sampling seed.
+    - A three-change pull request is slower to review, so the number arrives too late to be useful.
+    - The three changes are not additive, so the 9 points cannot be split into three effects at all.
+    - The pass rate should be compared with the previous release rather than with the pinned baseline.
+  correct: 2
+  explanation: >-
+    Changing the check, the retrieval and the model together changes which questions are asked and how they
+    are counted, so the run measures one number with three causes attached. You can still act on "all
+    three", but you cannot price, revert or repeat any single one, which is the entire point of pinning a
+    baseline and moving one control.
+
+- id: q3
+  question: >-
+    You pin the baseline, change only the answer from the tuned system to the generic one, and the pass
+    rate does not move at all: 67.5% before, 67.5% after. What is the right reading?
+  options:
+    - The two systems are equivalent, so keep the generic prompt because it is simpler to maintain.
+    - The pass rate is insensitive, so the eval set needs more items before any diff can be trusted.
+    - You changed the answer, so the baseline should have been re-pinned before the comparison was read.
+    - Your check cannot see a change the humans see, which is a finding about the check, not the systems.
+  correct: 3
+  explanation: >-
+    The humans rate those same items 55.0% and 32.5%, so a 22.5-point quality difference exists and the
+    scoreboard reported zero. That makes the diff a measurement about the judge: it flipped seven items
+    each way and landed where it started. The loop's rule is to report an empty diff as a failure of the
+    check rather than as evidence of equivalence.
+
+- id: q4
+  question: >-
+    Your eval says 66.7% for the tuned system and 64.9% for a much worse one, while the human labels say
+    52.6% and 35.1%. The judge is the vague "is this good?" prompt. What is the lie in that scoreboard?
+  options:
+    - The humans were inconsistent on those 57 items, so their 17.5-point gap should be the corrected one.
+    - Both systems were scored on different item draws, so neither number can be compared to the other.
+    - The judge is measuring its own politeness, so the 1.8-point gap is a statement about the judge.
+    - The pass rate is capped by the share of items with a citation, which is fixed for both systems.
+  correct: 2
+  explanation: >-
+    A judge that was never told the criterion has no way to separate a good answer from a merely fluent
+    one, so it scores the two systems almost identically while the people who read both can tell them
+    apart easily. The gap it reports is its own, not the systems', and it lands well inside the noise floor
+    measured in the first question.
+
+- id: q5
+  question: >-
+    You are one week from a release that must ship three fixes together. What do you do with the eval?
+  options:
+    - Run all three on the held-out set once, since the individual effects are already known in advance.
+    - Measure each fix separately on dev, then confirm all three together once on the held-out set.
+    - Skip the eval for this release and re-run it afterwards, when there is time to do it properly.
+    - Measure all three together on dev, because separate runs would take longer than the release window.
+  correct: 1
+  explanation: >-
+    The point of one-at-a-time is to price each change and keep the ability to answer "which one broke it?"
+    later; the combined confirmation run exists to check for interaction, not to substitute for the three
+    cheap dev runs. You already know each effect size from the individual runs, so the confirmation run
+    only has to answer "did they interact?", and that is a question the held-out set is for.
