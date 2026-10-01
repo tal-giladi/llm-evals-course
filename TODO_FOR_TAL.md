@@ -39,6 +39,14 @@ All four build checks pass:
 | Python package (plan §12.8) | **A separate `evallab` package** in `labs/common/`, vendored into each module zip. `rag-course` has no `raglab` to share with yet, so there is nothing to coordinate |
 | Tier B playground | Deferred with M11–M15 |
 
+### Resolved while planning M11–M15 (2026-10-01)
+
+| Question | Decision |
+|---|---|
+| Does the Python path require a live model? | **No.** Recorded educational-model data by default; an Ollama judge is an optional extra, so the labs keep the no-API-key guarantee |
+| Docker in the production path? | **Yes, kept** — used to pin the judge (M11), the optional trace store (M12) and the CI image (M13). Pinning the judge is the *answer* to M11's portability problem, not setup tax |
+| Capstone subject | **The learner's own feature.** `templates/eval-design-review.md` is the deliverable; the ten module quizzes carry the objective grading, since a self-chosen capstone cannot be verified by us. A second, gradable capstone on the course's own support bot is available later if wanted |
+
 ### Open but minor — adjust in `curriculum/course-details.md`, no build impact
 
 - **Free or paid:** suggested **free**; the whole fundamentals path needs no paid model.

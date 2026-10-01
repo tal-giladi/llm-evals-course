@@ -60,11 +60,29 @@ exist rather than being a transcription exercise.
 **Deliverables:** `evallab` in `labs/common/`; `labs/module-11/` with starter code, tests and a
 `solution/`; a `doctor` command checking Python, Docker and model availability.
 
-**Deliberate constraint:** the labs stay offline-capable. The shipped dataset is the same
-educational-model data the browser path uses, and the labs must run with **no API key**. A live
-Ollama judge is an *optional* extra. This is not a compromise — it is the same zero-setup guarantee
-that made Part 1 work, and dropping it would make the course fail the people who can least afford
-a paid model.
+**Deliberate constraint — resolved by Tal: the live model stays optional.** The shipped dataset is
+the same educational-model data the browser path uses, and the labs must run with **no API key**.
+A live Ollama judge is an *extra*, not a requirement. This is not a compromise — it is the same
+zero-setup guarantee that made Part 1 work, and dropping it would make the course fail the people
+who can least afford a paid model.
+
+**Docker earns its place here, and the reason is the module's own lesson.** The failure M11 exists
+to teach is a suite that passes on your machine and fails on someone else's, and the usual culprit
+is the judge: a different model build or quantisation gives different verdicts. Running Ollama
+inside a pinned container with a pinned model tag is what makes the judge reproducible at all — so
+`docker compose up` for the judge is the *answer* to M11's problem, not setup tax. Docker stays in
+the production path, used for three things and always for the same reason (pinning something the
+rest of the path depends on):
+
+| Where | Container | What it pins |
+|---|---|---|
+| M11 | Ollama + a pinned model tag | the judge, so verdicts are identical across machines |
+| M12 | optional MLflow backend (ClickHouse/Postgres) | the trace store behind the local UI |
+| M13 | the CI job image | Python version, eval dependencies, `evallab` itself |
+
+`labs/common/` ships a `docker-compose.yml` for the first, and the `doctor` command reports which of
+the three are present so a learner on a machine that cannot run containers is told which lessons
+are affected rather than hitting an error halfway through.
 
 **Estimate:** 4 lessons, 5 lab files, 1 shared package.
 
@@ -158,7 +176,12 @@ laptop that it would break the course's "this is quick" promise, and the plan al
 
 ---
 
-## Capstone
+## Capstone — on the learner's own feature (resolved by Tal)
+
+The learner takes **an LLM feature of their own**, ideally one they have already shipped, and carries
+it through the whole loop: error analysis, a labelled dev/test set, at least one validated judge, an
+instrumented app, a CI regression suite and a sampled online eval. The rubric below is unchanged
+from `plan.md` §9.
 
 | Criterion | "Meets the bar" |
 |---|---|
@@ -173,8 +196,35 @@ laptop that it would break the course's "this is quick" promise, and the plan al
 | Online loop | a sampled online judge and one new failure turned into a test case |
 | Reproducibility | one command re-runs the suite to a stated tolerance |
 
-`templates/eval-design-review.md` is already written against exactly this rubric, so the capstone
-brief is mostly assembly.
+**The consequence to plan around: this cannot be verified by us.** Nothing we ship can check
+whether a capstone was done honestly, so the assessment has to be structured rather than graded.
+Three things make that workable, and all three are already partly written:
+
+1. **`templates/eval-design-review.md` is the deliverable.** It is written against exactly this
+   rubric, and every row is a number with a sample size and a reason next to it. A capstone that is
+   two pages of that sheet is checkable by a human reader even though we cannot run it.
+2. **The portfolio framing is a feature, not a weakness.** A capstone on the learner's own codebase
+   is the thing they put in front of a hiring manager or their team, and that is worth more than a
+   marked exercise.
+3. **The module quizzes still carry the objective grading.** All ten exist already, so the course's
+   *assessed* content is unchanged — the capstone is the ungraded, self-directed piece.
+
+`projects/capstone.md` is therefore written as a brief with a definition-of-done checklist rather
+than as an assignment with a marking scheme. If you would rather have a gradable capstone later, the
+cleanest way is a second one: the support bot from Modules 1–10, with a fixed dataset, which we
+*could* verify. Worth considering once the path is built.
+
+---
+
+## Resolved questions — closed 2026-10-01
+
+These were open when the plan was drafted. All three are now settled and folded into the text above.
+
+1. **Does the Python path require a live model?** No — recorded data by default, Ollama optional.
+2. **Docker?** Yes, kept, and used specifically to pin the judge, the trace store and the CI image.
+3. **Capstone on the learner's own feature?** Yes. `templates/eval-design-review.md` is the
+   deliverable, the module quizzes carry the objective grading, and a verified variant on the
+   course's own support bot is available as a later addition if you want gradable work.
 
 ---
 
@@ -194,13 +244,3 @@ teaches a loop that cannot be closed.
 
 ---
 
-## Open questions this plan raises
-
-1. **Does the Python path also use the educational-model data?** My assumption in the plans above is
-   yes, with a live Ollama judge as an optional extra. It is what keeps the zero-API-key guarantee.
-   Say if you want M11 to require a real model.
-2. **Docker.** The plan assumed it. With MLflow chosen and Ollama optional, nothing in M11–M14
-   *needs* Docker. Dropping it would widen the set of machines the production path runs on.
-3. **Capstone on the learner's own feature**, or on the course's support bot? The rubric in
-   `plan.md` §9 implies the learner's own. That makes the capstone unverifiable by us, which is
-   fine for a portfolio piece and weak as an assessment.
