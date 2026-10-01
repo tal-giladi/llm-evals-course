@@ -1,0 +1,114 @@
+- id: q1
+  question: >-
+    Your nightly gate failed overnight and passed on a re-run of the same commit. On 57 items, two runs of the
+    identical judge differ by 12.3 points of pass rate. What is the correct explanation?
+  options:
+    - >-
+      The gate threshold is too tight for the judge in use, so widen the tolerance until the flakiness stops
+      appearing.
+    - >-
+      The gate is under-sampled rather than flaky: one greedy verdict is a single draw from a distribution
+      whose width you have now measured, so the fix is repeats at a recorded seed.
+    - >-
+      The eval set is too small to gate on at all, and the first change should be to label more items rather
+      than to sample the judge more than once.
+    - >-
+      The re-run used a different random subset, so the two verdicts were never comparable and the gate is
+      behaving correctly.
+  correct: 1
+  explanation: >-
+    A single verdict is one point of a distribution: across 94 items the greedy call disagrees with a
+    temperature sample 24.5% of the time, and on half the items the five recorded samples are not all the
+    same. Repeats, with the count and the seed written into the result key, is what turns one draw into a
+    measurement whose width you know.
+
+- id: q2
+  question: >-
+    On the same 40 items, four repeats give a kappa of 0.90 and five repeats give 0.85, while one repeat gives
+    0.70. Why does adding the fifth repeat lower the number?
+  options:
+    - >-
+      The majority vote is a poor aggregator at small k, so the fifth sample dilutes the first four and the
+      kappa falls toward the mean of the four.
+    - >-
+      Four repeats needs 3 of 4 samples to pass and five needs only 3 of 5, so four is the stricter test
+      and three items that passed at five fail at four.
+    - >-
+      The extra sample widens the bootstrap interval enough that the point estimate is pulled down, since
+      kappa is recomputed rather than reused.
+    - >-
+      The cost of the fifth call exceeds a budget cap, so the lab silently falls back to four samples and
+      reports the four-sample figure.
+  correct: 1
+  explanation: >-
+    A bare majority over an even number of samples requires a strict majority, which is a higher bar than the
+    odd count above it. That is why "more repeats" is not automatically a more permissive or a more accurate
+    judge — the repeat count is an operating point, and the tie rule belongs in the config beside it.
+
+- id: q3
+  question: >-
+    Kappa on the 57 dev items goes 0.79 at one repeat, 0.86 at three and 0.89 at five. What do you set?
+  options:
+    - >-
+      Five repeats, because the kappa is still rising and the interval is the narrowest of the three.
+    - >-
+      One repeat, because the three higher figures all come from a judge being asked the same question
+      repeatedly, which is not an independent measurement.
+    - >-
+      Three repeats — essentially all of the gain arrives at two or three, and the difference between three
+      and five sits inside the intervals while the bill goes from $22.7640 to $37.9400 on 200 items.
+    - >-
+      Two repeats, because two is where the whole gain arrives and it is the cheapest setting that removes
+      the single-sample dependence.
+  correct: 2
+  explanation: >-
+    Variance reduction on a binary verdict saturates almost immediately, so the marginal repeat stops paying
+    for itself long before five. Three is a defensible ceiling on cost grounds; what you must not do is
+    quote the best number you happened to try, which on this corpus means quoting k = 4.
+
+- id: q4
+  question: >-
+    Your padding probe shows the judge gains 17.5 points of pass rate when two neutral sentences are appended
+    to every answer. You propose running the judge five times and taking the majority. What does that fix?
+  options:
+    - >-
+      Nothing — repeats average five draws from a biased distribution, so they narrow the interval around a
+      verdict that is wrong for a systematic reason.
+    - >-
+      Part of it — the majority vote removes the per-sample noise, which is the only part of the 17.5 points
+      that was ever random.
+    - >-
+      Most of it — a biased verdict still has a correct majority whenever the bias is smaller than the
+      sampling spread.
+    - >-
+      Everything, provided the seed is fixed, because a fixed seed removes the random component the bias is
+      being confused with.
+  correct: 0
+  explanation: >-
+    Repeats reduce variance; they do not move the centre. If length buys a pass, five samples out of five will
+    agree that it does, and you will have paid five times as much for a tighter interval around the wrong
+    number. Fix the judge first, then decide how many times to ask it.
+
+- id: q5
+  question: >-
+    At five repeats the three-shot judge reads a kappa of exactly 1.00 with an interval of 1.00–1.00 on the
+    held-out set. What does that shape tell you?
+  options:
+    - >-
+      The judge is now perfect and the eval can drop its human labels, since there is nothing left to
+      disagree with.
+    - >-
+      The majority vote has exceeded the reliability ceiling, so the remaining errors are in the human labels
+      rather than in the judge.
+    - >-
+      The exemplar set and the repeats were both worth it, since neither change on its own reached 1.00 on
+      this split.
+    - >-
+      The interval is meaningless on 37 items, because with zero disagreements the bootstrap has nothing to
+      resample; a collapsed interval is the absence of evidence, not certainty.
+  correct: 3
+  explanation: >-
+    A kappa of 1.00 with a point interval is what a small set produces automatically once you aggregate hard
+    enough, and it is the shape to distrust most. It also cannot separate the two changes that produced it:
+    the zero-shot judge also reaches 1.00 at five repeats on the same split, so the ceiling hides which edit
+    did the work.

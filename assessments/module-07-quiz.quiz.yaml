@@ -1,0 +1,230 @@
+- id: q1
+  question: >-
+    Your pairwise eval reports 97.9% accuracy on 48 comparisons with every pair shown as A then B. Judging the
+    same pairs in both orders, the judge gives the same winner in both orders 47.9% of the time. Which
+    sentence belongs in the write-up?
+  options:
+    - >-
+      Position bias and quality point the same way in a one-order run where the better answer is always
+      first, so the 97.9% is not evidence about the judge; 47.9% is below the 50% a coin would score.
+    - >-
+      The judge is unstable on roughly half the comparisons, so the calibration set needs at least 500 pairs
+      before the consistency rate can be read at all.
+    - >-
+      The two numbers measure different things — accuracy against humans and consistency with itself — so
+      both belong on the dashboard and neither needs to be explained.
+    - >-
+      The swap result is the more reliable of the two because it is the more recent run, so the report should
+      lead with 47.9% and drop the accuracy figure.
+  correct: 0
+  explanation: >-
+    A single-order run stacks two effects on top of each other, and when the better answer is always first
+    they add. Separating them needs the second observation, and 47.9% is a genuinely alarming result rather
+    than a small-sample artefact.
+
+- id: q2
+  question: >-
+    You apply the both-orders rule — a win only when the same answer wins twice, disagreement is a tie — and
+    get 23 ties, 24 wins for the better answer and 1 win for the worse one out of 48 comparisons. What is the
+    defensible report?
+  options:
+    - >-
+      Accuracy 96.0% on 48 comparisons, because the 23 ties were still judged by a five-sample majority.
+    - >-
+      Accuracy 47.9% on 48 comparisons, because that is the share of comparisons whose verdict held up.
+    - >-
+      No accuracy, because a rule that produces ties on nearly half the set has not resolved the comparison
+      and a single figure would overstate it.
+    - >-
+      Accuracy 96.0% on the 25 comparisons that resolved, with a tie rate of 47.9% reported beside it
+      because the judge decided barely half the set it was given.
+  correct: 3
+  explanation: >-
+    The accuracy is earned this time — 24 of 25 decided comparisons — and the tie rate belongs beside it
+    because it is what says whether the judge is sharp enough to gate on. Swapping removed the bias; it did
+    not make the judge good.
+
+- id: q3
+  question: >-
+    You copy an answer verbatim, append two sentences that add no facts, and re-run the judge. The pass rate
+    goes from 59.6% to 64.9% on 57 items, and the true-negative rate falls from 100% to 70.4%. What does that
+    establish?
+  options:
+    - >-
+      The padded copy is genuinely better, because it contains the original answer's facts plus helpful
+      context a reader would appreciate.
+    - >-
+      The change is inside sampling noise, because 5.3 points is well under the 12-point gap between two runs
+      of this judge on 57 items.
+    - >-
+      The judge has a length prior: content, item and human label were all held fixed, so a rising pass rate
+      and a falling TNR can only be length, and the gate is now shipping failures.
+    - >-
+      The rubric needs an explicit clause about answer length, which would make the verdicts reproducible
+      from the prompt text.
+  correct: 2
+  explanation: >-
+    That is the probe design: one variable, everything else fixed, so any movement is that variable. And the
+    direction of the disagreement between pass rate and TNR is what makes it matter — the new passes are
+    failures, not newly recognised quality.
+
+- id: q4
+  question: >-
+    A judge scores 59.6% on originals and 56.1% on their padded copies. A colleague concludes it mildly
+    prefers short answers. What is the correct response?
+  options:
+    - >-
+      Agree, and normalise every answer to the corpus mean length so the prior cannot operate on the
+      comparison.
+    - >-
+      Agree, and cap the answer at the mean length, recording the cap in the run key so the verdicts stay
+      reproducible.
+    - >-
+      Disagree, but only because the correct reading is that the effect is larger than 3.5 points and the
+      cohort size is too small to have shown it properly.
+    - >-
+      Disagree — 6 of the 10 changed items went toward fail and 4 toward pass, which is a coin rather than a
+      preference, and stating the null is what makes the next real effect visible.
+  correct: 3
+  explanation: >-
+    A preference needs a direction and a magnitude that clears the noise floor. Six-four on ten changed items
+    is neither, and writing the null down explicitly is what lets you claim a real effect next time.
+
+- id: q5
+  question: >-
+    You are migrating a Llama-family system to a Qwen-family candidate and validating with an LLM judge. The
+    judge passes the incumbent at 90% and the candidate at 70%. What is the cheapest correct move?
+  options:
+    - >-
+      Average the two pass rates and report the midpoint, since two numbers with a family confound in them
+      bracket the unbiased answer.
+    - >-
+      Pick a judge from a family other than the candidate's, and say in the write-up that the incumbent's
+      score is an upper bound while the original judge shares its family.
+    - >-
+      Upgrade to a 14B judge from the same family, so size separates from family and the confound can be
+      attributed.
+    - >-
+      Run the comparison twice at different seeds and take the majority, since family effects are known to
+      vary between samples.
+  correct: 1
+  explanation: >-
+    Self-preference is a property of the judge-system pair, and averaging cannot remove it. A judge from
+    another family costs one line of config; a bigger judge from the same family keeps the confound and
+    enlarges the bill, which is the trap the size ladder sets.
+
+- id: q6
+  question: >-
+    A panel labelled "self-preference" reports the judge passing one system 12.3 points more than another and
+    a third 10.5 points less. You have measured that two runs of this identical judge on 57 items differ by
+    12.3 points. What is the panel actually showing you?
+  options:
+    - >-
+      A family prior of roughly 11 points, because both differences exceed the floor once you average them.
+    - >-
+      Nothing usable, because a panel whose label and data disagree should be discarded rather than
+      interpreted.
+    - >-
+      A self-preference effect that is present but too small for 57 items, so the study should be repeated on
+      the full set before any conclusion is drawn.
+    - >-
+      A null result and a useful control: the changed items run 12 one way on one system and 10 the other way
+      on another, which is the noise floor of one judge measured against itself.
+  correct: 3
+  explanation: >-
+    A bias has a direction on every system it touches; a re-roll scatters. The value here is the floor itself,
+    because every other bias reading in this module — padding at 17.5 points, size at 0.11 of kappa — has to
+    be measured against it before it means anything.
+
+- id: q7
+  question: >-
+    Five rubric judges score the same 57 dev items with kappas of 0.68, 0.61, 0.79, 0.86 and 0.79, and their
+    95% intervals all overlap. What is the right conclusion for a team choosing a judge?
+  options:
+    - >-
+      This eval set cannot rank these judges; write a TNR and TPR target, take the cheapest rung that clears
+      both, and spend the difference on items.
+    - >-
+      Take the highest rung, because paying 6.8 times more per call is worth a point estimate of 0.11 even when
+      the intervals overlap.
+    - >-
+      Take the bottom rung, because it clears every target at a third of the price and the ladder shows no
+      rung separating from another.
+    - >-
+      Take the middle rung, because the average of five noisy kappas is a better estimator than the best or
+      the worst of them.
+  correct: 0
+  explanation: >-
+    Overlapping intervals mean no rung is distinguishable from another on this set, so a ranking is not
+    available to act on. Target-based selection is: on this ladder exactly two rungs clear TNR ≥ 0.85 and
+    TPR ≥ 0.90, and the cheaper one is the fourth rung, not the top.
+
+- id: q8
+  question: >-
+    Moving a 57-item run from the $0.03794 judge to the $0.09872 judge costs $3.4645. What does that money buy
+    spent on items at the cheaper price instead?
+  options:
+    - >-
+      91 extra items, but only for trend reporting, since the kappa interval on a release gate is determined
+      by the judge model rather than by the sample size.
+    - >-
+      3 extra items, because a run of the cheaper judge needs its prompt rebuilt and re-registered for every
+      item added after the first 50.
+    - >-
+      91 extra items, taking the set to 148 and narrowing the kappa interval from about 0.31 to about 0.19,
+      which tightens every number you have and have not yet measured.
+    - >-
+      Nothing worth having, because a kappa interval narrows with judge size and not with the number of
+      items scored.
+  correct: 2
+  explanation: >-
+    Interval width falls roughly like one over the square root of the item count, so items improve every
+    estimate at once. The upgrade moves the estimate by at most 0.07 between two rungs whose intervals overlap,
+    which is less than half of what the items buy.
+
+- id: q9
+  question: >-
+    Your release gate failed overnight and passed on a re-run of the same commit, on 57 items where two runs
+    of the identical judge differ by 12.3 points of pass rate. What now?
+  options:
+    - >-
+      Raise the gate tolerance until the flakiness stops, since the judge itself is stable on average.
+    - >-
+      Sample the gate judge several times at a recorded seed, write the repeat count and the tie rule into
+      the run key, and keep one greedy verdict for the nightly trend only.
+    - >-
+      Discard the second run and treat the first as the result, because the run that disagrees is the one
+      that sampled badly.
+    - >-
+      Keep both numbers on the dashboard as a range, because a pass rate that moves by 12 points on a
+      fixed set is genuinely uncertain.
+  correct: 1
+  explanation: >-
+    A single verdict is one draw from a distribution whose width you have now measured — across 94 items the
+    greedy call disagrees with a temperature sample a quarter of the time. Repeats turn one draw into a
+    measurement, and the count and seed have to be in the key or the next run is uninterpretable.
+
+- id: q10
+  question: >-
+    On the same 40 items, four repeats give a kappa of 0.90 and five give 0.85, and your padding probe shows
+    the judge gains 17.5 points of pass rate when two neutral sentences are appended. What does raising the
+    repeat count to five actually buy?
+  options:
+    - >-
+      Nothing about the padding bias — repeats average five draws from a distribution that already contains
+      it — and the four-versus-five gap shows the repeat count is an operating point, not a free accuracy
+      upgrade.
+    - >-
+      Most of the bias, because a biased verdict still has a correct majority whenever the bias is smaller
+      than the sampling spread.
+    - >-
+      The bias, plus a better kappa, since 0.85 at five repeats is above the 0.70 at one repeat on the same
+      items.
+    - >-
+      Nothing, because four and five repeats are statistically equivalent, so the point estimates should have
+      been identical and the 0.05 gap indicates an error in the run.
+  correct: 0
+  explanation: >-
+    Repeats reduce variance; they do not move the centre, so five samples out of five will agree on a
+    length-driven pass. And the four-versus-five gap is not an error: a bare majority over an even number of
+    samples is a stricter test, which is why the repeat count belongs in the config with its tie rule.

@@ -1,0 +1,229 @@
+- id: q1
+  question: >-
+    A support assistant's judge reads kappa 0.77 on dev. The 94-item human set was labelled in one
+    afternoon by the engineer who wrote the retrieval prompt, with no second pass. What does that 0.77
+    measure?
+  options:
+    - >-
+      The judge's accuracy against the task, since the prompt and the labels came from the same
+      understanding of what a correct answer is.
+    - >-
+      Consistency between the judge and one unrecorded labelling convention, because both came from one
+      document rather than from two independent ones.
+    - >-
+      The judge's ability to catch real failures, which is why the number can be read without the
+      labels having been written down anywhere else.
+    - The quality of the system being judged, since the labels describe what it should have said and
+      the judge describes what it did say.
+  correct: 1
+  explanation: >-
+    A recorded agreement number is a claim about two things at once. When both come from the same person
+    on the same afternoon, the comparison measures consistency rather than correctness, and the
+    criteria that produced it exist nowhere a second person could check them.
+
+- id: q2
+  question: >-
+    You relabel the 6 `over_refusal` items as passes after a policy meeting, leaving everything else
+    alone. The rubric judge's kappa over 94 items moves from 0.77 to 0.64. What is the right reading of
+    those two numbers?
+  options:
+    - >-
+      Six labels is noise, so pool more items until the two numbers stop disagreeing.
+    - >-
+      The judge is the unstable component, since it is the only artefact that moved when the humans
+      were re-read.
+    - >-
+      Nobody re-graded anything carelessly; one criterion was applied two ways. The write-down is the
+      rule that says whether declining counts as a failure.
+    - A labelling cost to avoid, which is why the second pass should be run by a domain expert rather
+      than by a second developer on the same team.
+  correct: 2
+  explanation: >-
+    Both labellers applied the written criteria correctly, so where they diverge is a place the criteria
+    are silent. Writing that sentence down fixes six labels and every later measurement that touches
+    them; resolving the disagreement by seniority throws the finding away.
+
+- id: q3
+  question: >-
+    Over 94 items a judge passes 89.4% of the answers humans passed and fails 51.1% of the answers
+    humans failed, with accuracy at 70.2%. A release gate is built on the 89.4% figure. What is the
+    gate doing?
+  options:
+    - >-
+      Releasing most real faults. That rate measures how often good answers survive; the rate that stops
+      faults reaching users is TNR, and this gate never checks it.
+    - >-
+      Catching the faults the taxonomy found, since a judge that passes good answers reliably will
+      also fail bad ones reliably.
+    - >-
+      Twice the work it should, since the higher rate is the conservative one and conservatism in a
+      gate always means catching more.
+    - >-
+      Nothing, because accuracy of 70.2% is too low to back a gate and the judge should be retrained
+      before it is used at all.
+  correct: 0
+  explanation: >-
+    TNR of 51.1% means 24 of 47 real failures were caught, so 23 reach users while the gate reports a
+    healthy 89.4%. The accuracy figure of 70.2% describes the mix of the set rather than the judge,
+    which is why both rates belong on the same screen with their denominators.
+
+- id: q4
+  question: >-
+    Your eval set is 95% good answers. A judge that passes every item scores 95% accuracy on it, and
+    another judge scores 87%. Which is better?
+  options:
+    - >-
+      The second, because accuracy is computed over every item equally and so penalises a judge that
+      catches the small minority of faults.
+    - >-
+      The first, because a judge that never rejects a correct answer cannot annoy a good user.
+    - >-
+      The first, provided the 5% of bad answers are spread across enough slices to keep the interval
+      narrow on each one.
+    - >-
+      Neither can be ranked from accuracy, because it rises as the set gets more skewed. Kappa reads
+      0.00 for the always-pass judge and separates the two.
+  correct: 3
+  explanation: >-
+    Re-weighting one judge's own verdicts across mixes moves accuracy and kappa in opposite directions:
+    the plain judge here goes from 70.2% and 0.40 at a 50/50 split to 87.4% and 0.23 at 95% good. The
+    always-pass judge sits at kappa 0.00 at every mix, which is the figure that identifies it.
+
+- id: q5
+  question: >-
+    A judge reads kappa 0.88 on 57 dev items with an interval of 0.71 to 1.00, and 0.44 on the
+    held-out test set. Your team is about to ship. What should the runbook say?
+  options:
+    - Report the dev figure as the validated number, since dev is the larger half and the test half is
+      too small to conclude from.
+    - Re-run the test set with a different seed until the number recovers, since the 0.44 is within the
+      noise a 37-item draw produces.
+    - >-
+      Report both halves with their intervals, and say that the judge transfers its shape but not its
+      precision: the point estimate moved 0.44 and the interval on 37 items holds the whole gap.
+    - Keep the judge for nightly regression checks and drop it from the release gate, since a kappa of
+      0.44 is below any usable threshold.
+  correct: 2
+  explanation: >-
+    The held-out half is the only evidence about items the judge was not tuned on, and 37 items cannot
+    resolve a 0.44 difference with any precision. The honest artefact is both numbers with both
+    intervals, plus the direction of the mismatch — a weaker judge on test is a finding about the
+    judge, not a reason to re-roll the seed.
+
+- id: q6
+  question: >-
+    Your judge reads 88.3% accuracy and kappa 0.77 against a human pass rate of 50.0%. A stakeholder
+    reads "88.3% correct" on a slide. What is wrong with that sentence?
+  options:
+    - >-
+      Nothing, since accuracy is the rate over all items and kappa is only a chance correction on top
+      of it.
+    - >-
+      It conflates two different claims. Kappa is not "77% correct", and a slide carrying one number
+      instead of both hides the rate that decides whether the judge can gate anything.
+    - >-
+      The accuracy should be quoted with its interval, because 88.3% over 94 items carries a wide one
+      and the kappa does not.
+    - >-
+      It is only correct if the humans agreed with each other, which this dataset never measured, so no
+      accuracy figure here can be quoted at all.
+  correct: 1
+  explanation: >-
+    Accuracy and kappa are different quantities answering different questions: one is the share of
+    agreements, the other is that share in excess of the agreements two labellers with the same
+    marginals would reach by accident. Reporting either alone invites the reader to hear the other.
+
+- id: q7
+  question: >-
+    You set the threshold to 0.20 with 5 repeats on all 94 items. The judge then passes 81.9% of items
+    where humans pass 50.0%, with kappa 0.36. Moving the same knob to 0.50 gives kappa 0.94. What is the
+    right way to choose a threshold?
+  options:
+    - >-
+      By the pass rate that sits closest to the human rate, since a calibrated judge should report the
+      same number the humans did.
+    - >-
+      By the highest kappa on the sweep, since kappa already accounts for the class balance that the
+      pass rate ignores.
+    - >-
+      By whatever threshold produces zero false alarms, since a false alarm costs a human's afternoon
+      and a missed fault is corrected in production.
+    - >-
+      By kappa and the false-alarm/missed-fault counts, because the pass rate is the quantity the
+      threshold exists to estimate and cannot also be the evidence for it.
+  correct: 3
+  explanation: >-
+    The sweep on these 94 items goes from 30 false alarms and kappa 0.36 at 0.20 to 3 false alarms and
+    kappa 0.94 at 0.50 with the prompt untouched. Choosing by pass rate would have picked 0.80, whose
+    46.8% is the closest to the human 50.0% and which misses 3 real faults where 0.50 misses none. Where
+    two thresholds tie on kappa, the tie-break is which direction you can afford to be wrong in.
+
+- id: q8
+  question: >-
+    Repeats on 57 dev items read kappa 0.79 at one repeat, 0.64 at two, 0.86 at three, 0.79 at four and
+    0.89 at five. A colleague concludes the measurement is unreliable and wants to discard it. What is
+    actually happening?
+  options:
+    - >-
+      At two repeats a 0.50 threshold means at least one of two samples said pass, the most generous
+      setting available. Repeats and threshold have to be chosen as a pair.
+    - >-
+      The ladder is not monotone, which means the statistic has too much variance to gate on at any
+      repeat count.
+    - >-
+      Four repeats should beat three, so one of the five rows is a bug in the run and should be
+      re-run before anything is reported.
+    - >-
+      Five repeats is only 0.10 better than one, so the extra calls are not worth the money on a set
+      this size.
+  correct: 0
+  explanation: >-
+    Each extra repeat re-rolls the whole comparison, so the per-item probability estimate improves
+    smoothly while the thresholded verdict does not move smoothly with it. The pair is the unit you
+    tune: pick the repeat count from the budget, then the threshold from the dev sweep, and record both
+    in the run key so the next run is reproducible.
+
+- id: q9
+  question: >-
+    A judge reads TPR 86.7% and TNR 33.3% on your dev set, and your nightly pass rate says 87.5%. The
+    Rogan–Gladen correction returns 104.2%. What do you publish?
+  options:
+    - >-
+      The raw 87.5% with its interval, plus TPR, TNR and the denominator of 0.20, plus a sentence
+      saying why you are not correcting it.
+    - >-
+      104.2%, since the correction is the mathematically correct pass rate and the raw figure is the
+      biased one that the judge measured.
+    - The midpoint of the raw and corrected figures, since the truth is between them.
+    - Neither number, because a judge with TNR 33.3% cannot produce any pass rate worth reporting.
+  correct: 1
+  explanation: >-
+    The denominator TPR + TNR − 1 is 0.20 here, so the correction is a five-times multiplier on a small
+    numerator and it swings from 41.7% to 104.2% purely on which items you drew. A pass rate above 100%
+    is a statement that the measured rates cannot both be true of the set, and the honest artefact is
+    the raw number with its interval and an explanation.
+
+- id: q10
+  question: >-
+    Your judge reads 28 disagreements over 94 items: 12 missing citations, 7 wrong facts, 3
+    over-refusals, 1 invented policy and 5 good answers it failed. What does that grouping change about
+    the next piece of work?
+  options:
+    - >-
+      Nothing, because 28 items is too many to read and the categories are only a summary of what the
+      list already says.
+    - >-
+      The judge should be replaced, because a judge disagreeing on 30% of items cannot be improved by
+      editing its prompt.
+    - >-
+      It is the specification. Twelve repeated lines become one rubric clause, the five missed good
+      answers a prompt change, the three over-refusals a policy question.
+    - >-
+      The set should be shrunk to the categories the judge handles, which is what the kappa target is
+      really asking for.
+  correct: 2
+  explanation: >-
+    Grouping by the human's failure category converts a list of 28 into a short list of distinct
+    problems — on this dataset the rubric judge's 11 disagreements contain only 3 — and each problem gets
+    one owner and one change. Every missed fault here also begins with a fail sample, which is a fix in
+    the run rather than the prompt.

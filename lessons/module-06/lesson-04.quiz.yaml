@@ -1,0 +1,87 @@
+- id: q1
+  question: >-
+    You set the threshold knob to 0.15 on a judge run with 5 repeats, then to 0.20, and the confusion
+    matrix does not change. Why?
+  options:
+    - >-
+      The page only recomputes when the repeat count changes, so the threshold is applied after the
+      matrix is built and has no effect at this resolution.
+    - >-
+      With 5 samples the score can only be 0, 0.2, 0.4, 0.6, 0.8 or 1, and both settings accept an
+      item on a single pass out of five, so they are the same operating point.
+    - The bootstrap interval is wider than the difference, so the table is showing rounded counts and
+      the underlying cells did change.
+    - Below 0.20 the judge is treated as greedy, and a greedy run ignores every repeat but the first.
+  correct: 1
+  explanation: >-
+    The probability-weighted score lives on a grid of k + 1 values, so at 5 repeats a threshold in the
+    open interval between 0 and 0.2 accepts anything with at least one pass. The same collapse happens
+    at 0.50 to 0.60 and at 0.95 to 1.00, which means six real settings spread over twenty knob
+    positions.
+
+- id: q2
+  question: >-
+    On 94 items the rubric judge reads a pass rate of 81.9% at threshold 0.20 against a human pass
+    rate of 50.0%, with kappa 0.36. A teammate concludes the judge is useless. What does the full row
+    of numbers show?
+  options:
+    - >-
+      The judge is useless, since a 32-point gap between its pass rate and the human rate cannot be
+      explained by anything else.
+    - >-
+      The pass rate is made almost entirely of 30 false alarms on the 47 items the humans failed, and
+      the judge missed none of them, so the gap measures generosity rather than uselessness.
+    - The judge is mis-measured, because the pass rate and the human rate are measured on different
+      numbers of items and cannot be compared directly.
+    - The judge is fine and the labels are wrong, since a 50/50 human split on this dataset is a sign
+      the labels were guessed rather than applied.
+  correct: 1
+  explanation: >-
+    At that setting the confusion matrix reads `tp 47, fp 30, fn 0, tn 17`: every good answer passed and
+    30 of the 47 real failures passed too. Raising the threshold to 0.50 moves the same judge to 3 false
+    alarms, 0 missed faults and kappa 0.94, with no change to the prompt. The pass rate is the quantity
+    the threshold is there to correct, so it cannot also be the evidence against the correction.
+
+- id: q3
+  question: >-
+    The repeats ladder on 57 dev items reads kappa 0.79 at 1 repeat, 0.64 at 2, 0.86 at 3, 0.79 at 4
+    and 0.89 at 5. What does this tell you about choosing the repeat count?
+  options:
+    - >-
+      Nothing useful, because the ladder is not monotone and therefore the measurement is unreliable on
+      this set.
+    - >-
+      Two repeats at a 0.50 threshold means at least one of two samples said pass, which is the most
+      generous setting available, so repeat count and threshold have to be chosen together.
+    - Four repeats is the sweet spot at 4 times the cost of one, so the budget argument always favours
+      the cheapest rung that passes your target.
+    - Repeats buy a better estimate of a probability, but the verdict that estimate produces jumps, so
+      the ladder's shape is expected and the pair is what you tune.
+  correct: 3
+  explanation: >-
+    Each extra repeat re-rolls the comparison, so the estimated per-item probability improves smoothly
+    while the thresholded verdict does not move smoothly with it. The rung that looks best is the rung
+    you happened to sample, which is why you pick repeats from the budget and the threshold from the
+    dev sweep, and record both in the run key.
+
+- id: q4
+  question: >-
+    Your threshold of 0.50, chosen on 57 dev items, reads kappa 1.00 with an interval of 1.00 to 1.00
+    on the 37 held-out items. Before shipping, what does that interval tell you to do?
+  options:
+    - Report it as the strongest evidence in the module, because a zero-width interval means the judge
+      has no remaining variance on this population.
+    - >-
+      Nothing, since a held-out score that matches dev exactly is the expected result of a threshold
+      chosen on dev rather than on test.
+    - Re-tune the threshold on the test half to raise TPR, since the test set is now available and
+      there are no disagreements left to lose.
+    - >-
+      Treat the zero-width interval as a resampling artefact: with no disagreements there is nothing to
+      vary, so it is the absence of evidence rather than perfect agreement.
+  correct: 3
+  explanation: >-
+    A bootstrap over items with zero disagreements cannot produce a distribution, so the interval
+    collapses to a point. That shape is what overfitting looks like on a small split, and it is the
+    signal to stop reading the number and go back to the items. The threshold still transfers: 0.95 on
+    the same 37 items reads kappa 0.37 with 11 missed faults.

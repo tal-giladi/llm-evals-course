@@ -1,0 +1,95 @@
+- id: q1
+  question: >-
+    A judge reads TPR 90.0%, TNR 30.0% and a pass rate of 95.0% over 94 items. What does the corrected
+    pass rate come out at, and what is the honest thing to do with it?
+  options:
+    - >-
+      70.0%, and it should be published because the arithmetic is correct once TPR and TNR are
+      measured rather than estimated.
+    - >-
+      75.0%, and it is publishable with its interval as long as the denominator, 0.20, is printed
+      beside it.
+    - >-
+      125.0%, which is outside the possible range. The denominator TPR + TNR − 1 is 0.20, so the
+      correction multiplies a small numerator by five and the raw rate should be reported instead.
+    - >-
+      25.0%, which shows the correction cannot be applied to a judge that fails this many good
+      answers.
+  correct: 2
+  explanation: >-
+    The denominator measures how far the judge is from always-fail. At 0.20 the correction is a
+    five-times multiplier on a small numerator, so an observed 95.0% lands at 125.0% — a statement that
+    the measured TPR and TNR cannot both be true of that set. In this lab a judge at that denominator
+    produces 41.7% at one seed and 104.2% at another on an unchanged set.
+
+- id: q2
+  question: >-
+    The correction is applied to a 40-item pass rate of 67.5% using a TPR of 86.7% and a TNR of 55.6%
+    measured on all 57 dev items. It returns 54.6%, and the humans' rate on those same 40 items is
+    55.0%. Why are the rates measured on all 57 rather than on the 40?
+  options:
+    - >-
+      Forty items is too few to estimate a rate, so the correction needs a larger sample to avoid a
+      bootstrap interval that is too wide to publish.
+    - >-
+      Estimating TPR and TNR on the same 40 items makes the correction circular: it would return the
+      sample's own human rate rather than a corrected estimate of it.
+    - The 57-item dev half is the only split with labels, since the held-out half's labels are revealed
+      by the Validate button and not before.
+    - The 40 items are a random draw and the 57 are the whole dev set, so the correction needs the
+      population rather than the sample in order to be unbiased.
+  correct: 1
+  explanation: >-
+    If the observed rate and both input rates come from the same items, the algebra returns that set's
+    human rate as a fixed point. On all 57 dev items the plain judge's correction lands on exactly
+    52.6%, which is 30/57 — the input, handed back. The observed rate and the rates used to correct it
+    have to come from different samples or nothing has been corrected.
+
+- id: q3
+  question: >-
+    Your judge reads a 69.1% pass rate over 94 items where the humans passed 50.0%. The correction says
+    52.6%. A team proposes shipping the corrected figure as the product's quality number. What is the
+    strongest objection?
+  options:
+    - >-
+      The correction was computed with the wrong formula, since the observed rate should have been
+      replaced rather than adjusted.
+    - >-
+      The correction describes the judge rather than the system. The judge still passes 23 of the 47
+      real faults, and publishing its de-biased rate does not make it usable in the gate.
+    - >-
+      The corrected rate is within a point of the human rate, so publishing it would be accurate and
+      there is nothing to object to.
+    - >-
+      A pass rate corrected by judge bias is a lower bound, so shipping it as the headline would
+      understate the system for the sales team.
+  correct: 1
+  explanation: >-
+    Rogan–Gladen takes the judge's measured bias out of the observed rate, which is a measurement of
+    the judge and not a repair of it. The raw rate stays the reproducible headline and the corrected
+    value lives beside it as an annotation; what makes the judge usable is raising its TNR, which is
+    the work in 06.2 and 06.3.
+
+- id: q4
+  question: >-
+    You refresh the pass rate every night but last measured TPR and TNR three months ago, before two
+    prompt edits. The nightly correction still prints a plausible number. What has gone wrong?
+  options:
+    - >-
+      Nothing, because TPR and TNR are properties of the eval set rather than of the judge, so they
+      stay valid across prompt edits.
+    - >-
+      The bootstrap is stale, and recomputing it over fresh items will make the corrected number
+      consistent with the new pass rate.
+    - >-
+      The correction's inputs are from a different key than the rate being corrected. A recorded
+      verdict belongs to an exact configuration, and that applies to the bias numbers too.
+    - >-
+      The sample size is too small to correct reliably, so the correction should be run on the full 94
+      items rather than the nightly draw.
+  correct: 2
+  explanation: >-
+    The correction is a function of three recorded numbers, and if two of them come from a
+    configuration that no longer exists the output is precise and wrong. The fix is not a bigger
+    sample or a recomputed interval; it is to re-measure TPR and TNR whenever the judge changes, and to
+    carry the judge's key in the correction's key.

@@ -276,12 +276,35 @@ export function correctedPassRateCI(pairs, opts = {}) {
  * ------------------------------------------------------------------ */
 
 /**
+ * A stable, low-cardinality grouping key for an item.
+ *
+ * The subtlety this exists to handle: a dataset's `slice` is usually an
+ * *object* (`{intent, difficulty, section}`), and grouping on it by reference
+ * yields one key per item — every bucket of size 1, no shuffling, and a draw
+ * that degenerates into the first n items in list order. Group on a primitive
+ * instead, preferring the field the lab stratifies on.
+ */
+function sliceKeyOf(it) {
+  if (it === null || it === undefined) return "all";
+  if (typeof it === "string" || typeof it === "number") return String(it);
+  const s = it.slice;
+  if (s === null || s === undefined) return "all";
+  if (typeof s === "string" || typeof s === "number") return String(s);
+  if (typeof s === "object") {
+    for (const k of ["intent", "type", "kind", "category", "difficulty"]) {
+      if (s[k] !== undefined) return String(s[k]);
+    }
+    return JSON.stringify(Object.keys(s).sort().map((k) => [k, s[k]]));
+  }
+  return String(s);
+}
+
+/**
  * Draw a subset of item indices.
  *
  * @param items    the array to sample FROM. **Must be the item objects**, not
- *                 an array of indices — stratification groups on `item.slice`,
- *                 and passing indices silently collapses every item into one
- *                 bucket, turning "stratified" into a second random draw.
+ *                 an array of indices — grouping reads `item.slice`, and
+ *                 passing indices collapses every item into one bucket.
  * @param size     how many to take
  * @param strategy "all" | "random" | "stratified"
  * @param seed     makes the draw reproducible
@@ -289,7 +312,8 @@ export function correctedPassRateCI(pairs, opts = {}) {
  *
  * "stratified" keeps the proportion of every slice, which is what lesson 04.3
  * is about: a random sample of 20 from a set that is 5% "hard refusals" is
- * almost never going to contain one.
+ * almost never going to contain one. It preserves the *mix*; it cannot
+ * manufacture items the population does not have.
  */
 export function sampleItems(items, size, strategy, seed) {
   if (!items.length) return [];
@@ -299,8 +323,7 @@ export function sampleItems(items, size, strategy, seed) {
   if (strategy === "stratified") {
     const bySlice = new Map();
     items.forEach((it, i) => {
-      // Accept a bare string, or an item carrying a slice descriptor.
-      const k = (typeof it === "string" ? it : it && it.slice) || "all";
+      const k = sliceKeyOf(it);
       if (!bySlice.has(k)) bySlice.set(k, []);
       bySlice.get(k).push(i);
     });

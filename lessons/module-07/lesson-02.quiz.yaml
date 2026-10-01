@@ -1,0 +1,91 @@
+- id: q1
+  question: >-
+    You take one answer from your eval set, copy it verbatim, and append two sentences that add no facts. Your
+    judge's pass rate on the 57-item set moves from 59.6% to 64.9%. What does that establish?
+  options:
+    - >-
+      That the judge has a length prior: content was held fixed and only the sentence count changed, so the
+      movement cannot be attributed to anything else.
+    - >-
+      That 5.3 points of pass rate is inside normal sampling noise, because the dev set is only 57 items and
+      differences under 10 points never mean anything.
+    - >-
+      That the padded copy is a better answer, since the judge saw the same facts and reached the same
+      conclusion with more room to explain itself.
+    - >-
+      That the judge needs a clause in its rubric about answer length, which would make the verdicts
+      reproducible from the prompt.
+  correct: 0
+  explanation: >-
+    This is the probe design from the lesson: same item, same content, same human label, one variable. The
+    padding adds no correct fact and no new information, so any movement in the verdict is length and only
+    length. The fix is not a clause about length; it is a judge that grades a checkable field.
+
+- id: q2
+  question: >-
+    The verbosity-biased judge passes 64.9% of the padded copies and 43.2% of the originals on the 37 held-out
+    items, and its true-negative rate falls from 95.0% to 65.0%. What happened to the failures?
+  options:
+    - >-
+      Nothing — the false alarms rose from 1 to 7 but the true-negative rate still clears a 0.60 gate, so the
+      judge is usable with a wider tolerance.
+    - >-
+      They were caught by code checks rather than by the judge, so the judge's loss is not a loss to the
+      release process.
+    - >-
+      The judge went from catching 19 of 20 to catching 13 of 20, so the change improves the headline pass
+      rate while costing 6 real failures per 37 items.
+    - >-
+      They moved into the true-positive column, because a longer answer that contains the right fact is
+      genuinely better and was failing before only on length.
+  correct: 2
+  explanation: >-
+    This is the number that decides whether the effect matters. A rising pass rate with a falling TNR means
+    new false alarms, not newly recognised quality, and a gate is judged on the TNR. It is also why the
+    honest judge's 3.5-point move is the control worth wanting: its kappa stayed at 0.79 while the biased
+    judge's fell to 0.68.
+
+- id: q3
+  question: >-
+    The honest judge scores 59.6% on the originals and 56.1% on the padded copies. A colleague concludes it is
+    slightly biased against long answers. What is the right response?
+  options:
+    - >-
+      Agree, and normalise every answer to the mean length before scoring so the bias cannot operate.
+    - >-
+      Agree partially — 3.5 points is small, so cap the answer length at the corpus mean and record the cap
+      in the run key.
+    - >-
+      Disagree, but only because the correct reading is that the honest judge prefers short answers by about
+      3.5 points, which is worth fixing before it gates anything.
+    - >-
+      Disagree — 6 of its 10 changed items went toward fail and 4 toward pass, a split indistinguishable from
+      a coin, which is what a judge with no length prior looks like.
+  correct: 3
+  explanation: >-
+    A preference has to show up with a direction and clear the noise floor; six-four on ten changed items is a
+    coin. The practical point is that a null result is worth stating explicitly, because without it there is
+    nothing to distinguish a real bias from the ordinary scatter of a greedy verdict on 57 items.
+
+- id: q4
+  question: >-
+    Your eval compares two teams' answers on open-ended questions, and the team with longer answers scores 8
+    points higher every week. Which change actually removes the confound?
+  options:
+    - >-
+      Truncate every answer to the first 200 characters before sending it to the judge, and record
+      `truncated_at` in the result key.
+    - >-
+      Replace the whole-answer judge with field-level judges that check specific facts, so the length of the
+      answer cannot reach the verdict.
+    - >-
+      Add a rubric clause saying that longer answers should not be preferred, then re-run to confirm the gap
+      has closed.
+    - >-
+      Report both scores as a range, because the difference between the teams is genuinely a matter of
+      judgement rather than a measurable bias.
+  correct: 1
+  explanation: >-
+    Truncation removes the bias by discarding most of the answer, and a clause states a preference the judge
+    can still decline to follow. A question like "does the answer name the handbook section it came from?"
+    has nowhere for a length prior to act, so the bias stops being a thing you have to argue with.

@@ -1,0 +1,112 @@
+- id: q1
+  question: >-
+    Five rubric judges score the same 57 dev items. Their kappas read 0.68, 0.61, 0.79, 0.86 and 0.79, with
+    intervals of 0.47–0.86, 0.40–0.79, 0.62–0.93, 0.71–0.96 and 0.64–0.93. What is the correct conclusion?
+  options:
+    - >-
+      The ladder is not monotone and no rung separates from any other, so this eval set cannot rank these
+      judges and the ranking should not be reported as a result.
+    - >-
+      The ladder is not monotone because the 0.6B and 1.7B entries are noisy, so the cleaned ordering is
+      0.6B, 3B, 3.8B, 7B with 1.7B as an outlier to discard.
+    - >-
+      The ladder is non-monotone but the top rung is still best, because a higher kappa survives a wider
+      interval than the rungs below it.
+    - >-
+      The ladder is non-monotone, which means the recorded runs disagree with the model sizes and the data
+      should be regenerated before any judge is chosen.
+  correct: 0
+  explanation: >-
+    Every adjacent pair's intervals overlap, and so do the two ends — 0.64–0.86 spans both the bottom and the
+    top rung. That is not a defect to clean up; it is the honest state of the evidence on 57 items, and the
+    correct response is to stop ranking and start choosing against a target.
+
+- id: q2
+  question: >-
+    Upgrading a 57-item run from the $0.03794 judge to the $0.09872 judge costs $3.4645. What does that money
+    buy if you spend it on eval items at the cheaper price instead?
+  options:
+    - >-
+      3 extra items, because the cheaper judge's per-call cost includes a prompt that has to be re-run for
+      each item separately.
+    - >-
+      91 extra items, but only for the nightly dashboard, since the kappa interval on a gate is set by the
+      judge model rather than by the sample size.
+    - >-
+      Nothing comparable, because a kappa interval narrows with model size rather than with item count.
+    - >-
+      91 extra items, taking the set from 57 to 148 and narrowing the kappa interval from about 0.31 to about
+      0.19, which improves every number you have not measured too.
+  correct: 3
+  explanation: >-
+    Interval width falls roughly like one over the square root of the item count, so items narrow every
+    estimate on the board at once. The upgrade moves the point estimate by at most 0.07 between two rungs
+    whose intervals overlap, which is less than half of what the items buy.
+
+- id: q3
+  question: >-
+    On the same 57 dev items, the largest kappa step on the whole ladder is 0.61 to 0.79, between the 1.7B
+    and 3B rungs. That same step also changes the model family. What can you conclude from it?
+  options:
+    - >-
+      Judge size has a clear effect above roughly 1.7B, so every judge below that rung should be replaced.
+    - >-
+      Nothing about size alone — size and family moved together on that rung, so the 0.18 is a real change in
+      the judge and an unattributable one as to its cause.
+    - >-
+      Family matters more than size, because the other three steps on the ladder change size only and move
+      the kappa by less than 0.07 each.
+    - >-
+      The step is a sampling artefact, because a difference of 0.18 is larger than the width of either
+      interval on that rung.
+  correct: 1
+  explanation: >-
+    Two variables moved and the number moved, which tells you the judge changed and tells you nothing about
+    why. That is the confound [7.3](lesson-03.md) is about, and it is why the honest conclusion from a
+    five-rung ladder is "pick against a target, and do not buy parameters you cannot resolve".
+
+- id: q4
+  question: >-
+    You need a judge with a true-negative rate of at least 0.85 and a true-positive rate of at least 0.90 on
+    57 dev items. Which rung do you take from this ladder, and what do you report?
+  options:
+    - >-
+      The $0.01444 rung, because a TNR of 81.5% and a TPR of 86.7% are the closest available to the
+      targets and it is a third of the price of the next rung that clears them.
+    - >-
+      The $0.09872 rung, because the largest model clears every target and the ladder shows agreement
+      rising monotonically with size.
+    - >-
+      The $0.04680 rung at TNR 92.6% and TPR 93.3%, reported with its 81–100% TNR interval, noting that
+      the interval still contains 0.85 so the target is met on the estimate but not with confidence.
+    - >-
+      The $0.02244 rung, because it is the only entry whose interval is narrow enough to show which way the
+      rates differ from the targets.
+  correct: 2
+  explanation: >-
+    Exactly two rungs clear both targets — the $0.04680 one and the $0.09872 one — and the cheaper of the two
+    is the right default. Reporting the interval beside the estimate is the part that matters: 81–100%
+    contains the 0.85 you are gating on, so the judge passes the challenge and does not pass it with
+    confidence.
+
+- id: q5
+  question: >-
+    You pick the best judge on dev from a five-rung ladder, then validate on 37 held-out items. The dev-best
+    rung reads 0.86 on dev and 0.62 on test, while the dev-worst rung reads 0.79 and 0.89. What now?
+  options:
+    - >-
+      Conclude that this eval set cannot rank these judges, choose against a written TNR and TPR target
+      instead, and size the eval set up before the next such comparison.
+    - >-
+      Ship the test winner instead, since the held-out split is the unbiased estimate and 0.89 beats 0.62.
+    - >-
+      Average the two readings into one number per rung so neither split dominates the choice.
+    - >-
+      Keep the dev winner, because selecting on dev and confirming on test is exactly what the split is for,
+      and the disagreement is ordinary sampling noise.
+  correct: 0
+  explanation: >-
+    The two orderings disagree about which rung is best, and picking either one is a selection on the split
+    you happened to look at. The disagreement is the finding: with intervals this wide on 30 to 60 items,
+    the ranking was never available, so target-based selection and a bigger eval set are the fixes rather
+    than another look at the same numbers.

@@ -12,7 +12,8 @@
       come from the same document rather than from two independent ones.
     - The judge's ability to catch real failures, which is why the number can be read without the
       human labels having been written down.
-    - The overall quality of the system, because the labels describe what the system should have said
+    - >-
+      The overall quality of the system, because the labels describe what the system should have said
       and the judge describes what it did say.
   correct: 1
   explanation: >-
@@ -30,13 +31,13 @@
       The model's accuracy on all 94 items, extrapolated from a category whose rule is mechanical and
       therefore easy to get right.
     - >-
+      Nothing useful, because checking any 20 of 94 items gives an interval too wide to act on.
+    - >-
       The model's ability to spot citation markers. The 20 judgement-call items it was not checked on
       are exactly the ones that need a human decision.
-    - >-
-      Nothing useful, because checking any 20 of 94 items gives an interval too wide to act on.
     - The rubric itself, since a model that can label these items has effectively been validated by
       the same review.
-  correct: 1
+  correct: 2
   explanation: >-
     Spot-checking the biggest category verifies the part that needed no judgement. `wrong_fact`,
     `over_refusal` and `out_of_scope` are 20 items of pure decision work and would go unchecked, which
@@ -50,16 +51,16 @@
     set. What is the disagreement?
   options:
     - >-
-      Six labels out of 94 is noise, and the right response is to pool more items until the two numbers
-      are close enough to stop arguing.
-    - >-
       A finding about the criteria rather than about either labeller: nobody ever wrote down whether
       declining to answer is a failure, so the fix is that sentence.
+    - >-
+      Six labels out of 94 is noise, and the right response is to pool more items until the two numbers
+      are close enough to stop arguing.
     - Evidence that the judge is the unstable component, since it is the only artefact that moved when
       the humans were re-read.
     - A labelling cost that should be avoided, which is why the second pass should be run by a domain
       expert rather than by a second developer.
-  correct: 1
+  correct: 0
   explanation: >-
     Both labellers applied the written criteria correctly, so where they diverge is a place the
     criteria are silent. Writing that sentence down fixes six labels at once and every future
@@ -75,14 +76,14 @@
       The labels are correct, because the two halves were labelled by the same people and a drop of
       that size is only the judge's sampling noise.
     - >-
-      The judge changed between the halves while the labels stayed frozen, so the drop measures the
-      judge rather than the humans.
-    - >-
       The test labels were harder, since kappa depends on how difficult the items are for the judge and
       not at all on who wrote the labels.
     - The interval is narrow enough on both halves that the 0.04 gap is a real regression, and the
       prompt needs another round of tuning.
-  correct: 1
+    - >-
+      The judge changed between the halves while the labels stayed frozen, so the drop measures the
+      judge rather than the humans.
+  correct: 3
   explanation: >-
     A label is a judgement about an item and a system output, and the same people wrote all of them
     before the split existed, so nothing about the humans differed between the two numbers. The

@@ -96,22 +96,23 @@
 
 - id: q6
   question: >-
-    Switching to **Keep the slice mix** guarantees every intent slice is drawn from, yet two slices
-    still read `none seen` in the failing-items column. What is the reason, in one sentence?
+    A mix-preserving sampler gives the 7-item `out_of_scope` slice a quota of 1.49 items in a sample
+    of 20. Why does that slice still read `none seen` most of the time?
   options:
-    - Stratification picks which slices you draw from, not which failures — a mix-preserving draw of 20
-      expects 0.64 `exception` items and about 0.43 `out_of_scope` failures.
-    - The panel only refreshes when the sample size changes, so the rows you see are stale until you
-      redraw.
-    - Stratified draws weight the hard slices deliberately, and `exception` failed that weighting
-      test.
-    - Failing items are left out of every draw by design, because a failing item has no verdict to
-      contribute yet.
+    - >-
+      About one item after rounding, and one item drawn from a slice where two of seven fail is a
+      useful draw only two times in seven.
+    - The panel only refreshes when the sample size changes, so the rows you see stay stale until you
+      redraw the whole panel.
+    - Stratified draws weight the hard slices deliberately by design, and `out_of_scope` failed that
+      particular weighting test at this size.
+    - Failing items are left out of every stratified draw by design, because a failing item has no
+      verdict to contribute to the table yet.
   correct: 0
   explanation: >-
-    Keeping a 3-in-94 share proportional gives you shares of 3%, and no rate can be measured on 0.64
-    of an item. The fix is not a better sampler but a different allocation: take the whole rare stratum
-    by hand so the failing count inside it is large enough to have an interval.
+    Keeping a 3-in-94 share proportional gives you shares of 3%, and a quota that rounds to one item
+    cannot support a rate. The fix is not a better sampler but a different allocation: take the whole
+    rare stratum by hand so the failing count inside it is large enough to have an interval.
 
 - id: q7
   question: >-

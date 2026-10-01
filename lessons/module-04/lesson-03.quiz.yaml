@@ -20,23 +20,24 @@
 
 - id: q2
   question: >-
-    Switching to **Keep the slice mix** at n = 20 guarantees every intent slice has at least one item in
-    the sample. Two of them still read `none seen` in the failing-items column. Why?
+    A mix-preserving sampler gives the 7-item `out_of_scope` slice a quota of 1.49 items in a sample
+    of 20. What does that actually buy you on that slice?
   options:
-    - The panel only updates when the sample size changes, so the rows you see are stale until you
-      redraw.
-    - Stratification picks which slices you draw from, not which failures — a mix-preserving draw of 20
-      expects 0.64 `exception` items and 0.43 `out_of_scope` failures.
-    - Stratified draws deliberately weight the hard slices, and `exception` failed that particular
-      weighting test.
-    - Failing items are left out of every draw by design, because a failing item has no verdict to
-      contribute yet.
+    - Everything a random draw buys you, because the quota is computed from the population rather than
+      from luck.
+    - >-
+      About one item — and that item is a failing `out_of_scope` item two times in seven, so the
+      slice is drawn from reliably but is still unmeasured most of the time.
+    - A guarantee of coverage, because 1.49 always rounds up to two items and both of them fail two
+      times in seven.
+    - Nothing at all, because a quota that does not come out as a whole number cannot be honoured by a
+      sampler.
   correct: 1
   explanation: >-
     Stratification decides which slices you draw from; allocation decides how many failing items end up
     inside each one, and those are different questions. Preserving a 3% share gives you 3% of the
-    items, and `out_of_scope` failures are 2 items in 7, so a mix-preserving draw of 20 expects 0.43
-    of them — a rate cannot be measured on 0.43 of an item.
+    items, the quota rounds to one, and one item from a slice where two of seven fail is a useful draw
+    only two times in seven — so the rare slice arrives more reliably and stays just as unmeasured.
 
 - id: q3
   question: >-

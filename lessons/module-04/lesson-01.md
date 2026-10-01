@@ -239,10 +239,12 @@ and the pass rate tile sits above all of it looking exactly the same kind of num
 40.0%, then 52.5%, then 50.0% — with intervals 39, 30 and 20 points wide. A dashboard built on those
 three tiles cannot tell you which of them contains a test for the failure that invents a salary band.
 
-The sharper version costs one click: set **Keep the slice mix** at 20. The sample changes, the pass rate
-moves to 50.0% (29.9%–70.1%), and the slice table below still shows two slices with a zero in the
-failing-items column. Keeping the mix is not the same thing as covering the failure, and the scoreboard
-does not distinguish them.
+The sharper version costs one click: set **Keep the slice mix** at 20. The sample changes and the
+pass rate moves, and the slice table below still shows a slice with a zero in the failing-items
+column. Keeping the mix is not the same thing as covering the failure — the mix for the smallest
+category here is 2 items in 94, so a mix-preserving draw of 20 is not going to contain one — and the
+scoreboard does not distinguish the two. Lesson [4.3](lesson-03.md) is about exactly that
+distinction.
 
 The lie has a name and it is the one this whole module is about: **an eval set is a measurement of the
 population it was drawn from, and the headline pass rate does not say which population that was.** A

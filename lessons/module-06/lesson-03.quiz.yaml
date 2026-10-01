@@ -1,0 +1,88 @@
+- id: q1
+  question: >-
+    Ten items, five passed by the humans, judge passes six of the ten, and `tp` 4, `fp` 2, `fn` 1,
+    `tn` 3. What is Cohen's kappa, and what is the step that produces it?
+  options:
+    - >-
+      0.40, from observed agreement 0.70 minus the 0.50 two labellers would agree on by accident,
+      divided by the 0.50 available above that.
+    - >-
+      0.20, because seven of ten items agree and kappa reports the excess over a chance rate of 0.50
+      rather than the agreement itself.
+    - >-
+      0.70, since kappa is the observed agreement once the judge's marginal is subtracted from both
+      sides of the matrix.
+    - >-
+      0.50, because with two classes and equal margins the expected agreement is always 0.50 whatever
+      the judge says.
+  correct: 0
+  explanation: >-
+    Observed agreement is (4 + 3) / 10 = 0.70. Expected agreement is the human marginal times the judge
+    marginal in each class: 0.5 × 0.6 + 0.5 × 0.4 = 0.50. Kappa is the excess, 0.20, as a fraction of
+    the maximum excess available, 0.50 — which is the whole reason it exists.
+
+- id: q2
+  question: >-
+    On this dataset the humans passed exactly 47 of 94 items. You discover that kappa can be computed as
+    twice the accuracy minus one for every judge on variant A. When does that shortcut stop working?
+  options:
+    - >-
+      It never fails, because the lab always reports kappa and accuracy for the same items and the
+      two figures are calculated together.
+    - It fails the moment you change the threshold, since the pass rate moves but accuracy does not.
+    - >-
+      When the human labels are not split 50/50, because expected agreement stops being exactly 0.5
+      and kappa and accuracy stop agreeing with each other.
+    - >-
+      It fails on any set with fewer than 94 items, since the shortcut depends on the full population
+      rather than on a draw from it.
+  correct: 2
+  explanation: >-
+    The collapse needs the human marginal at 0.5: only then is expected agreement exactly 0.5 whatever
+    the judge says. Switch this dataset to variant C, where the humans passed 8 of 94, and the shortcut
+    is gone. The same mechanism is why kappa on the failures alone reads 0.00 while the judge is
+    unchanged.
+
+- id: q3
+  question: >-
+    Two judges disagree with the humans on 28 and 11 of the same 94 items. You group the items by the
+    human's failure category. What has the grouping bought you?
+  options:
+    - >-
+      A shorter evaluation run, because categories with no disagreements can be sampled out of the
+      nightly job.
+    - >-
+      A specification: repeated items in one category become one rubric clause, and each unrepeated
+      one becomes a named question for whoever owns that policy.
+    - >-
+      Confidence that the categories are unbiased, since any disagreement that does not fit a category
+      is excluded from the count.
+    - A ranking of the judges, since the judge with fewer disagreements in the largest category is
+      better on every category.
+  correct: 1
+  explanation: >-
+    Grouping converts a list into a list of distinct problems: the rubric judge's 11 disagreements here
+    fall into only 3 categories, and the plain judge's 28 into 5. Each becomes one owner and one change,
+    which is the only form in which reading the items produces a diff.
+
+- id: q4
+  question: >-
+    Your judge reads kappa 0.90 on 57 dev items with an interval of 0.80 to 1.00, and 0.42 on the
+    held-out half. Which description of the first number is honest?
+  options:
+    - >-
+      The judge is validated, since dev is the split it was tuned on and test is the noisy one.
+    - >-
+      The judge has been tuned to the 57 dev items. The interval is the evidence of how much room there
+      is left to keep tuning, and it has run out.
+    - >-
+      The judge is validated and the test figure is a sampling artefact of a smaller half.
+    - >-
+      The interval is too narrow to trust, because a bootstrap on 57 items should never give a
+      0.20-point spread.
+  correct: 1
+  explanation: >-
+    A high dev kappa after several rounds of editing is the expected shape of overfitting, and the
+    held-out half exists to produce exactly this contrast. The only figure worth gating on is the one
+    from items the judge has not been tuned against, printed with its interval, because on 37 items
+    that interval is 45 to 51 points wide.

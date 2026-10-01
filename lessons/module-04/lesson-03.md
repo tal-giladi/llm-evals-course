@@ -91,42 +91,72 @@ rate**. It is not weighted in at zero, which would be pessimistic. It is simply 
 true-negative rate gets recomputed over the surviving slices, the rare hard ones are exactly the ones
 that went missing, and the headline number goes **up** rather than down.
 
-The lab prints this in its own words, in the warn callout under the slice table:
+At 20 items, drawn at random with seed 11, the lab's warn callout under the slice table reads:
 
 > **Slices with no failing items:** exception, out of scope. A slice with zero failures contributes
 > nothing to the true-negative rate, so the judge looks better than it is on exactly the population
 > you care about.
 
-### Keeping the slice mix is not the same as covering the failure
+### A quota is still a share
 
-Set **How to choose them** to **Keep the slice mix** and the draw changes: 20 items, 9 `policy_fact`,
-5 `boundary`, 4 `how_to`, 1 `exception`, 1 `out_of_scope` — roughly the population proportions, and a
-different set of items, so the pass rate moves from 40.0% to **50.0% (29.9%–70.1%)**.
+The knob on this page called **Keep the slice mix** is the sampler-side half of the answer, and it is
+worth being precise about exactly how much it does.
 
-And the slice table still reports **none seen** on `exception` and on `out_of_scope`. Every slice is
-now represented, and two of them still cannot tell you anything about a check.
+What it does is give every slice a **quota**: a number of items equal to that slice's share of the
+population. What it does not do is change what is inside the slice. Write the two rare quotas down at
+n = 20:
 
-That is not a defect in the knob. It is arithmetic. A mix-preserving draw of 20 gives you 0.64
-`exception` items and 1.49 `out_of_scope` items; the `out_of_scope` one is a failing item only two
-times in seven, so the expected number of `out_of_scope` **failures** in your stratified sample is
-1.49 × 2/7 ≈ 0.43. You cannot measure a rate on 0.43 of an item, and no amount of preserving the mix
-will change that — **the mix is 3 in 94, and preserving a share of 3% gives you shares of 3%.**
-
-Turn the seed knob through its 200 values at n = 20 and count:
-
-| Strategy | Draws of 20 leaving at least one slice with no failing item | `out_of_scope` with none | `exception` with none |
+| Slice | Items in the population | Quota in a sample of 20 | Of those items, how many fail |
 |---|---|---|---|
-| At random | **178 of 200** | 127 | 117 |
-| Keep the slice mix | **180 of 200** | 128 | 130 |
+| `exception` | 3 | 3 × 20 ÷ 94 = **0.64** | 2 in 3 |
+| `out_of_scope` | 7 | 7 × 20 ÷ 94 = **1.49** | 2 in 7 |
 
-Nine times in ten, a 20-item sample of this population cannot tell you how a check behaves on its
-two smallest slices. Stratifying by slice guarantees that every slice is *drawn from*; it does not
-guarantee that any slice's **failures** are drawn, because failures are rarer than slices and the rare
-failures are the ones in the rare slices.
+Both quotas round to *about one item*. And one item is not a rate. The expected number of **failing**
+items a perfectly mix-preserving draw of 20 puts in each of those slices is 0.64 × 2⁄3 = 0.43 and
+1.49 × 2⁄7 = 0.43. **You cannot measure a rate on 0.43 of an item**, and no amount of preserving the
+mix changes that, because the mix *is* three in ninety-four and preserving a share of 3% gives you
+shares of 3%.
 
-That is the distinction this lesson exists to install. **Stratification is about which slices you draw
+Those two expected counts come out identical, and the reason is worth a line of your own arithmetic:
+each of the two rare slices holds exactly two failing items, so the expected number of failing items in
+either is 2 × n ÷ 94 = **n ÷ 47**. Which means you need **47 items** before either rare slice is
+expected to carry even one whole failing item — half the population, drawn and hand-labelled, to find
+out about two failures.
+
+Now put those two rows side by side, because the contrast is the lesson. A single `exception` item is a
+useful draw **two times in three**, because two of that slice's three items fail. A single
+`out_of_scope` item is a useful draw **two times in seven**. Stratification helps a rare slice in
+direct proportion to how rare the *failures* are inside it — which is precisely backwards from what
+you need. The slice you most want to hear about is the one the sampler helps least.
+
+And notice what is actually holding the rare slices up: **rounding**. At n = 20, largest-remainder
+rounding gives `exception` one item and `out_of_scope` one item — neither gets two, and 0.64 could as
+easily have gone to none. A slice arriving with one item that passes is not coverage; it is a coin
+toss that has dressed up as a number.
+
+What the sampler really buys is this: the rare slice is **drawn from**, reliably, instead of turning up
+by luck. That is worth having and it is not enough. **Stratification is about which slices you draw
 from. Allocation is about how many failing items you end up with inside each one.** You need both, and
-the second is not automatic from the first.
+the second is not a consequence of the first.
+
+### What random sampling costs you instead
+
+Turn the seed knob and count. The table below is the uniform draw — the one your eval uses unless
+somebody deliberately picks a sampler, and the one you cannot reason about in advance, because you do
+not know which slices you are going to be handed. Sweeping the lab's own sampler over 300 seeds at
+each size:
+
+| Over 300 seeds, **At random** | n = 20 | n = 40 | n = 57 | n = 80 |
+|---|---|---|---|---|
+| Draws leaving at least one slice with **no failing item** | **265** | 178 | 84 | 10 |
+| Draws where a slice is missing from the sample entirely | 178 | 59 | 16 | 0 |
+| Draws where `exception` holds no failing item | 183 | 102 | 42 | 5 |
+| Draws where `out_of_scope` holds no failing item | 185 | 100 | 45 | 5 |
+
+At n = 20, **112 of those 300 draws leave both** of the two rare slices with nothing in them at all.
+Nine times in ten, a 20-item sample of this population cannot tell you how a check behaves on either
+of its two smallest slices — and no seed in the knob's 200-wide range rescues it, which is the point:
+this is not bad luck you can retry out of, it is the shape of the population.
 
 ### What it actually costs
 
@@ -142,36 +172,42 @@ The honest number is uncomfortable. Holding the seed at 11 and raising the size 
 | 94 | 7 of 7 | 2 | measured |
 
 You need 80 items — 85% of the population — before random sampling at this seed gives the
-`out_of_scope` slice a single failing item. Over all 200 seeds, a random draw of 57 still leaves a
-slice with no failing item **53 times in 200**. Random sampling is not a cheap way to cover rare
-slices; on this population it is an expensive one that mostly fails.
+`out_of_scope` slice a single failing item. Swept across 300 seeds, a random draw of 57 still leaves
+some slice with no failing item **84 times in 300**, and both of the rare slices empty **6 times in
+300**. Random sampling is not a cheap way to cover rare slices; on this population it is an expensive
+one that mostly fails.
 
 ## Show me
 
-The stratify preset opens at 20 items with **Keep the slice mix** already selected. The **Your sample**
-panel reads **Pass rate 50.0% (29.9%–70.1%)**, **Items drawn 20**, **Interval width 40 pts** — and the
-tile is coloured on the interval, because 40 points is wide.
+The stratify preset opens at 20 items with **Keep the slice mix** already selected. Before you read a
+single tile, switch **How to choose them** to **At random**. That is not a trick: this lesson is about
+the draw that gets chosen for you by accident, and the seed is the knob that prices it.
+
+Now the page reads **Pass rate 40.0% (21.9%–61.3%)**, **Items drawn 20**, **Interval width 39 pts** —
+and the tile is coloured on the interval, because 39 points is wide.
 
 The panel below it, titled **What your sample actually contains**, has four columns: `Slice`,
 `Sampled`, `Failing items`, `TNR measurable?`. Two rows read `none seen`:
 
 | Slice | Sampled | Failing items | TNR measurable? |
 |---|---|---|---|
-| policy fact | 9 of 34 | 6 | measured |
-| boundary | 5 of 31 | 1 | measured |
-| exception | 1 of 3 | 0 | **none seen** |
-| how to | 4 of 19 | 3 | measured |
-| out of scope | 1 of 7 | 0 | **none seen** |
+| policy fact | 8 of 34 | 8 | measured |
+| boundary | 5 of 31 | 3 | measured |
+| exception | 0 of 3 | 0 | **none seen** |
+| how to | 7 of 19 | 1 | measured |
+| out of scope | 0 of 7 | 0 | **none seen** |
 
-That table is the lesson. There are 20 items in the sample, the pass rate is a real 50.0%, and two of
-the five slices in your product have contributed nothing to any rate you are about to quote. Neither
-row is flagged red in a way a dashboard would catch — the row is present, the count is present, and
-the only warning is the two words in the last column.
+That table is the lesson. There are 20 items in the sample, the pass rate is a real 40.0% computed from
+human labels, and two of the five slices in your product have contributed nothing to any rate you are
+about to quote. Neither row is flagged red in a way a dashboard would catch — the row is present, the
+count is present, and the only warning is the two words in the last column.
 
-Switch **How to choose them** to **At random** and the table changes shape entirely (at seed 11:
-`exception` 0 of 3, `out_of_scope` 0 of 7, so both slices vanish rather than reporting nothing) and the
-pass rate drops to **40.0% (21.9%–61.3%)**. Same system, same seed, same size, a 10-point difference
-in the headline and a completely different set of slices underneath it. That is the risk being priced.
+Now switch back to **Keep the slice mix** and, before you read the tiles, read only the `out of scope`
+row. Ask yourself how many items a mix-preserving draw of 20 ought to have put into a slice of 7 out of
+94 — and do that arithmetic from the table above rather than from what the page says. **About one.**
+That row will show you at most that one item, and one item is a failing `out_of_scope` item two times
+in seven — so it is a coin flip, and a coin flip is not coverage. That is the whole argument for
+putting all 7 of them in the set by hand.
 
 ### The judge number behind the table
 
@@ -205,17 +241,20 @@ read. **The number you report is a weighted average, and the weights are an acci
 
 [Simulation: eval-set](../../simulations/eval-set/index.html?preset=stratify)
 
-1. **Read the slice table before the pass rate.** On the preset, two rows say `none seen`. Write the
-   failing-item count for every row next to its `TNR measurable?` verdict, then decide which rows you
-   are allowed to quote a rate for.
-2. **Prove the arithmetic yourself.** A proportional draw of 20 from 94 items gives `exception` 3 ×
-   20 ÷ 94 = 0.64 items. Multiply that by 2/7 for `out_of_scope` failures and 0.43. Write both down,
-   then find the smallest size at which you would expect one full failing item in each of the two rare
-   slices, and check your answer against the table in **How it works**.
-3. **Turn the seed across its range and count.** Hold the size at 20, switch between **At random** and
-   **Keep the slice mix**, and turn the seed from 1 to 40. For each, record whether a `none seen` row
-   appears. Extrapolate from what you have seen to the full 200 the knob offers, and say whether the
-   difference between the two strategies is the kind of difference you can act on.
+1. **Read the slice table before the pass rate.** Switch to **At random** first; on this draw two rows
+   say `none seen`. Write the failing-item count for every row next to its `TNR measurable?` verdict,
+   then decide which rows you are allowed to quote a rate for.
+2. **Prove the arithmetic yourself.** A quota for `out_of_scope` in a draw of 20 is 7 × 20 ÷ 94 =
+   1.49 items, and about one item in seven of those fails, so the expected number of failing items is
+   0.43. Do the same for `exception`: 3 × 20 ÷ 94 = 0.64 items, two in three of them failing, also 0.43.
+   Now notice both answers are the same and work out why, then use that to find the size at which you
+   would expect one *whole* failing item in either rare slice. Check the 57- and 80-item rows of the
+   table in **How it works** against it.
+3. **Turn the seed across its range and count.** Hold the size at 20 on **At random** and turn the seed
+   from 1 to 40, recording whether a `none seen` row appears. Then switch to **Keep the slice mix** and
+   do the same. Write the `exception` and `out of scope` rows for each strategy, and check both against
+   the quota you computed in step 2. Ask which of the two strategies changed the *number of items* in
+   the rare slices and which changed the *number of failing items* in them.
 4. **Buy coverage with size, and see what it costs.** Raise the size from 20 to 40, then 57, then 80,
    holding the seed at 11 and the strategy on **At random**. Record the `out_of_scope` row at each size.
    At which size does `none seen` finally become `measured`, and what fraction of the population had
@@ -229,11 +268,11 @@ read. **The number you report is a weighted average, and the weights are an acci
 
 Put the headline number on the slide and leave the slice table below the fold.
 
-The number is defensible — it is a real 50.0% (29.9%–70.1%) computed over 20 items with human labels —
+The number is defensible — it is a real 40.0% (21.9%–61.3%) computed over 20 items with human labels —
 and it is a statement about the judge over the slices that survived the draw. It is not a statement
 about the judge over your product, because `exception` and `out_of_scope` were not in the denominator
 and nobody was told so. A release decision taken on that slide is a decision about the three slices
-that happened to have items in them.
+that happened to contribute.
 
 The sharper version is to compare the wrong thing. The overall true-negative rate of that weak judge is
 48.9% on all 94 items, and a 20-item draw will hand you anywhere from 11.1% to 88.9%. A team that
@@ -251,10 +290,12 @@ Four changes, and each one is a line in the table rather than a change to a numb
 1. **Read the per-slice table before the headline, every run.** If a row says `none seen`, that row
    does not exist for this run and nothing on the scoreboard says so. Make it a hard rule that a run
    with a `none seen` row is not a release candidate.
-2. **Allocate failing items, not just slices.** Stratify to guarantee every slice is drawn from, then
-   over-sample the slices whose failing count is small — take **all 7** `out_of_scope` items and **all
-   3** `exception` items rather than 1.49 and 0.64 of them. This is the allocation argument from
-   [4.1](lesson-01.md) applied inside a slice rather than across the whole set.
+2. **Allocate failing items, not slices — and not slices as a share.** Set the sampler to preserve the
+   mix so every slice is drawn from, then deliberately over-take the slices whose *failing* count is
+   small: put **all 7** `out_of_scope` items and **all 3** `exception` items in the set rather than the
+   1.49 and 0.64 a proportional quota hands you. This is the allocation argument from
+   [4.1](lesson-01.md) applied inside a slice rather than across the whole set, and it is a decision
+   written into the set — not a setting on a slider.
 3. **Put the failing count next to every rate you quote.** "TNR 61.1%" is a claim. "TNR 61.1% on 18
    failures" is a claim somebody can check, and on 2 failures it is a claim nobody should be making.
 4. **Say "unmeasured" out loud, and gate on something else for that slice.** Two failing items cannot
@@ -266,15 +307,16 @@ chose.
 
 ## How do I know it works?
 
-**Challenge, on dev.** Take the stratified preset and write down five targets before turning any knob:
+**Challenge, on dev.** Open the preset and write down three targets before you turn any knob:
 
 - **Every slice in the table has at least one failing item, or is named in writing as unmeasured.** Two
   options only. There is no third option in which a slice with `none seen` is quietly counted as fine.
 - **Your quoted per-slice rates carry their failing counts.** A TNR beside the number of human failures
   it was computed from, on every row you publish.
-- **The rare slices are present by allocation, not by luck.** If `exception` and `out_of_scope` are in
-  the set because you put all 3 and all 7 there, a different seed changes nothing. If they are in there
-  because the draw happened to include them, the set is not finished.
+- **The rare slices are present by allocation, not by sampling.** If `exception` and `out_of_scope` are
+  in the set because you wrote all 3 and all 7 of them into it, then no sampler, no seed and no slider
+  changes anything about them. If they are in there because a draw happened to include them, what you
+  have is a coin toss with an interval printed next to it.
 
 Then do the check that catches a team which has only done the first item: set **All of them** and read
 the per-slice rates for the tuned system — `policy_fact` 47.1% (31.5%–63.3%), `boundary` 38.7%
@@ -297,9 +339,12 @@ be paged for, and a single number over all of them is a number about the easy ha
 
 **Do allocate to rare slices deliberately.** The cost is that your eval set no longer matches your
 traffic, and every pass rate on it needs to say so. That is a small price for being able to say
-anything about the cases that are 3 items out of 94. Teams that over-sample rare slices and then
-**weight** the per-slice rates back to production proportions get both properties at once, and that is
-worth doing once a slice has enough items to have an interval.
+anything about the cases that are 3 items out of 94. Keep the two halves of the decision apart: the
+sampler setting is a knob you can turn between runs and it guarantees nothing; the allocation is a
+decision recorded in the item file, and it is the only one of the two that shows up in next quarter's
+scoreboard. Teams that over-sample rare slices and then **weight** the per-slice rates back to
+production proportions get both properties at once, and that is worth doing once a slice has enough
+items to have an interval.
 
 **Don't use slices for fairness or compliance monitoring.** A slice built to compare outcomes across
 groups is a different artefact with different legal exposure, and it does not belong in the suite that

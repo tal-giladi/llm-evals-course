@@ -1,0 +1,94 @@
+- id: q1
+  question: >-
+    Your pairwise eval reports 97.9% accuracy on 48 comparisons, all shown as A then B. After judging every
+    pair in both orders, the same judge returns the same winner in both orders on 47.9% of them. What is the
+    right reading?
+  options:
+    - >-
+      The second number is noise from re-running the judge, so keep reporting the 97.9%, which was measured
+      on more data than the swap.
+    - >-
+      A single-order run measures the judge and the printing order together, and when the better answer is
+      always first the two effects add — so the 97.9% is not evidence about the judge.
+    - >-
+      The judge has improved, because agreeing with itself in both orders is a stronger result than
+      agreeing with the humans on one order.
+    - >-
+      The comparison set is too small at 48 pairs, and the swap test needs several hundred pairs before its
+      consistency rate means anything.
+  correct: 1
+  explanation: >-
+    Position bias and quality point the same way in an A–B run where A is the better answer, so a single
+    observation cannot separate them. The 47.9% is not noise — it is below the 50% a coin would score, which
+    means the judge reads position as signal and has little opinion about the answers themselves.
+
+- id: q2
+  question: >-
+    You judge every pair in both orders and count a win only when the same answer wins in both positions,
+    treating disagreement as a tie. On 48 comparisons your judge produces 23 ties, 24 wins for the better
+    answer and 1 win for the worse one. What does this give you?
+  options:
+    - >-
+      An accuracy of 96.0% on 48 comparisons, since 24 plus 1 is 25 decided comparisons out of 48.
+    - >-
+      An accuracy of 47.9% on 48 comparisons, because that is the share of comparisons where the verdict
+      survived the swap.
+    - >-
+      An accuracy of 96.0% on 25 comparisons, and a tie rate of 47.9% that should be reported beside it
+      because nearly half the comparisons were undecidable.
+    - >-
+      No usable accuracy, because a comparison that resolves to a tie carries no information about either
+      answer.
+  correct: 2
+  explanation: >-
+    24 correct wins out of 25 decided comparisons is 96.0%, and it is an accuracy you can quote because it
+    survived the swap. The tie rate is the other half of the result: 23 of 48 undecidable means the judge
+    decided about half the work it was given, which is the number that tells you whether it is sharp enough
+    to gate on at all.
+
+- id: q3
+  question: >-
+    Four pairwise judges score 97.9% to 100% on your 48-comparison set in A–B order. Three of them score 31%,
+    33% and 48% on the same pairs in B–A order. Which change would you make first?
+  options:
+    - >-
+      Report the A–B number as the judge's accuracy and note the B–A figure as a separate consistency
+      statistic, since both are true measurements of different things.
+    - >-
+      Raise the judge temperature and take the majority of five samples per comparison in B–B order, so that
+      sampling noise explains the disagreement.
+    - >-
+      Average the A–B and B–A verdicts into a confidence score, keeping whichever answer is ahead, so no
+      comparison is wasted on a tie.
+    - >-
+      Judge every pair in both orders on a frozen calibration set, report the swap consistency and the tie
+      rate, and treat disagreements as ties — at two calls per pair instead of one.
+  correct: 3
+  explanation: >-
+    The fix is to remove the confound rather than average it: two orders, one verdict, a win only when it
+    wins twice. Averaging reintroduces position bias at half strength, because a judge that picked first once
+    and a judge that picked first twice come out equal, and the second has no evidence.
+
+- id: q4
+  question: >-
+    You run the swap test on all 12 pairs in your calibration set and 7 of them come out undecided. What does
+    the price of the swap test have to do with that number?
+  options:
+    - >-
+      The tie rate is what you are paying for: at two calls per pair it is also the measure of how much of
+      the set the judge actually decided, and a high tie rate means you should stop buying pairs.
+    - >-
+      Nothing — the swap costs two calls per pair whether or not the comparison resolves, so the tie rate is
+      a property of the judge and not of the budget.
+    - >-
+      A high tie rate means the pairs were badly chosen, so replacing them with closer pairs will cut the
+      bill by removing the second call on each.
+    - >-
+      The tie rate falls as the budget rises, because a longer run gives the judge more samples to settle
+      each comparison without a second call.
+  correct: 0
+  explanation: >-
+    Doubling the calls is the price of finding out, and the tie rate is the return: it tells you how much of
+    your set the judge could actually decide. Once roughly a fifth of comparisons come out undecided, the
+    fix is a sharper judge rather than more pairs, because every extra pair buys another tie at the same
+    rate.
