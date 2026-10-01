@@ -5,8 +5,8 @@
     - >-
       Forty multi-turn conversations, each with two to three user messages and a transcript stored per turn.
     - >-
-      Forty single-shot runs: one task string per run, exactly one `chat` span per run, and no field a second user
-      turn could be stored in, so none of the 40 runs is multi-turn.
+      Forty single-shot runs: one task string per run, exactly one `chat` span per run, and no field a
+      second user turn could be stored in.
     - >-
       Forty runs carrying a conversation field, where the viewer simply renders only the first user turn of each.
     - >-
@@ -24,8 +24,8 @@
     overnight. What is the honest position?
   options:
     - >-
-      Two hypotheses fit the drop — the agent regressed, or the simulator asked for something stricter than the
-      old script did — and only measuring the simulator against hand-written labels can tell them apart.
+      Two hypotheses fit the drop — the agent regressed, or the simulator asked for something
+      stricter — and only measuring it against hand-written labels can tell them apart.
     - >-
       The agent regressed, because a 30-point drop is far wider than any sampling noise on the same item set.
     - >-
@@ -54,8 +54,8 @@
       Label the final state only, because the side effects are the only thing a real user can actually be harmed
       by.
     - >-
-      Label each agent reply inside the conversation, with the denominator stated, because a reply has a position
-      in the trajectory and a position is what routes a failure to an owner.
+      Label each agent reply inside the conversation, because a reply has a position in the trajectory
+      and a position is what routes a failure to an owner.
   correct: 3
   explanation: >-
     A per-reply label attaches to a step index, which is what turns a number into something you can debug and

@@ -7,9 +7,8 @@
       Judge error, because the two rates come from different branches of the scoring code and the trajectory
       branch is the newer of the two.
     - >-
-      Runs that reached the right resolution after a step the trace marks wrong — an extra lookup, a retry after a
-      timeout, a write that was made and then corrected — and on a refund-capable agent each one is a candidate
-      for a real side effect, so this is the number to explain before you ship.
+      Runs that reached the right resolution after a step the trace marks wrong — an extra lookup, a
+      corrected write — each one a candidate for a real side effect on a refund-capable agent.
     - >-
       Sampling noise, because 31 points is comfortably inside a typical interval on a set of 200 items.
     - >-
@@ -35,8 +34,8 @@
       The check should compare the tool names as an unordered set, because call order is not part of tool
       correctness.
     - >-
-      The 92% is a rate over runs that already contains the failures, and the check is silent on every one of
-      them, so the number reports how rarely the check fires rather than how often the agent is right.
+      The 92% counts runs that already include the failures, and the check is silent on every one, so
+      the tile reports how rarely it fires, not how often the agent is right.
     - >-
       The ordered comparison is unsound, because a span's parent links do not reliably record the order the calls
       happened in.
@@ -59,8 +58,8 @@
     - >-
       Judge variance, so you should re-score both halves with a second judge before trusting either number.
     - >-
-      The difference between that one customer's intent mix and everyone else's, because their tasks and their
-      tool failures are concentrated in the half you tuned on.
+      The difference between that one customer's intent mix and everyone else's, because their tasks
+      and failures sit in the half you tuned on.
   correct: 3
   explanation: >-
     Runs are independent; the sample is not representative. Grouping by session puts one customer's intents, tools
@@ -147,8 +146,8 @@
       It must be real, because both rates were computed on the same 40 runs and so cannot be independent samples
       of anything.
     - >-
-      Pair the two scores run by run: 10 runs disagree and none disagrees the other way, giving −25.0 points
-      with an interval of −40.0% to −12.5%, while the two marginal intervals overlap and cannot settle it alone.
+      Pair the two scores run by run: 10 runs disagree, none the other way, giving −25.0 points,
+      interval −40.0% to −12.5%, while the marginal rates cannot settle it alone.
     - >-
       It is real, because 25 points is far larger than the few points of run-to-run noise between two repeats of
       the same judge.

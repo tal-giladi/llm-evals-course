@@ -71,48 +71,49 @@
 
 - id: q4
   question: >-
-    The Difference tile is computed as A minus B, and the preset opens with A on 55.3% and B on 28.7%. A
-    teammate reads the callout above the tiles, which says the interval is above zero and therefore B is
-    better. What is actually on the page?
+    On the default preset the `Difference` tile reads `+26.6 pts` and is labelled only `Difference`, while the
+    list underneath marks thirty-five items `Used to pass, does not any more`. What does the page not tell
+    you?
   options:
     - >-
-      The callout is right and the tiles are wrong, because the pass rates are measured before the votes
-      are combined and the difference is measured after.
+      Which system the difference is relative to — the tile never says A minus B, and the list is named
+      from the candidate's side, so the thirty-five broken rows are what the positive number is made of.
     - >-
-      Both are right, because "better" here means "more efficient" and the panel is reporting cost rather
-      than pass rate on this preset.
+      Which item set the numbers were computed over, because the tile shows a rate and a rate without its
+      `n` cannot be checked.
     - >-
-      Neither can be relied on, because a signed difference has no fixed orientation on this panel and the
-      runbook must therefore quote the two pass rates instead.
+      Whether the judge was the same one for both systems, because a difference computed across two judges
+      is not a comparison.
     - >-
-      A positive difference means A passes more items, so on this preset the callout names the wrong system
-      and swapping the two dropdowns is the one-minute check that reveals which way a signed number runs.
-  correct: 3
+      Whether the interval was resampled or assumed, because a closed-form interval and a bootstrap give
+      different widths on the same data.
+  correct: 0
   explanation: >-
-    Twenty-five of 94 items separate the two pass rates, so the positive tile belongs to A, the system at
-    55.3%. A sign error like this does not break the page — it produces a launch — which is why the swap
-    check and the orientation belong in the same sentence as the number rather than in a footnote.
+    A signed number needs an owner: swap the two dropdowns and both the sign of the tile and the meaning of
+    the glyphs move, so a runbook that records "+26.6" without "A minus B" cannot be re-read by anybody,
+    including the person who wrote it. The item count is on the panel and the judge is in the
+    configuration, so neither of those is the gap.
 
 - id: q5
   question: >-
-    You move the `Items` knob from 94 to 40 and the two pass rates, the difference and the sign-test p all
-    stay exactly where they were. You want to report a 40-item comparison. What happened?
+    You drag the `Items` knob from 94 down to 10 and the Difference tile goes `+26.6 (12.8 to 39.4), p 0.000`
+    to `+0.0 (-40.0 to 40.0), p 1.000`, on the same two systems at the same seed. What just happened?
   options:
     - >-
-      The panel's item set is fixed at all 94 whatever the knob says, so every number on it is a 94-item
-      number and a runbook quoting 40 is describing a run that was never performed.
+      The knob picked a fresh random draw each time and ten items is simply not enough to see a 27-point
+      difference, so the runbook should record the 94-item number as the estimate.
     - >-
-      The bootstrap only resamples the items it was given and 40 of 94 happens to give the same counts, so
-      the coincidence is real and the run is reproducible either way.
+      The draws are nested, so the ten-item set sits inside the 94 — the denominator changed and nothing
+      else did, which makes the verdict a property of a knob position rather than of the systems.
     - >-
-      The knob sets the number of items per repeat, so at 94 it was sampling 94 times and at 40 it samples
-      the same 40 items four times.
+      The two systems genuinely became indistinguishable at ten items, so the smaller set is the more honest
+      measurement and the 94-item result was over-powered.
     - >-
-      The knob is disabled on the paired setting and only affects the unpaired split, which is why nothing
-      moved on this preset.
-  correct: 0
+      The bootstrap lost resolution at small n and the interval widened for that reason, so a larger resample
+      count would restore the original answer.
+  correct: 1
   explanation: >-
-    The sampling call behind this panel asks for the "all" strategy, which returns the whole item list
-    whatever size it is given. That makes a knob that looks like it sizes the comparison into a control
-    that does not change the quantity, which is worse than having none: it supplies false provenance for
-    every number on the page.
+    Shrinking the denominator is a real loss of evidence and a real gain in honesty about it, but it is not
+    evidence about the systems: the same items, nested, carrying a different verdict. The rule that follows
+    is about process — publish only from a frozen, named item set, and treat a knob moved to investigate a
+    noisy run as a diagnostic that has to be put back.

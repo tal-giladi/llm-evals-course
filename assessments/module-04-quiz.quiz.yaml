@@ -123,8 +123,8 @@
     - The `exception` slice is too small to matter, so 48.9% is the number that should be quoted
       instead.
     - >-
-      The draw held items from the slices the check handles and none from the two rare ones, so the
-      headline is an average whose weights came from the seed.
+      The draw held items from the slices the check handles and none from the rare ones, so the
+      headline is an average weighted by the seed.
     - The seed knob also changes the check's prompt, so the two runs are not measuring the same thing.
   correct: 2
   explanation: >-

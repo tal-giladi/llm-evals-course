@@ -106,8 +106,8 @@
       The metric missed the change, because recall only measures content that appears in the
       reference.
     - >-
-      The coverage half is saturated — every reference token was already present — so it cannot
-      register content being wrong, only content being missing.
+      The coverage half is saturated — every reference token was already present — so it registers
+      missing content but not wrong content.
     - Recall is noisy, so the run must be repeated until the two numbers separate.
     - The corruption was too small to measure, since a doubled quantity changes only one token.
   correct: 1

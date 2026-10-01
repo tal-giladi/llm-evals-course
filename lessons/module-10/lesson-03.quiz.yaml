@@ -1,104 +1,108 @@
 - id: q1
   question: >-
-    A gate panel prints `False alarms 0.0%` and `Missed regressions 100.0%`, and every row of its
-    nine-cell grid adds to exactly 100%. What does that tell you?
+    On the gate panel at 94 items and 3 repeats, the tolerance sweep reads `0 pts → 45.3% / 14.5%`,
+    `3 pts → 23.0% / 29.0%`, `5 pts → 10.0% / 52.8%`, `10 pts → 0.3% / 93.8%`. What is the panel telling
+    you?
   options:
     - >-
-      The two tiles are one event labelled twice, because the simulator builds its "broken" build by writing
-      into a copy of the runs that the pass-rate calculation never reads.
+      The two rates are complements of one event, so a gate can only ever be wrong in one direction at a
+      time and the crossing point is an artefact.
     - >-
-      Nothing is broken; the two failure modes are rare and nearly exhaustive on this item set, so the sum
-      is a coincidence worth recording.
+      Nothing, because the simulator plants a fixed tenth of the item set and both columns are therefore
+      properties of the simulator rather than of a real pipeline.
     - >-
-      The panel is well calibrated, since two complementary rates are what a correct gate simulator should
-      produce for a two-sided test.
+      The tolerance is the knob that trades the two failure rates against each other, and the two rates cross
+      near 3 points, which is the only setting where the team's two risks are balanced.
     - >-
-      The gate never fires, so the miss rate of 100% is the only number on the page that is doing any work.
-  correct: 0
+      The false-alarm rate falls because the tolerance is measured on the same pass rate as the regression,
+      so a looser gate is mechanically quieter.
+  correct: 2
   explanation: >-
-    Two failure modes measured on two different builds cannot sum to one by construction, and passing a
-    planted regression index of 0, 7 or none leaves the false-alarm rate identical to the last decimal
-    place. A panel whose two columns are complements is one measurement displayed twice, and the honest
-    deliverable from it is a written specification rather than a number anyone should paste into a runbook.
+    The tolerance sits between the size of the regression and the noise in the measurement, so every
+    tightening buys a lower miss rate with a higher false-alarm rate. The crossing point is where the two
+    risks are equal, and choosing a tolerance is choosing a point on that curve — which is why the choice
+    belongs in an ADR rather than with whoever typed the number.
 
 - id: q2
   question: >-
-    The simulator is described as 400 trials of a seeded generator, but the seeded generator is created and
-    never called and the seed changes nothing across twelve values from 1 to 65535. What does that mean for
-    a false-alarm rate you want to quote?
+    At a 5-point tolerance the gate grid reads false alarms `27% / 21% / 10%` as the item count goes 20, 40,
+    94, and missed regressions `51% / 62% / 53%`. The callout says more items and more repeats are the only
+    knobs that move both rates the right way. What is right?
   options:
     - >-
-      The rate is exact for this configuration rather than an estimate, so it can be quoted without an
-      error bar as long as the configuration is stated.
+      The callout is true of the false-alarm column and not of the missed column, because a proportional
+      regression costs the same share of the pass rate at 20 items as at 94 and more items only shrink the
+      noise around it.
     - >-
-      The rate is a lookup over at most `repeats` distinct comparisons repeated 400 times, so quoting it
-      as an estimate implies a variability the number cannot have and a stability it has not earned.
+      Both columns improve and the missed column's scatter is just the four-hundred-trial noise, so the
+      callout is correct once you look at the right resolution.
     - >-
-      The seed only controls the item draw rather than the trials, so the grid is stable by design and the
-      omission from the panel is a documentation gap rather than a measurement one.
+      Neither column improves, because the two knobs act on the same quantity and cancel at a fixed budget
+      of judged verdicts.
     - >-
-      The rate should be averaged across seeds before quoting, since a single seed is one sample from the
-      distribution the seed parameterises.
-  correct: 1
+      The missed column does fall if you hold the repeat count at five, so the callout is right about
+      repeats and wrong about items.
+  correct: 0
   explanation: >-
-    A rate with no error bar is normally a rate measured too few times. Here the trials are not independent
-    at all, so the number is exact for the recorded data while carrying none of the variation a real gate
-    would have from item mix, judge drift and time of day — which is exactly the variation a reader assumes
-    the bar would cover.
+    The signal is a proportion, so it does not grow with the sample; only the noise shrinks, and shrinking
+    noise buys down false alarms and leaves a proportional regression exactly as detectable. Repeats move the
+    same false-alarm side and leave the missed column flat at 53% against 52% between three and five
+    repeats, which is why the callout's claim needs the column split before it can be checked.
 
 - id: q3
   question: >-
-    On 94 items with 3 repeats the paired 95% interval on a real 27-point difference is `12.8 to 39.4`, so
-    the half-width is 13.3 points. You set the gate's tolerance to 5 points. What follows?
+    The simulator plants a block of broken items — a default tenth of the set. Re-running it with one broken
+    item gives an 89.8% miss rate and with nineteen gives 5.2%, while the false-alarm rate stays at 10.0%
+    throughout. What does that tell you about a miss rate?
+  options:
+    - >-
+      That the miss rate is a property of the gate and the block size is an implementation detail the
+      specification can leave out.
+    - >-
+      That miss rates should be quoted as the best case, since the real regressions are probably smaller
+      than the simulator's default block.
+    - >-
+      That the false-alarm rate is the only stable half of the specification, because it is the one that
+      does not depend on the item count.
+    - >-
+      That a miss rate is always a statement about a named regression, so the gate specification has to say
+      what size of regression it is buying detection for before the number means anything.
+  correct: 3
+  explanation: >-
+    The false-alarm rate cannot move when the block changes, because the block exists only in the broken
+    build, so the whole of the miss rate's variation is explained by the regression's size against the
+    tolerance. A miss rate quoted without the regression it applies to is a number about nothing in
+    particular, and naming the regression is the cheapest and most skipped line in the whole specification.
+
+- id: q4
+  question: >-
+    On 94 items and 3 repeats the paired 95% interval on a real 27-point difference is `12.8 to 39.4`, so the
+    half-width is 13.3 points. The regression the gate must catch is 9 broken items out of 94, a 4.26-point
+    drop. What follows?
   options:
     - >-
       The tolerance is irrelevant, because the paired interval measures the effect size and not the
       run-to-run variation a nightly gate actually sees.
     - >-
-      The gate is strict, because a five-point tolerance catches more regressions than a thirteen-point
-      one and strictness is what a release gate is for.
+      The gate is fine, because the false-alarm rate on the panel reads 10.0% at exactly this setting.
     - >-
-      The gate is fine, because the false-alarm rate on the panel reads 0.0% at exactly this setting.
+      The regression is a third of the measurement's own half-width, which is why the gate is close to a coin
+      on it and why no threshold fixes a signal that far under its noise.
     - >-
-      The gate fires on ordinary variation and stays quiet on ordinary variation, because five points is
-      38% of the measurement's own width and the threshold is smaller than the noise it sits on.
-  correct: 3
+      The gate is strict, because a 4.26-point regression is more than a third of the tolerance and a gate
+      can resolve anything above a third of its tolerance.
+  correct: 2
   explanation: >-
-    A threshold is only interpretable against the width of the quantity it is applied to, and here the two
-    are the same order of magnitude. The panel's zero false-alarm reading is itself the artefact from the
-    first question, not evidence that the setting is conservative.
-
-- id: q4
-  question: >-
-    Repeats take the interval half-width on 94 items from 14.4 points at one repeat to 13.3 at three.
-    Cutting the item count from 94 to 20 takes it from 13.3 to 30.0. Which buys more, and at what price?
-  options:
-    - >-
-      Repeats, because they reduce verdict noise directly, and they cost one extra judge call per item per
-      run rather than a new item.
-    - >-
-      Repeats, because a majority vote over three samples removes two thirds of the judge's run-to-run
-      variation by construction.
-    - >-
-      Neither, because interval width is a property of the item count alone and repeats never affect it.
-    - >-
-      Items, because item-sample noise is the larger term; repeats are the expensive way to shrink the
-      smaller one, at three times the judge calls for about one point of width.
-  correct: 3
-  explanation: >-
-    Both knobs shrink the width and they are not interchangeable: the item count sets how much the average
-    moves when you draw a different set, which dominates here, while repeats only stabilise the verdict on
-    the items already chosen. Repeats are per-item per-run cost forever, which is why the item budget is the
-    one to defend in a review.
+    A threshold is only interpretable against the width of the quantity it is applied to, and here the signal
+    is well under that width. More items shrink the width — 30.0, 18.8, 13.3 as the set grows — but a
+    4.26-point drop stays a 4.26-point drop at every size, so the only way to catch it reliably is a
+    threshold tight enough to fire on it and an honest statement of the false alarms that buys.
 
 - id: q5
   question: >-
-    Your gate reads `Tolerance 5 pts` on the CI tile and the team ships it into CI as a single checkbox.
-    A reviewer asks what the checkbox guarantees. Which answer is the one the runbook should contain?
+    Your gate reads `Tolerance 5 pts` on the CI tile and the team ships it as a single checkbox. A reviewer
+    asks what the checkbox guarantees. Which answer is the one the runbook should contain?
   options:
-    - >-
-      That on 94 items and 3 repeats the measurement carries a ±13.3-point half-width, the gate fires on
-      roughly one run in three with nothing changed, and both of those were accepted in writing.
     - >-
       That the candidate is not worse than the baseline by more than five points, which is the threshold
       expressed as the guarantee the team actually intended.
@@ -107,9 +111,13 @@
     - >-
       That the gate blocks regressions larger than five points, since anything smaller falls under the
       measurement's own noise floor.
-  correct: 0
+    - >-
+      That on 94 items and 3 repeats the measurement carries a ±13.3-point half-width, the gate blocks about
+      one healthy build in ten and misses about half of the one-in-ten breaks, and both of those were
+      accepted in writing.
+  correct: 3
   explanation: >-
     A gate specification is four numbers — the tolerance, the width of the measurement, the accepted
-    false-alarm rate and the accepted miss rate — and the first two together are what say whether the
-    threshold is strict or random. Writing both errors down is what stops the choice being made silently by
-    whoever tunes it last.
+    false-alarm rate and the accepted miss rate — plus the size of the regression the miss rate applies to.
+    The first two together say whether the threshold is strict or random, and writing both errors down is what
+    stops the choice being made silently by whoever tunes it last.

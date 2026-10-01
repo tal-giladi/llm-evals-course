@@ -10,8 +10,8 @@
       75.0%, and it is publishable with its interval as long as the denominator, 0.20, is printed
       beside it.
     - >-
-      125.0%, which is outside the possible range. The denominator TPR + TNR − 1 is 0.20, so the
-      correction multiplies a small numerator by five and the raw rate should be reported instead.
+      125.0%, which is outside the range. The denominator TPR + TNR − 1 is 0.20, so the correction
+      multiplies a small numerator by five; report the raw rate instead.
     - >-
       25.0%, which shows the correction cannot be applied to a judge that fails this many good
       answers.

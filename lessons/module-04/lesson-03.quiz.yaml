@@ -47,8 +47,8 @@
     - The judge was re-run and got better, so the earlier 48.9% is stale and can be replaced.
     - The check is fine on the population that matters and the `exception` slice is too small to count.
     - >-
-      The draw happened to contain items from the slices the check handles well and none from the two
-      rare ones, so the overall rate is an average whose weights came from the seed.
+      The draw held items from the slices the check handles well and none from the two rare ones, so
+      the rate is an average whose weights came from the seed.
     - The seed knob changes the check's prompt as well as the items, so the 88.9% is a different
       measurement entirely.
   correct: 2

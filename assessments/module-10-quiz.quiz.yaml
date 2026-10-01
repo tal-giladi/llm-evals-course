@@ -6,7 +6,7 @@
   options:
     - >-
       The candidate is 26.6 points worse, and the reviewer's direction is wrong because the Difference tile
-      is computed as baseline minus candidate.
+      is computed as baseline minus candidate and is labelled only `Difference`, with no owner stated.
     - >-
       The candidate is 27 points better on the items that flipped, and the reviewer used the fixed count
       instead of the difference.
@@ -18,10 +18,10 @@
       ordinary variation for this metric.
   correct: 0
   explanation: >-
-    The tile is A minus B, so a positive number names the baseline, and the callout sentence above it names
-    the other system — which is why swapping the two dropdowns is the one-minute check that reveals a sign's
-    orientation. Thirty-five broken items against ten fixed is a separate and equally important fact, but it
-    tells you about the items rather than about the direction of the headline.
+    The tile is A minus B, so a positive number belongs to the system at 55.3%, and the tile never says so —
+    which is why the runbook has to write the orientation down rather than inherit it from the page. The
+    thirty-five broken items against ten fixed is a separate and equally important fact, but it tells you
+    about the items rather than about the direction of the headline.
 
 - id: q2
   question: >-
@@ -29,16 +29,16 @@
     unpaired difference runs 10.6 to 34.0 points. Which statement about that range belongs in a runbook?
   options:
     - >-
+      That the range shrinks as more partitions are drawn, so a hundred partitions would collapse it to the
+      paired figure.
+    - >-
+      That the paired comparison, fixed at 19.2 across all twelve draws, is the estimate to publish and the
+      range is the price of the split design.
+    - >-
       That the systems' difference is somewhere between 11 and 34 points, which is the honest interval the
       split design produces.
     - >-
-      That the paired comparison, which stays at 19.2 across all twelve draws, is the estimate to publish
-      and the range is the price of the split design rather than uncertainty in the systems.
-    - >-
       That the mean of the twelve values, 20.2 points, is the best single estimate of the effect.
-    - >-
-      That the range shrinks as more partitions are drawn, so a hundred partitions would collapse it to the
-      paired figure.
   correct: 1
   explanation: >-
     Each partition is a different experiment, so the spread is variation between experiments rather than
@@ -70,25 +70,28 @@
 
 - id: q4
   question: >-
-    A gate panel prints `False alarms 0.0%` and `Missed regressions 100.0%`, and all nine grid rows sum to
-    100% at every tolerance. What is the fastest way to describe what the panel is measuring?
+    On the gate panel at 94 items, 3 repeats and a 5-point tolerance the tiles read `False alarms 10.0%` and
+    `Missed regressions 52.8%`. Move the tolerance to 2 points and they read `34.5%` and `22.3%`. Which knob
+    is doing the trading?
   options:
     - >-
       A well-calibrated two-sided test, since complementary rates are what a correct simulator should
       produce for a gate with two-sided error.
     - >-
-      One event labelled twice: the simulator writes its planted regression into a copy of the runs that the
-      pass-rate calculation never reads, so both columns describe the healthy build.
+      The item count, because quadrupling the eval set is what moves a rate that has been measured on 94
+      items rather than on 20.
     - >-
-      A gate with an unusually wide tolerance, which is why it fires on nothing at all.
+      The repeat count, because averaging three judge samples instead of one is what separates a real
+      regression from verdict noise.
     - >-
-      A broken grid, because the item-count knob on the panel does not change the headline tiles either.
-  correct: 1
+      The tolerance, and it is the only one: moving it trades the two rates directly, while more items and
+      more repeats buy down false alarms and leave the miss rate where it is.
+  correct: 3
   explanation: >-
-    Two failure modes on two different builds cannot sum to one by construction, and passing a planted
-    regression index of 0, 7 or none leaves the false-alarm rate identical to the last decimal place. The
-    honest deliverable from a panel like this is a written specification, not a rate anybody should paste
-    into a runbook.
+    The tolerance sits between the size of the regression and the noise in the measurement, so tightening it
+    buys a lower miss rate with a higher false-alarm rate and nothing else substitutes for it. The other two
+    knobs shrink the noise around the difference, which is why they flatten the false-alarm side and leave a
+    proportional regression exactly as detectable as it was.
 
 - id: q5
   question: >-
@@ -194,12 +197,12 @@
     - >-
       Drop the slice, since a metric whose intervals overlap cannot support a release decision.
     - >-
-      Keep the slice as a floor on a named denominator — `over-refusals ≤ 12 of 94` — and say in the
-      specification that it is a floor rather than a detector, because the counts are one and seven events.
-    - >-
       Report the difference of four refusals as a 4.3-point regression, since counts and rates are the same
       unit on this panel.
-  correct: 2
+    - >-
+      Keep the slice as a floor on a named denominator — `over-refusals ≤ 12 of 94` — and say in the
+      specification that it is a floor rather than a detector, because the counts are one and seven events.
+  correct: 3
   explanation: >-
     Six and ten on 94 items are one and seven events, and an interval spanning a factor of two cannot
     separate them. A floor on a named denominator catches a slice that grows as the item set grows, which is
@@ -207,22 +210,24 @@
 
 - id: q10
   question: >-
-    Your move `Items` knob from 94 to 40 on the A/B panel and every number stayed exactly the same; doing it
-    on the gate panel left the tiles reading `Items 94`. What is the rule this teaches?
+    The `Items` knob now draws a real sample, and dragging it from 94 to 10 on the A/B panel takes the
+    difference from `+26.6 (12.8 to 39.4), p 0.000` to `+0.0 (-40.0 to 40.0), p 1.000` on the same two
+    systems at the same seed. What does the knob make necessary?
   options:
     - >-
-      Knobs should be moved one at a time, since a change in one control can mask the effect of another.
+      A written rule about which positions may be published, because a control that can turn a significant
+      result into a non-result in one drag supplies provenance for a comparison nobody chose.
     - >-
-      The panels always run on the whole set and the knobs are for highlighting, so a runbook should quote
-      94 and note the knob as presentational.
+      Nothing, since the knob is reproducible at a fixed seed and a reproducible draw is as good as a
+      frozen set for a release decision.
     - >-
-      Controls in this lab are advisory, so the configuration you type is the configuration that is
-      recorded even when the underlying sample does not change.
+      A second judge at the smaller item count, because ten items is too few for one judge to be reliable.
     - >-
-      A control that does not change the quantity it labels is worse than no control, because it supplies
-      false provenance for every number printed beside it.
-  correct: 3
+      A larger bootstrap resample count at small n, because the interval at ten items is dominated by
+      resampling noise rather than by the items.
+  correct: 0
   explanation: >-
-    A knob that does not move the measurement invites a runbook to describe a run that never happened, and
-    nothing on the page corrects the reader afterwards. Quoting the size the number was actually computed
-    over — and saying so — is what keeps the record honest.
+    The draws are nested at a fixed seed, so the ten-item set sits inside the 94 — nothing about the systems
+    changed and the verdict did. A knob that can move a conclusion is a process control rather than a
+    setting, and process controls belong in the runbook: publish only from the frozen set, and treat a knob
+    moved to investigate a noisy run as a diagnostic that has to be put back.

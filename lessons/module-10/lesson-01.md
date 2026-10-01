@@ -5,7 +5,7 @@ minutes: 17
 practice_minutes: 45
 prerequisites: ["06.2", "04.4"]
 objectives:
-  - Run a paired A/B on one fixed item set and read the bootstrap interval on the difference instead of the two pass rates.
+  - Run a paired A/B on one fixed item set, read the bootstrap interval on the difference instead of the two pass rates, and say what moving the item count does to that interval.
   - Produce a flip list, sort it into what the candidate fixed and what it broke, and argue why the broke half is the one to read first.
   - Decide whether a four-point change on 94 items is a difference or a draw, using the interval and the sign-test p-value together.
 volatility: concept
@@ -201,22 +201,27 @@ Do this, in order:
 1. **Count the denominators yourself before touching the page.** 52 of A's answers pass and 27 of B's, on
    94 items each. 52 − 27 = 25, and 25/94 = 26.6 points. The difference tile is arithmetic on two counts you
    can do in your head, which is how you know it is not doing anything clever.
-2. **Read the callout.** `The whole interval is above zero: B is better on this set, not just on one lucky
-   draw.` Read the tiles beside it: A is 55.3% and B is 28.7%, so **B is not better here** — it is 26.6
-   points worse. The difference tile is computed as A minus B, so a positive number names A, and the sentence
-   above it names the other side. Swap the two dropdowns and watch the sign flip: that is the one-minute
-   check that tells you which way a signed number on this panel runs.
+2. **Check the callout against the tiles.** It reads *The whole interval is above zero: A — handbook-tuned
+   prompt is the better system on this set, not just on one lucky draw*, and the tiles agree: A 55.3%, B
+   28.7%, difference +26.6. Now find what the prose does **not** tell you. The `Difference` tile is labelled
+   `Difference` and nothing else — it never says *A minus B*. And the list underneath is named from the other
+   side: ▲ `Now passes` is an item **B** fixed, ▼ `Used to pass, does not any more` is an item **B** broke.
+   So the thirty-five ▼ rows are what the +26.6 is actually made of. Write "A minus B" into the runbook
+   yourself; do not rely on the page to remember it for you six months from now.
 3. **Switch B to `D — A, padded`.** Difference **+4.3 pts**, interval **−2.1 to 10.6**, sign test **0.344**
-   (*not significant*), and the callout changes to the interval-crosses-zero wording. Seven fixed, seven
+   (*not significant*), and the callout changes to the interval-crosses-zero wording. Three fixed, seven
    broke. Same judge, same 94 items, same page — and now the honest answer is "we cannot tell".
 4. **Read the broke list against the fixed list and count.** Ten fixed, thirty-five broke, and the panel
    shows the first fourteen rows followed by `…and 31 more (use Export to see all)`. The truncation is
    visible, which is the only reason it is acceptable; a list that silently shows fourteen of forty-five is
    the same failure as a dashboard that shows a rate with no `n`.
-5. **Move the `Items` knob from 94 to 40 and watch nothing move.** The tiles stay at 55.3% and 28.7% and the
-   difference stays at +26.6, because this panel's item set is fixed at all 94 and the knob only
-   highlights a row in the gate grid. If you sized a comparison with that knob you would be reporting a
-   number computed over the full set under a label that says forty.
+5. **Walk the `Items` knob down and watch the verdict change.** Drag it from 94 to 60, 40, 30, 20 and 10.
+   The difference runs **+26.6, +31.7, +22.5, +20.0, +15.0 and then +0.0** — and at 10 items the interval is
+   **−40.0 to 40.0** with a sign test of **1.000**, so the page says *you cannot tell these two systems
+   apart* about the pair it said was 27 points apart four clicks earlier. Nothing about the systems changed.
+   Note also what the knob is doing structurally: at this seed the draws are **nested**, so the 10-item
+   draw is contained in the 20-item draw, which is contained in the 30, and so on. You are not comparing two
+   systems on two samples — you are watching one comparison lose its way to a result.
 6. **Open the items the flip list cannot show you.** Pick two of B's over-refusals that are *not* on the
    list — s37, s43 and s73 are three. A fails those items too, so nothing moved and nothing is listed.
    Your A/B is reporting a system whose behaviour is not fully described by anything on the panel.
@@ -251,12 +256,13 @@ Do this, in order:
 3. **Find the smallest change the page will call a result.** Set A against D, then B against C. Record the
    difference, both ends of the interval, the sign-test p, and the fixed and broke counts for each. One of
    them clears zero and one does not — write down what the non-clearing one is allowed to claim.
-4. **Move the `Repeats` knob from 3 to 1 and back to 5, keeping the pair at A against B.** Record the two
-   pass rates, the difference and the interval at each setting. Then say which of those numbers changed
-   because the system changed and which changed because the judge's verdict did.
-5. **Break the tie-count.** Set A against B, set `Repeats` to 1, and count the items where the two systems
-   disagree. Work out by hand what the sign test would be for a 20-versus-10 split and compare it with the
-   tile. Then ask what you would have to change to get the same conclusion from a smaller item set.
+4. **Walk the `Items` knob from 94 down to 10** and write down the difference, both ends of the interval and
+   the sign-test p at each stop. You should get +26.6 (12.8–39.4), +31.7 (16.7–45.0), +22.5 (5.0–42.5),
+   +20.0 (0.0–43.3), +15.0 (−15.0–45.0) and +0.0 (−40.0–40.0, p 1.000). Then write one sentence about
+   what a knob that can turn a significant result into "no difference" deserves to be called in a runbook.
+5. **Move the `Repeats` knob from 3 to 1 and back to 5**, keeping the pair at A against B and `Items` at 94.
+   Record the two pass rates, the difference and the interval at each setting. Then say which of those
+   numbers changed because the system changed and which changed because the judge's verdict did.
 
 ## Break it
 
@@ -265,11 +271,11 @@ compute 26.6 and believe it. On the preset that difference summarises 45 moved i
 which 45, so the slide supports a decision that the run does not support. The lie: **a difference without
 its flip list is a number with the actionable part deleted.**
 
-**Read a signed difference without its orientation.** The Difference tile is A minus B; the callout above it
-names B for a positive interval, which on the default preset is the wrong system. Nothing on the page tells
-you which convention a signed number follows, and a sign error here does not produce an obviously broken
-page — it produces a launch. The lie: **a sign is a claim about direction, and the page does not label
-which system it points at.**
+**Record the difference without recording which system it is relative to.** The tile is labelled
+`Difference` and nothing more — not `A − B` — and the flip list underneath is named from B's side, so the
+thirty-five ▼ rows are what the positive number is made of. The page's prose is right and the habit is
+still required. The lie: **a signed number with no stated orientation is a runbook entry nobody can
+re-read, and a sign error here does not break the page — it ships.**
 
 **Trust the fixed list and skim the broke list.** The fixed rows are the good news, so they get read. But
 every broken item was a working answer a user had yesterday, and the broken list on this preset is three
@@ -281,10 +287,12 @@ complete account of what B did to the product. It is not: three of B's six over-
 s73 — are items A also fails, so no verdict moved and none of them appears. The lie: **a list of differences
 is not a census of failures, and the items it is blind to are the ones the system was already bad at.**
 
-**Size the comparison with the `Items` knob.** The knob is right there, it moves, and it says `Items`. This
-panel's item set is fixed at all 94 whatever you set it to, so every number above is a 94-item number and a
-runbook that says "40 items" is describing something that was not computed. The lie: **a control that does
-not change the quantity is worse than no control, because it looks like the thing you configured.**
+**Drag `Items` to 10 and ship "no difference".** The knob is live, it does what it says, and the page goes
+from `+26.6 (12.8 to 39.4), p 0.000` to `+0.0 (−40.0 to 40.0), p 1.000` — on the same two systems, at the
+same seed, with nothing else touched. Because the draws are nested, that 10-item set is *inside* the 94, so
+the two numbers are not even about different populations. The lie: **a comparison can be made unfalsifiable
+by choosing its denominator, and a knob that lets you do that in one drag needs a written rule about which
+positions are legal.**
 
 **Round the difference and drop the interval.** `+27 points` is what gets said in the standup. The interval
 on that comparison runs 12.8 to 39.4 — a range a factor of three wide — and the number that decides anything
@@ -293,10 +301,11 @@ centre of a range somebody has not read.**
 
 ## Fix it
 
-1. **Publish the triple, every time.** Pass rate A, pass rate B, difference with its interval, and the
-   sign-test p, all on 94 items with the judge named. On this run: `A 55.3% (52/94), B 28.7% (27/94),
-   difference +26.6 pts (95% 12.8 to 39.4), sign test p 0.000, judge c-rubric-3b, 3 repeats`. Every number
-   is checkable and every number has a denominator.
+1. **Publish the triple, every time.** Pass rate A, pass rate B, the difference with its orientation and its
+   interval, and the sign-test p, all on 94 items with the judge named. On this run: `A 55.3% (52/94),
+   B 28.7% (27/94), difference A − B = +26.6 pts (95% 12.8 to 39.4), sign test p 0.000, judge c-rubric-3b,
+   3 repeats, all 94 items`. Every number is checkable, every number has a denominator, and the sign has an
+   owner.
 2. **Ship the flip list as the artefact and the difference as its caption.** The list is what a person reads
    at 9am; the number is what goes in the changelog. Make sure the list says *fixed* and *broke* separately
    and shows how many it truncated — `…and 31 more` on this preset.
@@ -312,14 +321,18 @@ centre of a range somebody has not read.**
 
 ## How do I know it works?
 
-**Challenge, on dev.** This panel always runs on all 94 items, so the dev split it gives you is the
-dataset's own published one: **`dev_ids`, 57 items**, which is where any tuning of this eval would have
+**Challenge, on dev.** This panel's `Items` knob draws a sample, so the split you tune on has to be a split
+you chose before you saw the numbers — not whichever knob position produced a result you liked. The
+dataset's own published split is **`dev_ids`, 57 items**, which is where any tuning of this eval would have
 happened. Take A against B on those 57 and require all four of these:
 
+- **The item set is frozen and named, and the knob is at 94 for every published number.** The preset numbers
+  above are all 94 items; the runbook says so on every line. A comparison sized at 40 is a different
+  measurement and is labelled as one.
 - **The interval is on the page and it has been read.** A against B on the 57-item dev split reads a
-  difference of **+19.3 pts**, interval **3.5 to 35.1**, sign test **p 0.043** — 18 fixed, 7 broke. That is
+  difference of **+19.3 pts**, interval **3.5 to 35.1**, sign test **p 0.043** — 7 fixed, 18 broke. That is
   19.3 points with a lower end of 3.5, against 26.6 with a lower end of 12.8 on all 94. Same systems, same
-  judge, same question; half the denominator and less than half the margin.
+  judge, same question; two thirds of the denominator and under a third of the margin.
 - **The flip list is published split into fixed and broke**, with both counts and the truncation count if
   any. `10 fixed, 35 broke, 49 unchanged, 31 not shown` on the preset.
 - **The sign test is stated with its null and its raw split**, not as a bare `p = 0.000`.
@@ -347,9 +360,10 @@ is what keeps that from being a different system. It is [4.3](../module-04/lesso
 wearing an A/B costume.
 
 Now run **A against D** on the same two halves and the picture inverts into the lesson's other half. On dev
-the difference is **+1.8 pts**, interval **−7.0 to 10.5**, sign test **p 1.000**. On the held-out half it is
-**+8.1 pts**, interval **0.0 to 16.2**, sign test **p 0.250**, and every single flip went the same way — 3
-fixed, 0 broke. A panel that reports "no difference" on dev and a positive number on test is not a bug. It
+the difference is **+1.8 pts**, interval **−7.0 to 10.5**, sign test **p 1.000**, and the flips split 3 fixed
+against 4 broke. On the held-out half it is **+8.1 pts**, interval **0.0 to 16.2**, sign test **p 0.250** —
+and the three flips there are **3 broke, 0 fixed**, meaning the padded variant was worse on all three and
+better on none. A panel that reports "no difference" on dev and a positive number on test is not a bug. It
 is three disagreements, which is not enough to say anything, and the interval's low end sitting at exactly
 zero is the page telling you so in the only way a bootstrap can.
 
@@ -359,9 +373,11 @@ zero is the page telling you so in the only way a bootstrap can.
 have the runs, and it removes item difficulty from the variance. [10.2](lesson-02.md) shows what you lose
 when you throw it away.
 
-**Do keep the item set frozen between A and B.** If the baseline was measured in March and the candidate in
-June, you have an unpaired comparison and you should read it as one — including the noise it adds. Freezing
-the set costs one release cycle and buys the whole difference.
+**Do keep the item set frozen between A and B, and treat the knob as a diagnostic rather than a control.**
+If the baseline was measured in March and the candidate in June, you have an unpaired comparison and you
+should read it as one — including the noise it adds. Freezing the set costs one release cycle and buys the
+whole difference. And when you do move the knob to understand a noisy run, put it back at 94 before anything
+is published.
 
 **Do export the flip list into the run record.** The Export button writes `{a, b, judge, n}`. The list itself
 is the part that will still be useful in six months, because it is the only thing on the page that names
@@ -383,12 +399,16 @@ whoever was on the team.
 
 ## Reflect
 
-1. The Difference tile reads `+26.6 pts` and the callout above it says B is better. Write the two sentences
-   you would send to the team that ran the comparison, and say which one you would put in the release note.
+1. The Difference tile reads `+26.6 pts` and is labelled only `Difference`, while the list underneath calls
+   thirty-five items `Used to pass, does not any more`. Write the two sentences you would send to the team
+   that ran the comparison, and say which one you would put in the release note.
 2. A candidate fixes 3 items and breaks 7, sign test p 0.344. Write the sentence that stops the release
    without implying the candidate is worse — and say what you would collect to change the answer.
 3. Thirty-five items broke and ten were fixed, and three of the candidate's six over-refusals are not on the
    list. Name the number that would show those three, and say who has to own it.
+4. The `Items` knob goes from 94 to 10 and the difference goes from +26.6 to +0.0 with the interval at
+   −40.0 to 40.0. Write the rule you would put in the runbook about which knob positions may be published,
+   and say why "the knob was left where someone found it" is not a defence.
 
 Finish with the knowledge check for this lesson: five questions, one correct answer each.
 

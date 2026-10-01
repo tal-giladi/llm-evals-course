@@ -73,8 +73,8 @@
       whole recipe.
     - The first is cheaper to check, since clarity can be scored per sentence and suitability cannot.
     - >-
-      People agree often enough on the first to give a judge a target to be measured against, while
-      on the second the labels disagree with each other and any average is mush.
+      People agree often enough on the first to give a judge a target, while on the second the labels
+      disagree with each other and any average is mush.
     - Both belong with humans, since neither has a rule, and judges are only for factual accuracy.
   correct: 2
   explanation: >-

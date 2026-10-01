@@ -68,23 +68,29 @@ The textbook line is that pairing buys a large variance reduction and therefore 
 items. Compute the covariance term on this corpus — 94 items, `c-rubric-3b`, 3 repeats — and the size of the
 win depends entirely on how alike the two systems are:
 
-| Pair | Items where both agree | Per-item correlation | Variance factor | Items needed, unpaired |
-|---|---|---|---|---|
-| A vs B | 49 of 94 (52.1%) | 0.098 | **×1.11** | 99 (×1.05) |
-| A vs C | 47 of 94 (50.0%) | 0.147 | **×1.15** | 101 (×1.07) |
-| B vs C | 64 of 94 (68.1%) | 0.033 | **×1.03** | 96 (×1.02) |
-| A vs D (A, padded) | 84 of 94 (**89.4%**) | **0.790** | **×4.75** | **205 (×2.18)** |
+| Pair | Items where both agree | Per-item correlation | Variance factor | Unpaired SE is | Items needed per arm |
+|---|---|---|---|---|---|
+| A vs B | 49 of 94 (52.1%) | 0.098 | **×1.11** | 1.05× wider | 105 |
+| A vs C | 47 of 94 (50.0%) | 0.147 | **×1.15** | 1.07× wider | 108 |
+| B vs C | 64 of 94 (68.1%) | 0.033 | **×1.03** | 1.02× wider | 97 |
+| A vs D (A, padded) | 84 of 94 (**89.4%**) | **0.790** | **×4.75** | 2.18× wider | **447** |
+
+The last column follows straight from the algebra above: to match the paired standard error, an unpaired
+design needs $n \times \text{variance factor}$ **per arm**, because the unpaired variance divides the sum
+of two systems' variances by $n$ while the paired variance divides the variance of their *difference* by
+the same $n$. That is 94 × 1.11 = 104 for A against B, and 94 × 4.75 = 447 for A against A-padded — 894
+items in total, for a change that bolts a paragraph of filler onto every answer.
 
 The first three rows are the correction. When two systems genuinely behave differently — a different prompt,
 a different model — their per-item verdicts on this corpus barely correlate, the covariance term is small, and
-pairing buys you 3–15% of variance, which is one or two extra items out of a hundred. Pairing is not a magic
+pairing buys you 3–15% of variance, which is a handful of items out of a hundred. Pairing is not a magic
 multiplier.
 
 The fourth row is where the classic claim is true. A and A-padded are the *same answers with a paragraph
-added*, they agree on 89.4% of items, and unpaired measurement costs you **2.18 times the items** to reach
-the same confidence. The pairing advantage is largest exactly where the systems are most alike — which is
-where release decisions are most often made, because small changes are the ones people argue about for a
-month.
+added*, they agree on 89.4% of items, and an unpaired design on this pair needs **4.75 times the items per
+arm** to reach the same confidence. The pairing advantage is largest exactly where the systems are most
+alike — which is where release decisions are most often made, because small changes are the ones people
+argue about for a month.
 
 ### The bigger win on this page is the item budget, not the variance
 
@@ -324,9 +330,9 @@ The last row is the held-out lesson. On 37 items the unpaired design for A again
 flips sign on five partitions of twelve; the paired design on the same 37 items reads **+8.1 pts, interval
 0.0 to 16.2, p 0.250** — a stable number whose lower end sits exactly at zero, which is the page correctly
 declining to claim three flips are evidence of anything. Write down that the pairing's advantage grows with
-the smallness of the set: on 94 items A vs D gained a factor of 2.18, and on 37 items the partition range
-nearly doubled again. The closer the decision is to a tie, the more the design matters and the less the
-runbook should depend on a single number.
+the smallness of the set: on 94 items the unpaired standard error for A against D is 2.18 times the paired
+one, and on 37 items the partition range nearly doubled again. The closer the decision is to a tie, the more
+the design matters and the less the runbook should depend on a single number.
 
 ## Use / don't use
 

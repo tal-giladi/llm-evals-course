@@ -32,8 +32,8 @@
     - >-
       Both runs really did fail completely, and the 0.00 is a correct summary of each of them taken on its own.
     - >-
-      The interval is omitted because the score is a mean of 40 per-run ratios rather than a proportion of 40
-      successes, and the same runs also give 62 of 91 = 68.1% pooled — a different question.
+      The interval is omitted because the score is a mean of per-run ratios, not a proportion, and the
+      same runs give 62 of 91 pooled — a different question.
     - >-
       The 0.00 is a rounding artefact, because per-run ratios are only ever reported to two decimal places.
   correct: 2

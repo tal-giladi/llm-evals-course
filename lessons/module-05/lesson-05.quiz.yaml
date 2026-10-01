@@ -4,8 +4,8 @@
     line that changed is the rubric version. What does the log let you conclude?
   options:
     - >-
-      Nothing is decided. System regression, natural marginality and a stricter rubric all produce this
-      log, and a judge that records only a word cannot tell them apart.
+      Nothing is decided. System regression, marginality and a stricter rubric all produce this log,
+      and a verdict-only judge cannot tell them apart.
     - >-
       The system regressed, because a rubric revision is a cosmetic change that cannot move verdicts.
     - >-
