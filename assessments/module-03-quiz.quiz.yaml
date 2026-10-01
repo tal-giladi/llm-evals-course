@@ -1,0 +1,196 @@
+- id: q1
+  question: >-
+    Your extraction feature produces malformed JSON on 4 of 20 items, and the team is about to add an
+    LLM judge that answers "is this valid JSON?" so the failure appears on the dashboard. What is the
+    strongest objection?
+  options:
+    - >-
+      A judge cannot reliably tell valid JSON from a trailing comma, so it would under-report the very
+      failures it was added to find.
+    - The judge would be correct, but a model call per item is too slow to sit inside the importer.
+    - >-
+      Validity is fully decidable, so a parser answers the same question for free, instantly, and with
+      a reason attached.
+    - >-
+      The dashboard would need human labels anyway, since only a person can confirm a JSON object is
+      right.
+  correct: 2
+  explanation: >-
+    The rule is to reach for the cheapest thing that can decide, and here something can decide. The
+    cost is not only money: a model opinion on the same 20 items varies between runs and has never
+    been validated against the parser it stands in for, while a parser names the missing bracket and
+    the character offset.
+
+- id: q2
+  question: >-
+    A substring check reads 100.0% on a system that is exactly right 20 times out of 20, and 100.0%
+    on a system that is exactly right 6 times out of 20. What does that pair of numbers establish?
+  options:
+    - >-
+      Nothing about either system, because the check gives them the same number and so cannot
+      separate them.
+    - The first system is better, since a perfect score is stronger evidence than a partial one.
+    - The check is conservative and correct, since it admitted no false alarm on either system.
+    - The second system needs a different prompt, because no single check can score both systems.
+  correct: 0
+  explanation: >-
+    A check earns its place by giving different systems different numbers. Here it does not, so the
+    100% is a measurement of the check rather than of the system — and in this lab that exact check
+    passes all 20 items on a variant that is wrong on 14 of them, catching zero real failures.
+
+- id: q3
+  question: >-
+    A system told "output JSON" wraps most answers in a markdown code fence. A raw string comparison
+    reports 4 of 20; comparing the parsed objects reports 15 of 20. Which statement is defensible?
+  options:
+    - Both are correct measurements, and the 11-item gap is the size of the model's formatting defect.
+    - The raw comparison is right, because downstream code receives the string and not the object.
+    - >-
+      The parsed comparison is right, because once an object parses its wrapper can no longer affect
+      the result.
+    - >-
+      The gap is entirely a parsing decision, so the team must write down whether a fence counts as a
+      failure before either number can be read.
+  correct: 3
+  explanation: >-
+    The eleven items are identical strings in both runs; only the decision about unwrapping changed.
+    Both numbers are defensible products, but a parser's leniency is a choice the team made rather
+    than a fact about the system, so it belongs in the criterion instead of buried in the evaluator.
+
+- id: q4
+  question: >-
+    A JSON parse check reports 100.0% on a system whose parsed objects differ from the reference on 5
+    of 20 items. What is the strongest correct reading?
+  options:
+    - The 5 items must also fail the schema, since a schema check validates the whole object.
+    - >-
+      The schema tests whether the object is legal, not whether it is right, so a clean sheet here is
+      a floor and not a verdict.
+    - >-
+      The reference objects must be wrong, because a passing schema is stronger evidence than a
+      side-by-side comparison.
+    - >-
+      The check needs a second pass that compares parsed objects, because shape legality and content
+      correctness are separate questions.
+  correct: 1
+  explanation: >-
+    Deleting a whole ingredient still leaves a legal array under `minItems: 1`, so the validator
+    prints nothing. Schema, parse and content are three different questions, and on this dataset the
+    first two pass at 100% while a fifth of the answers are wrong.
+
+- id: q5
+  question: >-
+    Your recipe system is wrong on 14 of 20 items and one check passes all 20. You switch to ROUGE-L
+    and the scoreboard reads 92.2%. You change the prompt and ROUGE-L moves from 0.922 to 0.931.
+    What have you measured?
+  options:
+    - >-
+      The wording. The overlap metric improved because the outputs changed shape, not because more
+      recipes were extracted correctly.
+    - The system, because a rise of 0.009 on twenty items is larger than the run-to-run spread.
+    - The check, since an unvalidated check's score is a statement about the evaluator.
+    - Nothing yet, because the interval on 20 items is too wide to resolve a 0.009 difference.
+  correct: 0
+  explanation: >-
+    On this data the true correct rate on that variant is 6 of 20 — 30.0% — so the 92.2% is already
+    measuring resemblance rather than correctness. A prompt change that moves an overlap score without
+    moving a decidable check has changed the answers' shape, and shipping it as an improvement
+    records a wording change as a quality one.
+
+- id: q6
+  question: >-
+    You corrupt an answer by doubling its first ingredient quantity and appending two sentences of
+    confident filler. ROUGE-L recall reads 0.974 before and 0.974 after. What does that tell you?
+  options:
+    - >-
+      The metric missed the change, because recall only measures content that appears in the
+      reference.
+    - >-
+      The coverage half is saturated — every reference token was already present — so it cannot
+      register content being wrong, only content being missing.
+    - Recall is noisy, so the run must be repeated until the two numbers separate.
+    - The corruption was too small to measure, since a doubled quantity changes only one token.
+  correct: 1
+  explanation: >-
+    The candidate already contained every reference token, so there was no recall left for the padding
+    to buy. What moved was precision, 0.894 to 0.633, and the F-measure fell from 0.922 to 0.755 only
+    because precision was in the room — a coverage metric alone would have reported no change at all.
+
+- id: q7
+  question: >-
+    A numeric field has reference 45 and the system writes 50. A relative tolerance of 5% fails it; an
+    absolute tolerance of 5 passes it. Which choice is defensible for a cooking time?
+  options:
+    - >-
+      Relative 5%, because five minutes on a 45-minute bake is nearly a tenth of the dish and should
+      be treated as a defect.
+    - >-
+      Either, provided the choice is recorded next to the field so the next person knows which was
+      meant.
+    - >-
+      Neither, because the unit should be fixed first — once both values are minutes, a five-minute gap
+      is a judgement call rather than a metric question.
+    - >-
+      Absolute 5, because a relative tolerance scales with the magnitude of the reference rather than
+      with the consequence of being wrong.
+  correct: 3
+  explanation: >-
+    A relative tolerance divides by the reference's magnitude, so it is harshest exactly where being
+    wrong is cheapest: it also rejects twelve minutes on a ten-hour prep. The tolerance is a decision
+    about consequence, made per field rather than once as a constant.
+
+- id: q8
+  question: >-
+    "Is this step clear to a beginner?" and "Is this recipe good for a dinner party?" both have no
+    deciding rule. What separates them?
+  options:
+    - >-
+      The first is a better candidate for a judge, since it concerns a single document rather than a
+      whole recipe.
+    - The first is cheaper to check, since clarity can be scored per sentence and suitability cannot.
+    - >-
+      People agree often enough on the first to give a judge a target to be measured against, while
+      on the second the labels disagree and any average is mush.
+    - Both belong with humans, since neither has a rule, and judges are only for factual accuracy.
+  correct: 2
+  explanation: >-
+    Undecidable by rule is not the same question as contested between people. The judge rung requires
+    that humans already agree often enough for the target to exist; where they do not, a judge can only
+    average its own labels, and the disagreement is itself the finding you need to keep.
+
+- id: q9
+  question: >-
+    Someone writes `/\b(step|then|next)\b/` as the check for "is this step clear to a beginner?" and it
+    scores 100.0% on every system. What does that tell you?
+  options:
+    - The regex is too permissive, so tightening it until it fails will make the check meaningful.
+    - >-
+      The category is decidable after all, and the regex simply needs the other clear-writing signals
+      added.
+    - >-
+      No rule decides this category, so the check passes everything and cannot gate anything despite
+      carrying a real category's name.
+    - The sample is wrong, because a genuine check should reject some of the unparseable outputs too.
+  correct: 2
+  explanation: >-
+    A code check on an undecidable category is not a cheap judge, it is a gate wired to nothing — and
+    it is more believable than the honest alternative because it carries a real failure category's
+    name. The category needs a judge validated against humans, or it needs no automated check at all.
+
+- id: q10
+  question: >-
+    Five real failures arrive after your taxonomy and eval suite shipped. You classify all five before
+    writing any check for them, and three match no existing row. What does that establish?
+  options:
+    - The taxonomy is stale and should be rebuilt from scratch around the five new failures.
+    - The three unmatched failures are outliers, and five is too small a sample to change a taxonomy.
+    - >-
+      A failure class your eval cannot currently see, found without the eval — so it goes in the
+      taxonomy first.
+    - The eval suite is underpowered, so the fix is a larger sample rather than new failure rows.
+  correct: 2
+  explanation: >-
+    Classifying before checking is the discipline: a check written after a failure is a check written
+    to pass it, which is how a suite's pass rate climbs every time something goes wrong. Matching the
+    five against the taxonomy is the held-out test of whether the taxonomy is still the thing you are
+    measuring.

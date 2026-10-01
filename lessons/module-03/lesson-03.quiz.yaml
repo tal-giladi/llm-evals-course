@@ -1,0 +1,97 @@
+- id: q1
+  question: >-
+    You corrupt an answer: the first ingredient's quantity is doubled and two sentences of confident
+    filler are appended. ROUGE-L recall reads 0.974 before and 0.974 after. What does that tell you?
+  options:
+    - The metric failed to notice the change, because recall only measures content that appears in
+      the reference.
+    - Recall is a noisy statistic, so the run needs to be repeated until the two numbers separate.
+    - >-
+      The coverage half is saturated — every reference token was already present — so it cannot
+      register content being wrong, only content being missing.
+    - The corruption was too small to measure, since a doubled quantity changes only one token.
+  correct: 2
+  explanation: >-
+    The candidate already contained every reference token, so there was no recall left for the padding
+    to buy. What moved was precision, 0.894 to 0.633, and the F-measure fell from 0.922 to 0.755 only
+    because precision was in the room — a coverage metric alone would have reported no change at all.
+
+- id: q2
+  question: >-
+    At a threshold of 0.90, ROUGE-L passes 15 of 20 outputs on variant C. Which of those passes should
+    worry you most, and why?
+  options:
+    - The five that score between 0.90 and 0.95, because scores near a threshold are the least
+      reliable.
+    - >-
+      The four outputs that are not valid JSON at all, scoring 0.967 to 0.975, because overlap
+      rewards resemblance and refuses to notice that a parser rejects them.
+    - The fifteen that pass, because 15 of 20 means the system is roughly 25% broken and must be
+      rolled back.
+    - None of them, because ROUGE-L is a standard metric and a standard metric at a standard threshold
+      is defensible.
+  correct: 1
+  explanation: >-
+    `r01`, `r03`, `r07` and `r08` each score above 0.96 while `JSON.parse` refuses them, and they
+    pass at 0.90 and again at 0.95. That is the metric measuring resemblance rather than validity, and
+    it is why an overlap figure never gates a release on its own.
+
+- id: q3
+  question: >-
+    Token F1 and ROUGE-L both read 0.922 on the same twenty outputs. What is the honest conclusion?
+  options:
+    - >-
+      On these items the surplus tokens sit outside the reference's subsequence, so the bag and the
+      sequence agree and you have one opinion, not two.
+    - Two independent metrics agreeing at three decimals means the result is well confirmed.
+    - One of the two implementations is misconfigured, since a full agreement this close is
+      statistically implausible.
+    - F1 is the correct choice for extraction and ROUGE-L is the correct choice for summarisation, so
+      the tie confirms both.
+  correct: 0
+  explanation: >-
+    Adding a second overlap metric is a way of looking thorough without buying evidence. Here they are
+    identical on every individual item, because the extra tokens appear outside the reference's
+    longest common subsequence and so do not change either the bag overlap or the sequence overlap.
+
+- id: q4
+  question: >-
+    A recipe field has reference 45 and the system writes 50. A relative tolerance of 5% fails it; an
+    absolute tolerance of 5 passes it. Which choice is defensible for a cooking time?
+  options:
+    - >-
+      Relative 5%, because five minutes on a 45-minute bake is nearly a tenth of the dish and
+      should be treated as a defect.
+    - Either, provided the choice is recorded next to the field so the next person knows which was
+      meant.
+    - >-
+      Neither, because the unit should be fixed first — once both values are minutes, a five-minute
+      gap is a judgement call about the dish rather than a metric question.
+    - >-
+      Absolute 5, because a relative tolerance scales with the magnitude of the reference rather than
+      with the consequence of being wrong.
+  correct: 3
+  explanation: >-
+    A relative tolerance divides by the reference's magnitude, so it is harshest exactly where being
+    wrong is cheapest: it also rejects twelve minutes on a ten-hour prep. The tolerance is a decision
+    about consequence, and it is made per field rather than once as a constant.
+
+- id: q5
+  question: >-
+    The numeric check reports 0.0% on every tolerance from 0.001 to 0.2, relative and absolute, on
+    all three systems — including one that is exactly right twenty times out of twenty. What is going
+    on?
+  options:
+    - The systems are all failing on their numeric fields, so the check has found a shared defect.
+    - The tolerance range is too wide to be meaningful, and a tighter range would produce real
+      variation.
+    - >-
+      The check calls `Number()` on a whole JSON object, gets `NaN`, and returns 0 before comparing
+      anything.
+    - The sample is too small, since a 0% rate on twenty items cannot be trusted at any tolerance.
+  correct: 2
+  explanation: >-
+    `Number()` of a JSON string is `NaN`, `Number.isFinite(NaN)` is false, and the function returns 0
+    on every item — so the knob moves and the number does not. A metric that measures nothing looks
+    exactly like a metric that works, and the only way to tell them apart is to read what the check
+    compares.

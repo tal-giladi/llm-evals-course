@@ -11,8 +11,9 @@
     - >-
       Validity is fully decidable, so `JSON.parse` answers the same question for free, instantly and
       with a reason.
-    - The dashboard would need human labels anyway, since only a person can confirm a JSON object is
-    right.
+    - >-
+      The dashboard would need human labels anyway, since only a person can confirm a JSON object is
+      right.
   correct: 2
   explanation: >-
     The rule is to reach for the cheapest thing that can decide, and here something can decide. The
@@ -24,7 +25,7 @@
   question: >-
     A check reads 100.0% on a system that is exactly right 20 times out of 20, and 100.0% on a
     system that is exactly right 6 times out of 20. What does that pair of numbers tell you?
-  options: >-
+  options:
     - Nothing about either system: the check gives them the same number, so it cannot separate them.
     - The first system is better, because a perfect score is stronger evidence than a partial one.
     - The check is correct and conservative, since it rejected nothing and so admitted no false alarm.
@@ -40,7 +41,7 @@
   question: >-
     On 20 items, a check passes 16. You know that 6 items are truly correct. Reading the check against
     that truth, what can you conclude?
-  options: >-
+  options:
     - 16 of 20 pass, and the interval on that rate is the only thing still worth arguing about.
     - >-
       The check passes at least 10 items that are wrong, so it catches no more than 4 of the 14 real
@@ -57,16 +58,18 @@
   question: >-
     A code check in your suite is failing on every item, including items you know are correct. What
     should you do before treating that as a system regression?
-  options: >-
-    Read what the check actually compares, because a check that never ran and a check that caught a
-    real regression look identical on the scoreboard.
+  options:
     - >-
       Compare the failing output with a reference by hand, to confirm the check is wrong before
       trusting its verdict.
     - Raise the threshold or loosen the pattern until the pass rate looks like its previous value.
-    - Re-run on a larger sample, since a check failing on everything usually means the sample is
+    - >-
+      Re-run on a larger sample, since a check failing on everything usually means the sample is
       unrepresentative.
-  correct: 0
+    - >-
+      Read what the check actually compares, because a check that never ran and a check that caught a
+      real regression look identical on the scoreboard.
+  correct: 3
   explanation: >-
     The lab's numeric metric reads 0.0% on all three variants including the one that is exactly right
     every time, because it calls `Number()` on a whole JSON object and gets `NaN`. That 0% carries no

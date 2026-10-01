@@ -1,0 +1,101 @@
+- id: q1
+  question: >-
+    Your taxonomy has nine rows. For each you must record the check kind and a reason a reviewer could
+    disagree with. What is the strongest reason to insist on the reason column?
+  options:
+    - >-
+      It makes the eval suite auditable, so a later reviewer can tell whether the check still matches
+      the category it was written for.
+    - >-
+      It prevents checks from being added for failures as they happen, which is what drives the pass
+      rate up after a regression.
+    - >-
+      It lets a new team member rebuild the suite from the taxonomy without reading any of the
+      checks' source.
+    - >-
+      It is required before a suite can be wired into a CI pipeline, since the pipeline needs a
+      decision record per job.
+  correct: 0
+  explanation: >-
+    A check's reason is what makes its assignment reviewable months later, when someone asks why this
+    category is judged rather than checked. Without it, a lenient check gets simplified by the next
+    person who does not know why it was written that way, and the suite quietly stops describing the
+    system.
+
+- id: q2
+  question: >-
+    A team replaces its JSON parse check with an LLM judge asked "is this valid JSON?", because the
+    judge is more forgiving of formatting. What is the strongest objection?
+  options:
+    - A judge cannot be validated, since judge accuracy can only be measured against other judges.
+    - >-
+      Forgiving formatting is the wrong goal, because the downstream importer requires strict JSON to
+      function.
+    - >-
+      Model judges are known to under-report parse errors, so the check would fire far too often in
+      the first week.
+    - >-
+      Validity is decidable, so a judge here is slower, costlier, non-reproducible, and unvalidated
+      against the parser it stands in for.
+  correct: 3
+  explanation: >-
+    This is the first rung of the ladder applied in the wrong direction: one right answer, known in
+    advance, means code decides it for free and names the defect. The judge version costs about
+    $1.5176 per forty-item run, answers differently on a re-run, and has never been compared with a
+    parser.
+
+- id: q3
+  question: >-
+    Someone writes `/\b(step|then|next)\b/` as the check for "is this step clear to a beginner?" and
+    it scores 100.0% on every system. What does that tell you?
+  options:
+    - The regex is too permissive, so tightening it until it fails will make the check meaningful.
+    - >-
+      No rule decides this category, so the check passes everything and cannot gate anything despite
+      carrying a real category's name.
+    - >-
+      The category is decidable after all, and the regex simply needs the other clear-writing signals
+      added.
+    - The sample is wrong, because a genuine check should reject some of the unparseable outputs too.
+  correct: 1
+  explanation: >-
+    A code check on an undecidable category is not a cheap judge, it is a gate wired to nothing — and
+    it is more believable than the honest alternative because it carries a real failure category's
+    name. The category needs a judge, validated against humans, or it needs no automated check at all.
+
+- id: q4
+  question: >-
+    "Is this step clear to a beginner?" and "Is this recipe good for a dinner party?" both have no
+    deciding rule. What separates them?
+  options:
+    - >-
+      The first is a better candidate for a judge, since it concerns a single document rather than a
+      whole recipe.
+    - The first is cheaper to check, since clarity can be scored per sentence and suitability cannot.
+    - >-
+      People agree often enough on the first to give a judge a target to be measured against, while
+      on the second the labels disagree with each other and any average is mush.
+    - Both belong with humans, since neither has a rule, and judges are only for factual accuracy.
+  correct: 2
+  explanation: >-
+    Undecidable by rule is not the same question as contested between people. The judge rung requires
+    that humans already agree often enough for the target to exist; where they do not, a judge can only
+    average its own labels, and the disagreement is the finding you need to keep.
+
+- id: q5
+  question: >-
+    Five real failures arrive after your taxonomy and eval suite shipped. You classify all five before
+    writing any check for them, and three match no existing row. What does that establish?
+  options:
+    - The taxonomy is stale and should be rebuilt from scratch around the five new failures.
+    - The three unmatched failures are outliers, and five is too small a sample to change a taxonomy.
+    - The eval suite is underpowered, so the fix is a larger sample rather than new failure rows.
+    - >-
+      A class of failure your eval cannot see, found without the eval — so it belongs in the
+      taxonomy first.
+  correct: 3
+  explanation: >-
+    Classifying before checking is the discipline: a check written after a failure is a check written
+    to pass it, which is how the suite's pass rate climbs every time something goes wrong. Matching
+    the five against the taxonomy is the held-out test of whether the taxonomy is still the thing you
+    are measuring.

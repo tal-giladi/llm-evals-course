@@ -1,0 +1,74 @@
+- id: q1
+  question: >-
+    Your tracing tool can filter to "sessions where the user pressed thumbs down". You read 11 such
+    traces and 6 of the 11 answers are labelled correct by the reviewers. What has the batch measured?
+  options:
+    - The rate of bad answers, because a user who is annoyed has been shown a bad answer.
+    - How often users disagree with the answer they got, which is a different event from being wrong.
+    - Nothing useful at all, because a reviewer's label on a correct answer must itself be wrong.
+    - The severity of the failures, since an annoyed user makes every failure more severe.
+  correct: 1
+  explanation: >-
+    Being annoyed and being wrong are separate measurements, and 6 of 11 correct answers is what a
+    complaint filter looks like when it does not measure complaints. A batch selected by the user tells
+    you about expectations, which is worth knowing and is not a row in a failure taxonomy.
+
+- id: q2
+  question: >-
+    You sample 27 traces filtered to "has a span error". All 27 carry the same chip on the same span and
+    your taxonomy gets one row at 100%. Which statement about that batch is defensible?
+  options:
+    - It is the highest-quality batch available, because every item in it is a confirmed failure.
+    - It is the cheapest batch to code, because a homogeneous sample needs fewer categories.
+    - It is a sample of what your post-check detects, and it says nothing about the other traces.
+    - It is the batch to ship a taxonomy from, since one category means one fix to build.
+  correct: 2
+  explanation: >-
+    Filtering on the check you already trust selects on that check's detection set: here the 27 traces
+    are exactly the 27 uncited answers, and the 67 traces where the post-check stayed quiet — wrong
+    facts, refusals, invented policies — cannot appear in it at all.
+
+- id: q3
+  question: >-
+    The rarest and most damaging failure in your set is 2 items out of 94. You plan to read 30 random
+    traces and stop. What is the chance your 30 contain at least one of them?
+  options:
+    - About 54%, so the number is roughly a coin flip and the plan needs a deliberate slice.
+    - About 96%, since 30 of 94 covers almost a third of the set.
+    - Exactly zero, because a random batch cannot pick out items at the tail.
+    - About 38%, which is the figure for a random batch of 20 and is close enough at 30.
+  correct: 0
+  explanation: >-
+    Drawing 30 of 94 without replacement, the chance of missing both is about 0.46, so you see one a
+    little over half the time. To see both you have to read all 94, because there are only two — which is
+    why coverage of rare critical classes is a deliberate slice and not something a quota buys.
+
+- id: q4
+  question: >-
+    You read 20 random traces and 5 carry the error chip, which you report as a 25.0% failure rate. The
+    rate across all 94 traces is 28.7%. What does the Wilson interval on your 20 add to that number?
+  options:
+    - It confirms 25.0%, since the point estimate and the full-set rate are within three points.
+    - It is not needed here, because the full-set rate is already known and settles the question.
+    - It gives 25.0% as 20.6%–28.6%, which is narrow enough to compare two systems with.
+    - It gives 25.0% as 11.2%–46.9%, so 5% and 47% are both consistent with what you read.
+  correct: 3
+  explanation: >-
+    Twenty traces cannot resolve a rate anywhere near that width, so the estimate landing near the true
+    value is luck rather than precision. A number that could have come from 5% is not a number you can
+    decide a release or a comparison on.
+
+- id: q5
+  question: >-
+    You have one afternoon a week for error analysis on a system you do not yet understand. What do you
+    do with it?
+  options:
+    - Read whatever traces the users complained about, since complaints are the cheapest signal to find.
+    - Read the traces your existing checks flagged, since those are the ones you already trust.
+    - Read a random batch first, then add slices for the rare classes that a random batch will miss.
+    - Read one section until nothing new appears in it, since depth on one area beats breadth.
+  correct: 2
+  explanation: >-
+    Random is the only strategy that conditions on nothing you already believe, so it is the spine.
+    Slices then buy the coverage a random batch cannot: rare critical classes need to be looked for,
+    and the strategy behind every row belongs on the sheet next to the count.

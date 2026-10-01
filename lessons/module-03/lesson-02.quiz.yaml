@@ -1,0 +1,82 @@
+- id: q1
+  question: >-
+    Your extraction system is told "output JSON" and a model wraps most answers in a markdown code
+    fence. A raw string comparison reports 4 of 20; comparing the parsed objects reports 15 of 20.
+    Which statement about those two numbers is defensible?
+  options:
+    - >-
+      Both are correct measurements, and the 11-item gap is the size of the model's formatting defect.
+    - The raw comparison is right, because downstream code receives the string and not the object.
+    - >-
+      The parsed comparison is right, because once an object parses its wrapper can no longer affect
+      the result.
+    - >-
+      The gap is entirely a parsing decision, so the team must write down whether a fence counts as a
+      failure before either number can be read.
+  correct: 3
+  explanation: >-
+    The eleven items are identical strings in both runs; only the decision about unwrapping changed.
+    Both numbers are defensible products, but a parser's leniency is a choice the team made rather
+    than a fact about the system, and it belongs in the criterion instead of buried in the evaluator.
+
+- id: q2
+  question: >-
+    A regex check is anchored as `^\s*[\{\[]` and reads 20 of 20 on your best system and 15 of 20 on
+    your worst. The team then removes the anchor so the pattern is just `\{`. What happens?
+  options:
+    - >-
+      The check becomes stricter, because without the anchor it matches the character at every
+      position rather than only the first.
+    - >-
+      The check passes everything, since every output contains a brace somewhere and only the anchor
+      was making it selective.
+    - >-
+      The check fails to compile, because a brace is a special character in a regular expression.
+    - >-
+      The check reads the same numbers, since anchors only affect which match is reported, not whether
+      one is found.
+  correct: 1
+  explanation: >-
+    An unanchored pattern is a search rather than a shape test, so it passes on all three variants
+    including the one emitting invalid JSON on four items. That is a check that cannot fail, and on a
+    dashboard it is indistinguishable from a system that is genuinely perfect.
+
+- id: q3
+  question: >-
+    The schema check reports 100.0% on a system whose parsed objects differ from the reference on 5 of
+    20 items. What is the strongest correct reading?
+  options:
+    - The 5 items must also fail the schema, since a schema check validates the whole object.
+    - >-
+      The reference objects must be wrong, because a passing schema is stronger evidence than a
+      comparison.
+    - >-
+      The schema tests whether the object is legal, not whether it is right, so a clean sheet here is
+      a floor and not a verdict.
+    - >-
+      The check needs a second pass that compares parsed objects, because shape legality and content
+      correctness are separate questions.
+  correct: 2
+  explanation: >-
+    Deleting a whole ingredient from an object still leaves a legal array under `minItems: 1`, so the
+    validator prints nothing. Schema, parse and content are three different questions, and on this
+    dataset the first two pass at 100% while a fifth of the answers are wrong.
+
+- id: q4
+  question: >-
+    Four outputs fail your parse check with `Expected ',' or ']' after array element`. You repair one by
+    hand and the schema check then reports `unexpected "notes"`. What should your suite do?
+  options:
+    - >-
+      Keep both layers and report them separately, because the first failure is a format bug and the
+      second is a content bug no single check would have named.
+    - Keep only the schema check, since it subsumes parsing and reports the more useful field name.
+    - >-
+      Relax the parse check to a lenient recovery, since a field the reference does not have is
+      harmless downstream.
+    - Merge both into one pass/fail boolean, so the scoreboard shows one number instead of two.
+  correct: 0
+  explanation: >-
+    The two layers catch two different bugs in the same output: a missing closing bracket and an
+    unrequested field. A lenient parser or a merged boolean hides exactly that, and one pass/fail
+    number cannot say whether the failure was formatting or content.

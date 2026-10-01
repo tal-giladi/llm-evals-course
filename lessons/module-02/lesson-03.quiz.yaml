@@ -1,0 +1,74 @@
+- id: q1
+  question: >-
+    You read 20 traces, tag them, and the largest row is `no_citation` with 6 of the 20. The sheet looks
+    finished. What turns this table into a plan?
+  options:
+    - Write a severity and an effort next to each row and rank on `share × severity ÷ effort`.
+    - Read 20 more traces, because a count is only trustworthy once it has been doubled.
+    - Drop every row you cannot attach a check to today, then re-rank whatever is left.
+    - Report the largest row as the team's headline metric, so the whole product can watch it move.
+  correct: 0
+  explanation: >-
+    A count says how often something happens and nothing about what it costs, so on its own it cannot
+    choose. Scoring severity and effort turns those two opinions into a column somebody can argue with,
+    and the argument is where the useful part of the review happens.
+
+- id: q2
+  question: >-
+    Across 94 items and three systems, `no_citation` is 78 answers and `extra` is 27. The tuned system
+    on its own produces 27 `no_citation` answers and none at all in the `extra` row. What follows?
+  options:
+    - The `extra` row is a coding mistake, because a real category has to appear in every system.
+    - The `extra` row is smaller than `no_citation`, so it is the cheaper fix and should go first.
+    - The pooled count of 78 is the one to quote, since pooling removes system-specific noise.
+    - The `extra` row describes the weaker systems, not the tuned one, so count your own system.
+  correct: 3
+  explanation: >-
+    A taxonomy describes the systems it was coded from. Counting per system is what shows that
+    `wrong_fact` is 12 of the tuned system's 47 failures but 29 of the small model's 86 — the same name,
+    more than twice the share, on a system whose fix is not a prompt edit.
+
+- id: q3
+  question: >-
+    Your counts table shows shares of 31%, 27%, 22% and 38%, and they add to 118%. What does the
+    arithmetic tell you about your sheet?
+  options:
+    - Nothing is wrong; the extra 18 points come from rounding every share to a whole number.
+    - The shares are computed wrongly, so re-run the count before the table goes in a review.
+    - The four rows overlap, because several traces carry more than one tag and share is of traces read.
+    - The four rows cannot both be real, because a taxonomy with genuine categories never overlaps.
+  correct: 2
+  explanation: >-
+    Share is the tag count divided by traces read, and one trace may carry several tags. Overlap is
+    allowed by the tagging panel, so the rule about what to do with an answer that fails twice belongs
+    written on the sheet rather than remembered by whoever reads it next.
+
+- id: q4
+  question: >-
+    You merge `over_refusal` and `out_of_scope` into one row called "the bot ignores the user". Which
+    sentence belongs in the plan?
+  options:
+    - Both failures are the same behaviour, so one fix should be able to remove both rows at once.
+    - The merged row is fine, as long as its sentence names both counts inside the parentheses.
+    - Split it, but only for the rows that fall below 10% of the answers you read.
+    - Split it and keep the counts separate, because the two rows need different fixes.
+  correct: 3
+  explanation: >-
+    One of those rows is a bot declining to answer a covered policy; the other is a bot stating a
+    company salary as fact. Merged, they become a row that no single change can move, which is the merge
+    you unpick again the first time the number does not move.
+
+- id: q5
+  question: >-
+    A row's check would have to be "does the answer read as helpful and on-topic". What does that tell
+    you about the row?
+  options:
+    - Nothing; every category needs a check, and a vague one is better than no row at all.
+    - The row is real and only the check is unfinished, so keep the count and find a judge later.
+    - The row is not ready to be planned, because its criterion cannot be written as a rule.
+    - The row should be split further until each part has a rule, however small the parts get.
+  correct: 2
+  explanation: >-
+    The count is the part of the taxonomy you can trust; the check is the part that decides whether the
+    row gets engineering time. A criterion two people cannot apply the same way produces a pass rate
+    nobody can argue about later, which is the problem module 1 opens with.

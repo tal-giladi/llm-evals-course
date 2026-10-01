@@ -1,0 +1,75 @@
+- id: q1
+  question: >-
+    A trace shows `error: answer contained no handbook citation` on the check span, a `chat` span of 72
+    output tokens, and a thumbs-up from the user. Which note is the open code this lab is asking for?
+  options:
+    - "The tag `no_citation`, because the check span already said so on its own."
+    - "This bot invents vendor policy whenever nobody gives it a source to cite."
+    - "Tighten the prompt so answers cite their source more often than this one did."
+    - "The user was satisfied and the check still failed it; the rule's truth is not visible here."
+  correct: 3
+  explanation: >-
+    The strong version names what the trace shows and where its knowledge stops. The other three are a
+    label, a conclusion you have already decided, and a fix — and a note carrying its own remedy is a
+    decision made before you have two more examples of the same thing.
+
+- id: q2
+  question: >-
+    Your team labels traces against a list from a meeting six weeks ago: wrong answer, too slow, wrong
+    tone. 27 of the 47 failures are right but uncited. What should you predict next?
+  options:
+    - The factual-accuracy judge you build next shows almost no movement, because those answers were right.
+    - The labelling slows down, because an uncited answer takes longer for a human to judge.
+    - The pass rate falls sharply, since uncited answers fail the stated success criterion.
+    - The taxonomy survives, because the nearest box is still a true description of the failure.
+  correct: 0
+  explanation: >-
+    27 correct-but-uncited answers all recorded as "wrong answer" produces a judge for factual accuracy
+    whose pass rate cannot move. The real cost is that the refusals and the invented policies now share
+    a row with answers that were never factually wrong, so nobody can see them separately again.
+
+- id: q3
+  question: >-
+    You read 20 traces in a batch, skip 8 of them before tagging, and tag the other 12. The Progress
+    panel reports "20 traces read". What has that done to your numbers?
+  options:
+    - Nothing; skipped traces are removed from the denominator in the counts table.
+    - Every share rises, because fewer tags are competing for the same traces.
+    - The distinct-failure-mode count rises, since skipping is what surfaces new categories.
+    - Shares fall without the trace count falling, so the taxonomy reads smaller and tidier than it is.
+  correct: 3
+  explanation: >-
+    Both buttons advance the batch and add the trace to your denominator, so skipping lowers every
+    share in the counts table while leaving "20 traces read" in place. A taxonomy built by skipping
+    looks more confident than one built by reading, and it is less true.
+
+- id: q4
+  question: >-
+    Shipped labels say 47 of 94 answers failed; the traces carry exactly one failure signal, on 27 of
+    them. What does that gap mean for the notes you are writing?
+  options:
+    - One of the two numbers is wrong, and the labels should be re-checked before you trust either.
+    - At least 20 failures cannot be named from the trace at all, so a note ending in "nothing here can
+      tell me" is the honest one.
+    - The remaining 20 should be tagged `no_citation` too, so that the counts add up to the labels.
+    - It means notes are only worth writing on the traces where the post-check fired.
+  correct: 1
+  explanation: >-
+    Wrong facts, refusals and invented policies all pass a clean post-check, and no span field separates
+    them from a good answer. An open note records what you can see, and the limit of that is part of the
+    note — which is the argument for going and reading the actual answers before you label them.
+
+- id: q5
+  question: >-
+    You tick `no_citation` on five traces before writing anything, then read them with the box already
+    ticked. The panel reports "1 distinct failure mode" after 5 traces. What has gone wrong?
+  options:
+    - Nothing unusual; one category over five similar traces is an ordinary finding.
+    - The batch was too small, since five traces cannot produce more than two categories.
+    - You labelled before reading, so each observation went into the nearest expected box.
+    - The panel needs a note on every trace before it will count a category as discovered.
+  correct: 2
+  explanation: >-
+    A label applied before reading is a filter that deletes evidence: everything you did not expect is
+    recorded as the nearest thing you did. The panel still reads like success, because a taxonomy with
+    one category is always tidy — and it is exactly the tidy table you would have got anyway.

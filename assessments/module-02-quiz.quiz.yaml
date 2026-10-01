@@ -1,0 +1,154 @@
+- id: q1
+  question: >-
+    A support bot's trace shows an `execute_tool` span named `retrieve_handbook` that ran for 39 ms,
+    with no other attributes recorded, and a `chat` span after it. A user reports the answer is wrong.
+    What is the cheapest change that would let you tell whether retrieval is the cause?
+  options:
+    - The retrieval step ran; the trace does not record what it came back with, so the cause is invisible here.
+    - Add a result count and the section id to that span, so the next batch carries the evidence.
+    - Re-run the batch with retrieval disabled and compare the two answers word for word.
+    - Compare the 39 ms against the model's 691 ms, since the gap is where the section is chosen.
+  correct: 1
+  explanation: >-
+    A span with a duration and no payload proves the step ran and nothing about its result, so the fix is
+    to record the payload on the span. Reading harder cannot reach a field the trace never exported.
+
+- id: q2
+  question: >-
+    The lab's post-check fires on 27 of 94 traces. You propose a release gate that fails a build when any
+    trace carries that error chip. Handed labels say 47 of 94 answers genuinely failed. What is the gate
+    measuring?
+  options:
+    - A fair gate, because 27 of 94 traces is 28.7% of traffic and that is above any sane threshold.
+    - A gate that is too strict for this product, and the threshold should be relaxed to 10% first.
+    - How often the post-check fires, which is a property of the check rather than of the answers.
+    - The 20 failures the check was never written for: wrong facts, refusals and invented policies.
+  correct: 3
+  explanation: >-
+    A check that tests one property is an alarm for that property. This one flagged 27 of the 47 failures
+    and stayed silent on the other 20, so shipping it as a gate waves through exactly the failures a
+    support user is most likely to ring about.
+
+- id: q3
+  question: >-
+    You have an hour and 20 traces, and a colleague hands you a four-row taxonomy from last quarter.
+    What produces the artefact your team will still be able to argue with in six months?
+  options:
+    - A note in your own words on each trace, with the row you applied and the evidence for it.
+    - The finished four-row taxonomy, because last quarter's rows are agreed and hard to reopen.
+    - A list of the traces you read to the end, since that is the part a summary always drops.
+    - A summary paragraph describing what the bot gets wrong, which is what the review asks for.
+  correct: 0
+  explanation: >-
+    The note is the only artefact that carries its evidence, so a reader can re-check a claim against the
+    trace without trusting the person who wrote it. A taxonomy without notes is a list of opinions that
+    happened to be counted.
+
+- id: q4
+  question: >-
+    One of your notes reads: the user pressed thumbs down, nothing in the pipeline complained, so tighten
+    the prompt. Which property of an open code does that note fail?
+  options:
+    - It names no span, so a stranger could not check the claim against the trace.
+    - It records two observations in one note, so neither one can be verified later.
+    - It carries its own remedy, which makes it a decision rather than an observation.
+    - It relies on the user's reaction, which is a signal and not an observation of the failure.
+  correct: 2
+  explanation: >-
+    A note that says what to do has stopped recording what happened, and the remedy will quietly shape
+    what you see in the next ten traces. The repair is to delete the last three words and state what the
+    trace showed and what it could not.
+
+- id: q5
+  question: >-
+    You read 20 traces, skipped 8 without tagging them, and tagged 12. Your biggest row holds 5 traces and
+    the panel reports "20 traces read". Which number belongs in the review?
+  options:
+    - 5 of the 20 you read — 25% — with the eight skipped traces reported as skipped.
+    - 5 of the 12 you tagged, because the eight you skipped were failures you had not looked at.
+    - 5 of the 20 you read, but only once the skipped traces leave the denominator entirely.
+    - 5 of the 12 you tagged, since only tagged traces are evidence about how a system fails.
+  correct: 0
+  explanation: >-
+    Skip advances the batch and adds the trace to your denominator, so the share the panel shows is
+    against all 20. Quoting the smaller denominator makes an unfinished analysis look like a sharper one,
+    which is the opposite of what a count is for.
+
+- id: q6
+  question: >-
+    Across 282 answers your taxonomy reads: `no_citation` 78, `wrong_fact` 60, `extra` 27, `over_refusal`
+    22, `out_of_scope` 14. The team plans to work down the rows by count. Which sentence should replace
+    that plan?
+  options:
+    - Fix `no_citation` first, since 27.7% of answers is more than a quarter of everything we serve.
+    - Fix `out_of_scope` first, because inventing policy is the only failure a user cannot detect.
+    - Fix `extra` next, since 27 answers is more than the 14 the policy row would return.
+    - Score every row on share, severity and cost to fix, and work down that ranking instead.
+  correct: 3
+  explanation: >-
+    A count says how often something happens and nothing about what it costs, so on its own it cannot
+    choose. Ranking on all three inputs moves the harmless row last and lifts the small critical one,
+    and it does so in a column the team can argue with.
+
+- id: q7
+  question: >-
+    `wrong_fact` is 12 of the tuned system's 47 failures and 29 of the small model's 86 — the same
+    category name, 25% of one system's failures and 34% of another's. You own the tuned system. What
+    does the difference change?
+  options:
+    - Nothing; a category is a category, and its count is the count wherever it is counted.
+    - The cost of the row depends on the system, so a prompt fix on one is not a fix for the other.
+    - The category is miscoded, since one name cannot cover 25% and 34% of the problem.
+    - You should recount before quoting anything, because two shares for one row is a data error.
+  correct: 1
+  explanation: >-
+    A pooled count tells you how often a failure exists in a world where you also run two deliberately
+    worse systems. What you fix, and what it costs, is a property of your system, which is why the
+    taxonomy has to be counted per system.
+
+- id: q8
+  question: >-
+    You can sample traces three ways: random, only traces with a span error, only thumbs down. The pools
+    hold 94, 27 and 11; the error pool is entirely one failure class, and 6 of the 11 thumbs-down traces
+    are labelled correct. Which batch do you read first, and why?
+  options:
+    - The thumbs-down batch, because 11 traces is a batch one person can finish in a sitting.
+    - The error batch, because every trace in it is a confirmed failure and none of them is a guess.
+    - The random batch, because it is the only one that conditions on nothing you already believe.
+    - All three merged, because three batches of different shapes must add up to better coverage.
+  correct: 2
+  explanation: >-
+    The error filter conditions on the check you already trust and the complaint filter on the user's
+    mood; only a random batch is unbiased with respect to both. Slices then buy the coverage random
+    cannot, deliberately and on the record.
+
+- id: q9
+  question: >-
+    You stopped at 30 random traces with four rows and a largest row under 60%, and the lab's callout says
+    you can probably stop. The failure class you care most about is 2 items in 94 and you have not seen
+    it. What is the honest next step?
+  options:
+    - Ship the taxonomy, since 30 traces is the working figure and the stop rule has fired.
+    - Read 30 more random traces, which gives the rare class the same chance a second time.
+    - Drop that class from the taxonomy, because 2 items out of 94 is not a signal worth keeping.
+    - Read a slice chosen to contain that class, and record the strategy beside every row's count.
+  correct: 3
+  explanation: >-
+    Thirty random traces see one of those two items about 54% of the time, so the quota bought you a coin
+    flip rather than coverage. The callout measures the shape of your table, and coverage of the rare
+    class is something you go and look for.
+
+- id: q10
+  question: >-
+    A lab scoreboard reads 27.7% `no_citation` and a median of $0.0293 per answer. You want to quote this
+    in a work chat. Which sentence is defensible?
+  options:
+    - "`qwen3-0.6b` fails to cite its source on 27.7% of support answers, so we need a bigger model."
+    - "A recorded run of the course's error-analysis lab reads 27.7% uncited; the traces are modelled."
+    - "Support bots cite their sources only 72.3% of the time, which is why the citation prompt matters."
+    - "Our support bot loses 27.7% of its answers to missing citations, measured over 94 sessions."
+  correct: 1
+  explanation: >-
+    The traces are generated by a seeded model and the statistics are computed for real in your browser
+    from those records, which is what makes them worth studying and exactly why none of them is a
+    published measurement of a system in the wild.
