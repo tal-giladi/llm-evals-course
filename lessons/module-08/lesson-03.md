@@ -219,7 +219,7 @@ Then:
    an abstention instruction tend to trade one of these two columns for the other, and which one users
    complain about first?
 
-[Simulation: judge-lab](../../simulations/rag-evals/index.html?preset=abstain)
+[Simulation: rag-evals](../../simulations/rag-evals/index.html?preset=abstain)
 
 1. **Recount the tile by behaviour.** With the panel open on variant A, mark each of the three listed items as
    *declined* or *answered* using only the answer text. The tile says 0 answered anyway; your recount says 2.

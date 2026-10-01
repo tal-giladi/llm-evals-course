@@ -1,0 +1,215 @@
+- id: q1
+  question: >-
+    A user forwards a bot reply quoting a salary band the company does not publish. Your dashboard leads with
+    `context recall 94%`. On the module's corpus, retrieval returned something for 17 of 20 questions and
+    something relevant for 14. What is the useful conclusion?
+  options:
+    - >-
+      The 15-point gap is the difference between a candidate coming back and a relevant candidate coming
+        back, so the recall tile measures the retriever rather than the system the user is quoting.
+    - >-
+      Context precision should replace context recall on the dashboard, since precision is the only metric
+        that reflects what the model actually saw.
+    - >-
+      Neither rate matters until the answer-level rate exists, because a grounded judge scores the answer and
+        therefore already accounts for retrieval quality.
+    - >-
+      The 15 points are retrieval faults the judge should have caught, so the fix is a stricter grounding
+        prompt rather than a retrieval fix.
+  correct: 0
+  explanation: >-
+    A judge scores the answer, not the retriever, so it cannot recover a link that broke upstream. The two
+    drops are the same size and land on opposite sides of the model, which is why a single tile is never
+    enough. Replacing one retrieval number with another leaves the user's ticket unclassified either way.
+
+- id: q2
+  question: >-
+    Item g18 asks for the security incident reporting deadline, retrieval returned the password-rotation
+    passage, and the answer says `You must report an incident within 24 hours.` How do you label it?
+  options:
+    - >-
+      `ungrounded`, because the number appears in no supplied passage — which is the whole definition of the
+        label and the only thing the confusion matrix needs.
+    - >-
+      A retrieval miss first and then an answer fault, because no amount of grounding could have produced the
+        right deadline from a password-rotation chunk.
+    - >-
+      `over_refusal`, because a correct system would have declined rather than answered from an unrelated
+      passage.
+    - >-
+      `off_topic_drift`, because the answer addresses a different question from the one that was asked.
+  correct: 1
+  explanation: >-
+    Labelling it only `ungrounded` is true and routes the ticket to the wrong team: the passages never held
+    the answer, so the fix belongs in retrieval. The answer-side label still matters for the rate, which is why
+    the chain in the lesson slices the answer metric by retrieval outcome first — on a slice where retrieval
+    always worked, the grounded rate measures the generator.
+
+- id: q3
+  question: >-
+    Your system answers `I cannot help with that.` to a question whose retrieved passage answers it in six
+    words. A claim-level grounding judge splits the answer into zero claims and finds zero ungrounded claims.
+    What now?
+  options:
+    - >-
+      Accept the pass: zero ungrounded claims out of zero claims is a perfect grounding result for that answer.
+    - >-
+      Accept the pass, provided the ratio is written as `0/0` rather than as 100%, so the denominator stays
+      visible.
+    - >-
+      Route it to a separate over-refusal check, because zero claims is a routing signal and a refusal is
+        consistent with any passage set at every granularity.
+    - >-
+      Fail it at the split step, since a splitter that returns no claims has found nothing to grade and should
+        raise an error instead of a verdict.
+  correct: 2
+  explanation: >-
+    Claim granularity cannot express "refused something the passage answers" — the failure is that the answer
+    contains nothing traceable, which is vacuously consistent with everything. What the count buys is the
+    signal that this answer made no claim at all, and that is a routing decision for the abstention metric, not
+    a grade. The plain grounding judge scores the same item as grounded on four of its five recorded calls.
+
+- id: q4
+  question: >-
+    On variant B, `Qwen3 1.7B · Plain` reports 80.0% grounded with a TNR of 44.4%, and
+    `Prometheus 2 7B · Stepwise` reports 60.0% grounded with a TNR of 88.9%. Which number do you gate on, and
+    what does the pass-rate drop mean?
+  options:
+    - >-
+      The 60.0% grounded rate, because it is computed on the same twenty answers the gate is run on.
+    - >-
+      Neither, because 60.0%–95.0% and 40.0%–80.0% overlap, so no gate can be justified from twenty items.
+    - >-
+      The 88.9% TNR, but only as a floor, because TPR on the stepwise judge is 90.9% and it may be buying
+      TNR by failing good answers.
+    - >-
+      The 88.9% TNR, and the pass-rate drop is the judge getting better at catching real faults.
+  correct: 3
+  explanation: >-
+    A pass rate has no direction — the judge that passes everything tops it — so a falling pass rate beside a
+    rising TNR is what improvement looks like on a grounding metric. The overlapping intervals in the third
+    option are about the pass rate, which is the number not being gated on; 8 of 9 against 4 of 9 is a claim
+    about named items, which twenty items can support. The TPR floor is a real check, but 90.9% is not what
+    buys the TNR here.
+
+- id: q5
+  question: >-
+    Three questions returned no passages. Adding "if the passages do not answer it, say so" moves the
+    `Answered anyway` tile from 1 to 0 while the behavioural count still shows two fabricated answers. What
+    explains the gap?
+  options:
+    - >-
+      The tile counts items shipped under the `should_have_abstained` category, and the two remaining
+        fabrications are labelled `ungrounded`, so it measures the label rather than the behaviour.
+    - >-
+      The tile uses a stricter rule than the answers imply, and the two extra answers contain no verifiable
+        claim, so they do not count as having been answered.
+    - >-
+      The panel shows only the three zero-passage items and two of them share a question, so one answer is
+      counted twice in the tile.
+    - >-
+      The tile is right and the answers are misleading, because a passage count of 0 means the passages were
+        truncated for display rather than genuinely absent.
+  correct: 0
+  explanation: >-
+    The two readings are both true and they disagree, which is the point: a tile computed over a category will
+    go green when you relabel your data without the product changing. Counting behaviourally — an answer that
+    makes a claim no passage supports, and an answer that makes no claim at all — makes the tile and the traces
+    agree, and it needs no model to compute.
+
+- id: q6
+  question: >-
+    Your retriever is tuned never to return an empty array. Which of the two abstention failure modes does that
+    make impossible to detect, and which does it make more common?
+  options:
+    - >-
+      The over-refusal case, and it makes fabrication more common, because a model handed a passage will
+        usually use it.
+    - >-
+      The fabrication-on-nothing case, and it makes the case where a passage was returned but does not answer
+        the question far more common, since a low threshold always returns something plausible-looking.
+    - >-
+      Neither: a retriever that always returns something leaves both failure modes measurable on the same
+        items, since the abstention judge sees the same input either way.
+    - >-
+      Both, because an empty retrieval array is a signal the abstention judge can detect without reading the
+        passages, and a populated one removes the signal entirely.
+  correct: 1
+  explanation: >-
+    The threshold decides which population the empty-retrieval branch of the metric can ever fire on, and a
+    retriever tuned never to return nothing leaves that branch empty in production. The case it makes more
+    frequent is g16 — a crèche question answered from the parental-leave passage — which never appears on the
+    lab's abstention panel because it returned a passage. That is why unanswerable questions have to come from
+    query logs rather than from whatever your retriever rejects.
+
+- id: q7
+  question: >-
+    A grounding metric ranks variant B first at 80.0% grounded while variant A reads 75.0%. Variant B
+    fabricates on all three questions where retrieval returned nothing. Which sentence belongs in the write-up?
+  options:
+    - >-
+      Variant B leads on the metric and is therefore the better system, because the metric was validated
+        against human labels before it was adopted.
+    - >-
+      Variant A is the better system because its grounded rate is lower, and a lower grounded rate on the same
+        items always means a stricter and more honest system.
+    - >-
+      Variant B leads on the metric, but the metric's own TNR is 44.4%, so the ranking describes the metric's
+        leniency and cannot be used to choose between your systems until it clears its own gate.
+    - >-
+      The two rates are within the interval, so the systems are indistinguishable and the decision should go
+        to the one with the cheaper generation cost.
+  correct: 2
+  explanation: >-
+    The metric has not cleared its own validation: 4 of 9 real faults caught, against a 0.70 floor. Until it
+    does, the leaderboard it produces ranks how much each system resembles what the metric waves through. The
+    overlapping intervals in the last option are true and beside the point — the metric is being asked a
+    question it has already failed to answer reliably.
+
+- id: q8
+  question: >-
+    The lab's `Questions` knob reads 5 items, then 10, then 20. On variant B the plain metric's kappa goes
+    1.00, then 0.80, then 0.47, its TNR goes 100.0%, 80.0%, 44.4%, and its grounded rate goes 60.0%, 60.0%,
+    80.0%. What is the right reading?
+  options:
+    - >-
+      The metric is warming up over calls, so the later readings are the accurate ones and the early kappa
+      of 1.00 is a startup artefact.
+    - >-
+      The bootstrap interval widens with n, so kappa necessarily falls while agreement itself is unchanged,
+        which is why the runbook should report the pass rate instead.
+    - >-
+      The metric is degrading as the corpus grows, which is the run-to-run drift Module 7 measured, so the
+        correct setting is the one with the highest kappa.
+    - >-
+      The knob takes a prefix rather than a random draw, so the small readings describe a population without
+        the faults this metric misses; a subset chosen after seeing the numbers is not a sample.
+  correct: 3
+  explanation: >-
+    TNR falling and the pass rate rising are the same mechanism seen from two sides: the extra items are ones
+    where the metric waves through a real fault. A prefix is not a draw and not a random subset, so the small
+    reading is not a low-noise estimate of the large one — which is why the lesson validates on items 1–14 and
+    reads 15–20 once.
+
+- id: q9
+  question: >-
+    On items 1–14 a metric reads TNR 66.7% (4/6) and kappa 0.70. On items 15–20, read once, it reads TNR 0.0%
+    (0/3) and kappa 0.00. What can you write in the runbook?
+  options:
+    - >-
+      The metric has no value on new data, since a held-out TPR and kappa of zero is a measurement rather
+        than an absence of evidence.
+    - >-
+      The metric caught none of the three held-out faults — g15, g18 and g20 — and three failures is too small
+        a denominator to claim anything either way about the other metrics on the menu.
+    - >-
+      The metric overfits fourteen items, since its TNR fell 67 points on data it had never seen.
+    - >-
+      The held-out half is unrepresentative, since three human failures out of six items is an unusually high
+        failure rate for a RAG system in production.
+  correct: 1
+  explanation: >-
+    A named, item-level failure is a strong claim; a rate on three items is a weak one, and its interval runs
+    most of the scale. The defensible outcome is a rejection plus a shortlist rather than a ranking, and the
+    runbook should carry a "what you may claim" column next to the number so nobody later reports 0.00 as a
+    measurement instead of an absence of evidence.

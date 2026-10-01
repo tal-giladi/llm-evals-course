@@ -186,8 +186,8 @@ Confusion `tp 11, fp 5, fn 0, tn 4`. Then, in order:
    g20 — all false alarms. Under `g-strict` it reads *(1)* and names g15. Under `g-claim` it reads *(3)*:
    g07, g10, g17, where g17 is the one grounded answer it wrongly failed.
 5. **Do the claim ledger yourself on three items.** g01, g02 and g20 from the table above. Then set the
-   "Questions" knob to 5 and watch every judge read kappa 1.00 — the reminder from
-   [4.4](../module-04/lesson-04.md) that a rate without its `n` is a decoration.
+   "Questions" knob to 5, with the System dropdown still on B, and watch all three judges read kappa 1.00 —
+   the reminder from [4.4](../module-04/lesson-04.md) that a rate without its `n` is a decoration.
 
 > [!NOTE]
 > Every verdict behind those tiles comes from a seeded educational model of judge behaviour, not from a live
@@ -208,7 +208,7 @@ Confusion `tp 11, fp 5, fn 0, tn 4`. Then, in order:
 3. Two judges differ in both model size and prompt shape. What can the table establish about which change
    caused the 33-point TNR gap, and what would you need to add to establish it?
 
-[Simulation: judge-lab](../../simulations/rag-evals/index.html?preset=grounding)
+[Simulation: rag-evals](../../simulations/rag-evals/index.html?preset=grounding)
 
 1. **Write the four-cell confusion yourself for all three judges.** The page gives you the counts; the work is
    the TPR denominator (11 for variant B) and the TNR denominator (9). Before clicking anything, predict which

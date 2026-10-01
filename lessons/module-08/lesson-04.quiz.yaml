@@ -1,0 +1,91 @@
+- id: q1
+  question: >-
+    A RAG metric scores variant B at 80.0% grounded and variant A at 75.0%, and its true-negative rate is
+    44.4% on B against 50.0% on A. Which decision does this support?
+  options:
+    - >-
+      Ship neither on this evidence. The metric's TNR is below 0.70, so it cannot rank your systems, and the
+        ranking it produces is a statement about its own leniency rather than about the systems.
+    - >-
+      Ship B, because a 5-point lead is the metric doing the job it was chosen to do and the interval overlaps.
+    - >-
+      Ship A, because a lower pass rate with a higher TNR means the metric is stricter on the system you
+      already trust.
+    - >-
+      Ship B with a widened tolerance, because the two TNRs are within 6 points of each other and therefore
+      cannot separate the systems.
+  correct: 0
+  explanation: >-
+    Step 4 of the procedure is the gate, and this metric does not clear it: 4 of 9 real faults caught. Once a
+    metric is known to miss more than a quarter of the failures, the ranking it produces ranks how much each
+    system resembles what the metric waves through. The two TNRs being close is not reassurance — it means
+    both are wrong in the same direction on the same items.
+
+- id: q2
+  question: >-
+    The same metric reads kappa 1.00 on the first five items and 0.47 on all twenty, while its TNR falls from
+    100.0% to 44.4% and its grounded rate rises from 60.0% to 80.0%. What is going on?
+  options:
+    - >-
+      The metric warms up over repeated calls, so the first five items are scored before it reaches full
+      accuracy and the later items are scored correctly.
+    - >-
+      The Questions knob takes a prefix rather than a random draw, so the small readings describe a
+        population without the faults this metric misses, not a smaller sample of the same one.
+    - >-
+      The metric is deteriorating as it sees more data, which is the same run-to-run drift Module 7 measured
+      at 12 points.
+    - >-
+      The bootstrap interval widens with n, so kappa looks lower on the larger set even when agreement is
+      unchanged.
+  correct: 1
+  explanation: >-
+    Both the TNR falling and the pass rate rising are the same mechanism: the extra items are ones where the
+    metric waves through a real fault, which lowers TNR and raises the headline at the same time. A subset you
+    can choose after seeing the numbers is not a sample, and a prefix is not a draw, so the small reading is
+    not a low-noise estimate of the large one.
+
+- id: q3
+  question: >-
+    On items 1–14 the plain metric reads kappa 0.70 and TNR 66.7%. On items 15–20, read once, it reads kappa
+    0.00 and TNR 0.0%. What can you legitimately claim?
+  options:
+    - >-
+      That the metric is unusable, since a held-out TNR and kappa of zero is proof it has no value on new data.
+    - >-
+      That the metric overfits 14 items, since its dev TNR fell by 27 points on data it had never seen.
+    - >-
+      That it caught none of the three held-out faults — g15, g18 and g20 — and that three failures is too
+        small a denominator to claim anything about the other two metrics either way.
+    - >-
+      That the held-out half is unrepresentative, because three human failures out of six is an unusually high
+      failure rate for a RAG system.
+  correct: 2
+  explanation: >-
+    A named, item-level failure is a strong claim; a rate on three items is a weak one, and its interval runs
+    most of the scale. The defensible outcome is a rejection plus a shortlist rather than a ranking, and the
+    runbook should carry a "what you may claim" column next to the number so nobody later reports 0.00 as a
+    measurement instead of an absence.
+
+- id: q4
+  question: >-
+    No third-party RAG metric clears your own gate on your own data. What is worth keeping?
+  options:
+    - >-
+      The framework, pinned to one version, because a reimplemented metric will drift and the framework will
+        not.
+    - >-
+      The benchmark score from the metric's own paper, which was measured on a labelled corpus and is the
+        closest published estimate available to your own.
+    - >-
+      The metric's own output distribution, which shows which answers it is confident about and therefore
+        where it is likely to be trustworthy.
+    - >-
+      The procedure: about a hundred labelled items across the four answer-side categories, TPR, TNR and
+        kappa beside them, and one held-out half you read once.
+  correct: 3
+  explanation: >-
+    The labels are the only durable asset: they are what lets you test the next metric, including one you
+    write yourself, and they cost an afternoon rather than a migration. A published benchmark score describes
+    somebody else's items and passages, and a framework's promise not to drift is not something a version pin
+    can keep — which is why the suite is re-run on every change, whoever made it.

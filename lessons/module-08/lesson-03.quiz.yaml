@@ -53,9 +53,8 @@
     Which failure above does that make impossible to detect, and which one does it make more common?
   options:
     - >-
-      It makes the zero-passage fabrication impossible to detect, and it makes the g16 case — a passage
-      returned that does not answer the question — more common, since a low threshold always returns
-        something plausible-looking.
+      It makes the zero-passage fabrication undetectable, and it makes the g16 case — a passage returned that
+        does not answer — more common, since a low threshold always returns something.
     - >-
       It makes both cases equally detectable, because returning something means the grounding judge always has
         evidence to work with.

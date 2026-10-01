@@ -97,7 +97,7 @@ context, and every remaining fault is the model's — and count human-grounded a
 | C | 8/14 | **57.1%** | 32.6%–78.6% |
 
 Four of the fourteen answers are still wrong for variants A and B, with the right passage sitting in the prompt.
-Three of them are one invented number each, and you can read them without a judge:
+Three of them replace a number the passage gave with one it did not, and you can read all three without a judge:
 
 | Item | Question | Passage says | Answer says |
 |---|---|---|---|
@@ -198,7 +198,7 @@ Do this, in order:
 3. Variant A is human-grounded on 12 of 20 answers and variant B on 11. Is one point of 20 enough evidence to
    rank them? Compute the interval before you answer.
 
-[Simulation: judge-lab](../../simulations/rag-evals/index.html?preset=grounding)
+[Simulation: rag-evals](../../simulations/rag-evals/index.html?preset=grounding)
 
 1. **Split the twenty by hand, then compare with the labels.** Read each item's question and passage and write
    `hit` or `miss` on your own sheet before you look at anything else. You should land on 14 hits and 6 misses,

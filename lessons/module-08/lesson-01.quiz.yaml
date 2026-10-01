@@ -54,15 +54,15 @@
     - >-
       Five grounded answers the judge failed, which is why the grounded rate reads 80% rather than 55%.
     - >-
-      Five answers where the judge and the human disagreed in either direction, of which on this
-        configuration all five are false alarms and none is a missed fault.
-    - >-
       Five items the judge scored five times each and was inconsistent on, since the run holds five repeats
       per item.
     - >-
+      Five answers where the judge and the human disagreed in either direction, of which on this
+        configuration all five are false alarms and none is a missed fault.
+    - >-
       Five items whose passages were empty, which is why they appear in the list but not in the grounded
         tile.
-  correct: 1
+  correct: 2
   explanation: >-
     The count is `human !== judge`, both directions, under a heading that describes only one of them. On
     variant B with this judge all five are cases where the judge passed an answer the human failed — the safe
