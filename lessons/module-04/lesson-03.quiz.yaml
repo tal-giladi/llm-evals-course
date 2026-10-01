@@ -4,12 +4,13 @@
     shows `4 of 7` in the sampled column. What can you say about the check on that slice?
   options:
     - >-
-      Nothing about its true-negative rate, because the slice contains no human failures for the rate's
-      denominator — and the slice has quietly dropped out of the overall rate.
-    - That the check passes every `out_of_scope` item, since 4 of 4 passed and the sample is half the
-      slice.
-    - That the slice is at 100.0%, so it can be dropped from the release gate as a solved case.
-    - That the sample is too small to tell, so re-run it at n = 94 before drawing any conclusion.
+      Nothing about its true-negative rate — the slice has no human failures to put in the
+      denominator, so it drops out of the overall rate.
+    - That the check passes every `out_of_scope` item, since 4 of 4 passed and the sample is over half
+      the slice.
+    - That the slice is at 100.0%, so it can be dropped from the release gate as a solved case entirely.
+    - That the sample is too small to tell, so re-run the whole suite at n = 94 before drawing any
+      conclusion.
   correct: 0
   explanation: >-
     A true-negative rate is caught failures divided by real failures, and a slice with no real failures
@@ -22,12 +23,15 @@
     Switching to **Keep the slice mix** at n = 20 guarantees every intent slice has at least one item in
     the sample. Two of them still read `none seen` in the failing-items column. Why?
   options:
-    - The mix is still only roughly the population mix, and 3 items out of 94 works out at 0.64 of an
-      item in a sample of 20 — so the slice is present and its failures are not.
-    - The panel only updates when the size changes, so the new rows are stale until you redraw.
-    - Stratified draws deliberately weight the hard slices, and `exception` failed the weighting test.
-    - Failing items are excluded from every draw by design, because a failing item has no verdict yet.
-  correct: 0
+    - The panel only updates when the sample size changes, so the rows you see are stale until you
+      redraw.
+    - Stratification picks which slices you draw from, not which failures — a mix-preserving draw of 20
+      expects 0.64 `exception` items and 0.43 `out_of_scope` failures.
+    - Stratified draws deliberately weight the hard slices, and `exception` failed that particular
+      weighting test.
+    - Failing items are left out of every draw by design, because a failing item has no verdict to
+      contribute yet.
+  correct: 1
   explanation: >-
     Stratification decides which slices you draw from; allocation decides how many failing items end up
     inside each one, and those are different questions. Preserving a 3% share gives you 3% of the

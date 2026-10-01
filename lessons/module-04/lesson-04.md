@@ -51,9 +51,9 @@ fact about the sample.
 Everything the labs print is the **Wilson score interval**, and it is five lines of arithmetic. Take
 the 20-item draw the eval lab opens on at seed 11: **8 items pass out of 20**. So
 
-$$p = \frac{8}{20} = 0.400, \qquad z = 1.96, \qquad z^2 = 3.8415$$
+$$p = \frac{8}{20} = 0.400, \qquad z = 1.96, \qquad z^2 = 3.8416$$
 
-$$\text{denominator} = 1 + \frac{z^2}{n} = 1 + \frac{3.8415}{20} = 1.1921$$
+$$\text{denominator} = 1 + \frac{z^2}{n} = 1 + \frac{3.8416}{20} = 1.1921$$
 
 $$\text{centre} = p + \frac{z^2}{2n} = 0.400 + \frac{3.8415}{40} = 0.400 + 0.0960 = 0.4960$$
 
@@ -68,9 +68,9 @@ That is the lab's line: **40.0% (21.9%–61.3%)**, width 39 points. Do the same 
 width 34.
 
 Why Wilson and not the familiar `p ± 1.96·√(p(1−p)/n)`? Because that one runs past 100% near $p = 1$,
-which is exactly where eval sets live once a feature is good. On 20 items with 20 passes the Wilson
-interval is **83.9%–100.0%**, which is honest; the normal approximation gives 100% ± 9.6% and calls
-109.6% a confidence interval. Wilson is what the labs use everywhere, and the arithmetic above is
+which is exactly where eval sets live once a feature is good. On 19 passes out of 20 the Wilson
+interval is **76.4%–99.1%**, which is honest; the normal approximation gives 95.0% ± 9.6% and calls
+**104.6%** a confidence interval. Wilson is what the labs use everywhere, and the arithmetic above is
 worth being able to do without a spreadsheet.
 
 ### The lab's size table, read as a price list

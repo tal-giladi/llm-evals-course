@@ -24,11 +24,11 @@
     because it read higher. What have you actually measured?
   options:
     - >-
-      That at least one of two prompts reads higher on these 37 items; because the test interval is 31
-      points wide, keeping the higher one is usually a coin rather than a measurement.
+      That one of two prompts reads higher on these 37 items — and a 31-point interval makes "keep the
+      higher one" a coin toss.
     - The better prompt, because the 5.9-point gap is larger than the difference in item counts.
     - The system, because the test items are held out and so cannot be biased by the choice.
-    - Nothing yet, but keeping the better prompt is harmless because test can be re-run as often as
+    - Nothing yet, but keeping the better prompt is harmless, since test can be re-run as often as
       dev can.
   correct: 0
   explanation: >-

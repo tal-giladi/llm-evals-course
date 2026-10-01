@@ -1,0 +1,116 @@
+- id: q1
+  question: >-
+    A judge passes 89.4% of the answers humans passed and fails 51.1% of the answers humans failed,
+    over 94 items with 47 good and 47 bad. How many of the system's real failures reach the user, and
+    what does the accuracy tile read?
+  options:
+    - >-
+      About 23 faults get through, and accuracy still reads 70.2%. The rate that protects users is
+      TNR, and the accuracy figure is describing the mix of the set rather than the judge.
+    - >-
+      About 5 faults get through, and accuracy reads 70.2%. TPR is the rate that matters because it
+      counts the answers that reach production.
+    - >-
+      About 23 faults get through, and accuracy reads 89.4%. Accuracy and TPR are the same quantity
+      once the two halves of the set are the same size.
+    - About 24 faults get through, and accuracy reads 51.1%, since the two failure rates add to the
+      fraction of items the judge gets wrong.
+  correct: 0
+  explanation: >-
+    TNR of 51.1% means 24 of the 47 human failures were failed, so 23 reached the user. Accuracy is
+    (42 + 24) / 94 = 70.2%, which looks like a working eval on a dashboard. Two of the wrong options
+    confuse TPR with the shipping rate; the fourth misreads accuracy as a failure rate.
+
+- id: q2
+  question: >-
+    Your eval set is 95% good answers. A judge that passes every single item scores 95% accuracy on
+    it. Why is that number useless, and what single figure exposes it?
+  options:
+    - >-
+      The item count is missing, so 95% cannot be distinguished from a 95% measured on a handful of
+      items; the interval is what settles it.
+    - >-
+      Nothing is wrong with it. A judge that never fails an item is exactly what a high-quality
+      assistant deserves, so the rate can be published as is.
+    - >-
+      Accuracy rises as the set gets more skewed toward good answers, so it is a statement about the
+      set's mix. Kappa falls instead, reading 0.00 for an always-pass judge.
+    - >-
+      Accuracy is measured against humans and the humans disagree among themselves, so any accuracy
+      figure is suspect regardless of the set's mix.
+  correct: 2
+  explanation: >-
+    Re-weighting one judge's own verdicts across mixes of good and bad answers moves accuracy and kappa
+    in opposite directions: the plain judge here goes from 70.2% accuracy and kappa 0.40 at a 50/50
+    split to 87.4% and 0.23 at 95% good. An always-pass judge sits at kappa 0.00 at every mix, which is
+    the figure that identifies it.
+
+- id: q3
+  question: >-
+    Two judges on the same 94 items read TPR 89.4% and TPR 96.7%, and TNR 51.1% and TNR 85.1%. A team
+    gates on the TPR figure because it is higher and steadier. What is the gate actually doing?
+  options:
+    - >-
+      Catching the faults the taxonomy found, since a judge that passes good answers reliably will
+      also fail bad ones reliably.
+    - >-
+      Releasing most real faults. TPR measures how often good answers survive, and the rate that stops
+      faults reaching users is TNR, which this gate never checks.
+    - >-
+      Nothing, because any gate built on an LLM judge requires both rates and a gate on one of them is
+      always decorative.
+    - >-
+      Twice the work it should, since the higher rate is the conservative one and conservatism in a
+      gate always means catching more.
+  correct: 1
+  explanation: >-
+    The two rates protect against opposite failure modes. Low TPR wastes a human's afternoon; low TNR
+    ships the fault the taxonomy was built to find. The plain judge reads TNR 51.1% over these items,
+    so a TPR gate lets 23 of 47 real faults through while reporting a healthy 89.4%.
+
+- id: q4
+  question: >-
+    The rubric judge reads 85.1% TNR over 94 items. Per category it reads 81.5% on missing citations,
+    83.3% on wrong facts, and 100% on over-refusals and out-of-scope rules. You have a per-category
+    target of 0.85. What does the total hide?
+  options:
+    - >-
+      Nothing, since 85.1% clears the target and the total is the number the gate should read.
+    - >-
+      That the two largest failure categories are both under 0.85, so the judge would miss its target
+      precisely where most of the system's faults live.
+    - >-
+      That the 100% rows are impossible on a category with 2 and 6 items, so the total is inflated by
+      categories too small to measure.
+    - >-
+      That the total weights a 27-item category and a 2-item category equally, so it is not a
+      meaningful average of anything.
+  correct: 1
+  explanation: >-
+    `no_citation` is 27 of the 47 failures and `wrong_fact` is 12 more, so the two categories sitting
+    under the target are 39 of the 47 things the taxonomy says go wrong. A total averaged over five
+    categories hides the fact that the shortfall is concentrated where the faults are, which is the
+    only part of the table a team acts on.
+
+- id: q5
+  question: >-
+    A judge reads TPR 86.4% and TNR 55.6% on 40 dev items, then kappa 0.43 with an interval of 0.13 to
+    0.69. A colleague reports "86.4% TPR, 55.6% TNR, 40 items" on a slide. What is still missing from a
+    claim someone could act on?
+  options:
+    - >-
+      The prevalence of good answers on those 40 items, without which the accuracy that goes beside
+      them cannot be checked.
+    - >-
+      The kappa interval, since a rate with no interval cannot be compared against a threshold even
+      when the item count is written down.
+    - The judge model's name and build, without which two readers cannot tell whether they are
+      comparing the same judge.
+    - The false-alarm count, since the two rates together do not reveal how many items a human has to
+      re-read.
+  correct: 1
+  explanation: >-
+    On 40 items the bootstrap interval on kappa runs 0.13 to 0.69, so the point estimate of 0.43 could
+    come from a judge reading anywhere in that range. Rates with denominators of 22 and 18 have the
+    same problem: TNR of 55.6% is 10 items out of 18. The interval, like the item count, is what turns
+    a reading into a claim.

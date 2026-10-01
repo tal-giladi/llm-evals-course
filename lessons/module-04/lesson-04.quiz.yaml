@@ -4,14 +4,14 @@
     margin of 0.2352 and a denominator of 1.1921. What does that produce, and why is it on the scoreboard
     rather than just the 40.0%?
   options:
-    - A normal-approximation interval of 40.0% ± 21.9%, which is wider because Wilson is conservative.
-    - >-
-      21.9%–61.3%, and it belongs on the scoreboard because the 21.9 points below 40.0% are the sample,
-      not the system — the same system reads 75.0% on a different twenty items.
     - 30.4%–49.6%, since the margin has to be subtracted from the centre before the denominator is
       applied twice.
+    - >-
+      21.9%–61.3%, and it belongs on the scoreboard because those 21.9 points below 40.0% are the
+      sample, not the system.
     - 39.0%–61.3%, since the interval is centred on the point estimate rather than on the shifted
       centre.
+    - 19.0%–61.0%, since the centre term has to be dropped whenever the pass rate is below one half.
   correct: 1
   explanation: >-
     Dividing both ends of `centre ± margin` by the denominator gives 0.2188 and 0.6134, which is what
@@ -23,10 +23,13 @@
     The size table reads: n = 20 is 39 points wide, n = 40 is 30 points wide, n = 80 is 21 points wide.
     Your team doubles the set again, to 160. What should they expect?
   options:
+    - >-
+      About 15 points wide, because the width goes as one over the square root of n and each doubling
+      buys back about a third of it.
     - About 10 points wide, because each doubling has been buying roughly a quarter of the width.
-    - About 30 points wide, because the width only improves once the sample passes 100 items.
-    - About 21 points wide, because the table flattens out after 80 items on this population.
-    - About 15 points wide, because the interval halves every time the sample doubles.
+    - About 21 points wide, because the width flattens out after 80 items on this population.
+    - About 30 points wide, because a doubling only starts to pay off once the sample passes 100
+      items.
   correct: 0
   explanation: >-
     The width goes as one over the square root of n, so each doubling buys back about a third of the
@@ -60,12 +63,12 @@
     improvement." Both figures come from the size table at seed 11. What is wrong with the claim?
   options:
     - Nothing, since both pass rates are computed the same way and the difference is therefore real.
-    - The seed was not recorded, so the result cannot be reproduced by anyone else.
+    - The seed was not recorded anywhere, so the result cannot be reproduced by anybody reading it.
     - The comparison should have used the test split, since dev items were already used for the
       previous prompt.
     - >-
-      Both intervals span both figures — 40.0% sits inside 36.1%–69.8%, and so does 53.3% — so the run
-      cannot distinguish a 13-point gain from the 34 points of noise on top of it.
+      Both intervals span both figures — 40.0% sits inside 36.1%–69.8% — so the run cannot tell a
+      13-point gain from 34 points of noise.
   correct: 3
   explanation: >-
     Two point estimates from the same population are not evidence of a difference on their own, and the

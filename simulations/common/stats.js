@@ -278,10 +278,18 @@ export function correctedPassRateCI(pairs, opts = {}) {
 /**
  * Draw a subset of item indices.
  *
- * `strategy` is "all" | "random" | "stratified". Stratified keeps the
- * proportion of every slice, which is what lesson 04.3 is about: a random
- * sample of 20 from a set that is 5% "hard refusals" is almost never going
- * to contain one.
+ * @param items    the array to sample FROM. **Must be the item objects**, not
+ *                 an array of indices — stratification groups on `item.slice`,
+ *                 and passing indices silently collapses every item into one
+ *                 bucket, turning "stratified" into a second random draw.
+ * @param size     how many to take
+ * @param strategy "all" | "random" | "stratified"
+ * @param seed     makes the draw reproducible
+ * @returns        indices into `items`, ascending
+ *
+ * "stratified" keeps the proportion of every slice, which is what lesson 04.3
+ * is about: a random sample of 20 from a set that is 5% "hard refusals" is
+ * almost never going to contain one.
  */
 export function sampleItems(items, size, strategy, seed) {
   if (!items.length) return [];
@@ -291,7 +299,8 @@ export function sampleItems(items, size, strategy, seed) {
   if (strategy === "stratified") {
     const bySlice = new Map();
     items.forEach((it, i) => {
-      const k = it.slice || "all";
+      // Accept a bare string, or an item carrying a slice descriptor.
+      const k = (typeof it === "string" ? it : it && it.slice) || "all";
       if (!bySlice.has(k)) bySlice.set(k, []);
       bySlice.get(k).push(i);
     });

@@ -1,0 +1,90 @@
+- id: q1
+  question: >-
+    A support assistant ships and the engineer who wrote its retrieval prompt also labelled all 94 eval
+    items, alone. The judge built from the same criteria reads kappa 0.77 on dev. What does that 0.77
+    measure?
+  options:
+    - >-
+      Agreement between the judge and the task, since the prompt and the labels came from the same
+      understanding of what correct means.
+    - >-
+      Consistency between the judge and one unrecorded labelling convention, since judge and labels
+      come from the same document rather than from two independent ones.
+    - The judge's ability to catch real failures, which is why the number can be read without the
+      human labels having been written down.
+    - The overall quality of the system, because the labels describe what the system should have said
+      and the judge describes what it did say.
+  correct: 1
+  explanation: >-
+    The judge and the labels were written by the same person from the same criteria, so their agreement
+    is one opinion applied twice. It is evidence of self-consistency, not of correctness, and the
+    criteria that produced it were never written down anywhere a second person could check them.
+
+- id: q2
+  question: >-
+    Your taxonomy has 27 `no_citation` items, 12 `wrong_fact`, 6 `over_refusal` and 2 `out_of_scope`.
+    A model drafts the labels and a reviewer checks 20 items drawn from the largest category. What has
+    actually been verified?
+  options:
+    - >-
+      The model's accuracy on all 94 items, extrapolated from a category whose rule is mechanical and
+      therefore easy to get right.
+    - >-
+      The model's ability to spot citation markers. The 20 judgement-call items it was not checked on
+      are exactly the ones that need a human decision.
+    - >-
+      Nothing useful, because checking any 20 of 94 items gives an interval too wide to act on.
+    - The rubric itself, since a model that can label these items has effectively been validated by
+      the same review.
+  correct: 1
+  explanation: >-
+    Spot-checking the biggest category verifies the part that needed no judgement. `wrong_fact`,
+    `over_refusal` and `out_of_scope` are 20 items of pure decision work and would go unchecked, which
+    is the opposite of where a reviewer is needed. The failure is not the sample size; it is the
+    category spread of the sample.
+
+- id: q3
+  question: >-
+    Two labellers both apply your written criteria carefully and disagree on all 6 of the items where
+    the system declined to answer. The rubric judge's kappa falls from 0.77 to 0.64 on the relabelled
+    set. What is the disagreement?
+  options:
+    - >-
+      Six labels out of 94 is noise, and the right response is to pool more items until the two numbers
+      are close enough to stop arguing.
+    - >-
+      A finding about the criteria rather than about either labeller: nobody ever wrote down whether
+      declining to answer is a failure, so the fix is that sentence.
+    - Evidence that the judge is the unstable component, since it is the only artefact that moved when
+      the humans were re-read.
+    - A labelling cost that should be avoided, which is why the second pass should be run by a domain
+      expert rather than by a second developer.
+  correct: 1
+  explanation: >-
+    Both labellers applied the written criteria correctly, so where they diverge is a place the
+    criteria are silent. Writing that sentence down fixes six labels at once and every future
+    measurement that touches them. Treating it as an error to be resolved by seniority throws away the
+    most expensive information the labelling pass produced.
+
+- id: q4
+  question: >-
+    Your judge reads kappa 0.77 on dev and 0.73 on the held-out test set. Which statement about the
+    human labels is justified by that pair?
+  options:
+    - >-
+      The labels are correct, because the two halves were labelled by the same people and a drop of
+      that size is only the judge's sampling noise.
+    - >-
+      The judge changed between the halves while the labels stayed frozen, so the drop measures the
+      judge rather than the humans.
+    - >-
+      The test labels were harder, since kappa depends on how difficult the items are for the judge and
+      not at all on who wrote the labels.
+    - The interval is narrow enough on both halves that the 0.04 gap is a real regression, and the
+      prompt needs another round of tuning.
+  correct: 1
+  explanation: >-
+    A label is a judgement about an item and a system output, and the same people wrote all of them
+    before the split existed, so nothing about the humans differed between the two numbers. The
+    interval on 57 and on 37 items is wide enough to hold the whole 0.04 gap, which is the other half of
+    what this pair tells you.

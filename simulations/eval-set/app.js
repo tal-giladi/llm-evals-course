@@ -47,8 +47,10 @@ function rateOver(indices) {
 }
 
 function drawnIndices() {
-  const all = D.items.map((_, i) => i);
-  return sampleItems(all, state.size, state.strategy, state.seed);
+  // Pass the item objects, not their indices: stratification groups on
+  // item.slice, and passing indices would collapse every item into one
+  // bucket and make "keep the slice mix" a second random draw.
+  return sampleItems(D.items, state.size, state.strategy, state.seed);
 }
 
 function buildControls() {
@@ -98,7 +100,7 @@ function sizePanel() {
   // What the interval would be at each size, for the whole population.
   const rows = [];
   for (let n = 10; n <= D.items.length; n += 5) {
-    const indices = sampleItems(D.items.map((_, i) => i), n, state.strategy, state.seed);
+    const indices = sampleItems(D.items, n, state.strategy, state.seed);
     const r = rateOver(indices);
     rows.push(el("tr", { class: n === state.size ? "diff-up" : "" }, [
       el("th", { scope: "row", text: String(n) }),

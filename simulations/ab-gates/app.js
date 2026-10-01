@@ -61,9 +61,11 @@ function verdict(itemId, variant) {
 
 function chosen() {
   const ids = D.dev_ids.concat(D.test_ids);
+  // Sample the item objects, not indices, so the contract of sampleItems
+  // (it groups on item.slice) is never accidentally violated.
   return sampleItems(
-    ids.map((_, i) => i), Math.min(state.n, ids.length), "all", state.seed
-  ).map((i) => ids[i]);
+    D.items, Math.min(state.n, D.items.length), "all", state.seed
+  ).map((i) => D.items[i].id);
 }
 
 function buildPairs(aVariant, bVariant) {

@@ -3,12 +3,14 @@
     Your taxonomy's smallest failure category has 2 items in the whole population. A check written for
     that category catches both of them. What is the most you can honestly claim?
   options:
-    - The category is solved, because a true-negative rate of 100% on every item in the row is proof.
+    - The category is solved, because a true-negative rate of 100% on every item in the row is proof
+      of it.
     - >-
-      The check caught 2 of 2, which is 100.0% with an interval of 34.2%–100.0%, so the row is in the
-      set but too small to measure and should be labelled that way.
-    - The category needs no more items, because two independent examples already rule out chance.
-    - The check is 100% reliable, so it can be the only gate on the release that touches this row.
+      The check caught 2 of 2 — 100.0%, interval 34.2%–100.0% — so the row is in the set and labelled
+      too small to measure.
+    - The category needs no more items, because two independent examples already rule out sampling
+      chance.
+    - The check is 100% reliable, so it can be the only gate on any release that touches this row.
   correct: 1
   explanation: >-
     The Wilson interval on a perfect two out of two runs from 34.2% upward, so a check that caught one
@@ -39,12 +41,14 @@
     2's answer states a policy the handbook contradicts. Both were labelled `label: 0`. What does that
     tell you about the set?
   options:
-    - Nothing, because a fail is a fail and the checks decide the verdict anyway, not the label.
-    - The set is fine, because two failing items already exercise the pass/fail path of the suite.
-    - The two items should be merged, since they fail in the same way as far as the suite is concerned.
+    - Nothing, because a fail is a fail and the checks decide the verdict anyway, not the label field.
+    - The set is fine, because two failing items already exercise the pass/fail path of the whole
+      suite.
+    - The two items should be merged into one, since they fail in the same way as far as the suite is
+      concerned.
     - >-
-      The set cannot derive checks from verdicts alone: these two need different checks, and only a
-      written failure clause per item tells the suite which is which.
+      The set cannot derive checks from verdicts alone — these two need different checks, and only a
+      written failure clause says which.
   correct: 3
   explanation: >-
     `no_citation` and `wrong_fact` both produce a fail verdict, and a citation check would pass the
@@ -57,12 +61,15 @@
     91% on the first release. Six weeks later a customer is told the company matches their pension
     contributions. What was wrong with the set?
   options:
-    - The set was too small to detect the failure, since 500 items is below the usual sample minimum.
+    - The set was too small to detect the failure, since 500 items sits below the usual sample minimum
+      for a release gate.
     - >-
-      Every row of the taxonomy was empty, because the items were drawn from the one population where
-      the system already succeeds, so the scoreboard measured the happy path.
-    - The labels were wrong, because items from resolved conversations should have been marked fail.
-    - The split was the problem, since the 500 items never got divided into a dev half and a test half.
+      Every row of the taxonomy was empty — the items came from the one population where the system
+      already succeeds, so the scoreboard measured the happy path.
+    - The labels were wrong, because items drawn from resolved conversations should really have been
+      marked as failures.
+    - The split was the problem, since the 500 items never got divided into a dev half and a held-out
+      test half.
   correct: 1
   explanation: >-
     A verdict-only set stores `correct` for every one of those items, so the categories you spent weeks
@@ -76,11 +83,14 @@
     the reply that holds up?
   options:
     - >-
-      Proportional allocation would give the `out_of_scope` row fewer than one item, so the set
-      spends its budget where measurement is hard and says so in writing beside each row.
-    - The counts came from a different population than the one the eval set serves, so they do not apply.
-    - Matching the counts matters less than making the set large enough, and 40 items is plenty large.
-    - The reviewer is right, so add 15 more `out_of_scope` items and rebalance the other rows down.
+      Proportional allocation gives `out_of_scope` under one item, so the set spends its budget where
+      measurement is hard and prints each row's interval.
+    - The counts came from a different population than the one the eval set serves, so they do not
+      apply here at all.
+    - Matching the counts matters less than making the set large enough, and 40 items is plenty large
+      for a support bot.
+    - The reviewer is right, so add 15 more `out_of_scope` items and rebalance the other rows
+      downward to compensate.
   correct: 0
   explanation: >-
     A row that is a few percent of the failures cannot be given a few percent of the items and then be
