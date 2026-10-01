@@ -1,0 +1,115 @@
+- id: q1
+  question: >-
+    A vendor's model card quotes a benchmark score, and your team is deciding whether to switch
+    to that build. What is that score admissible evidence for?
+  options:
+    - >-
+      Deciding whether your feature works on your own traffic, because the benchmark used expert
+      human judgements on multi-turn answers.
+    - >-
+      Choosing between two model builds on a fixed published question set with a fixed protocol
+      and a named publisher.
+    - >-
+      Setting the tolerance on your own release gate, since the gate blocks on a point estimate
+      and the score is a point estimate.
+    - >-
+      Deciding how many items your own eval set needs, because the benchmark's item count is a
+      published and independently checked number.
+  correct: 1
+  explanation: >-
+    A benchmark is a controlled comparison on one set under one protocol, which is exactly what
+    choosing between models needs and exactly what your own suite cannot do across vendors. It is
+    inadmissible for a claim about your users, because your users asked none of its questions.
+
+- id: q2
+  question: >-
+    You score sixteen judge configurations on 57 dev items, sort by agreement with your human
+    labels, and ship the top one. What has to appear next to the number you publish?
+  options:
+    - >-
+      The same judge's agreement on the items it was not chosen on, because a selected maximum is
+      biased upward by the number of things you tried.
+    - >-
+      The cost in tokens of running that judge across the suite, so readers can weigh the accuracy
+      against the spend of the chosen configuration.
+    - >-
+      A note that kappa depends on prevalence, since a high score on a lopsided label set is hard
+      to compare with a high score on a balanced one.
+    - >-
+      The full text of the judge's rubric, because the instructions are what produced the score
+      and a reader cannot otherwise reproduce the ranking.
+  correct: 0
+  explanation: >-
+    Selecting the maximum of sixteen numbers on the set you report on is the contamination you can
+    actually run and fix. On the shipped menu the winner holds its held-out score while the
+    bottom judge falls from 0.155 to 0.085, so the selection transfers for the winner and lies
+    about the field.
+
+- id: q3
+  question: >-
+    Your overlap check finds three items whose ids appear in both the dev and the test split. What
+    does that make the held-out number?
+  options:
+    - >-
+      Unaffected, because contamination only counts when the model saw the question during its
+      own training rather than during your own splitting.
+    - >-
+      Affected only for the three items involved, so the suite score stays valid if you report it
+      with the overlap count printed beside it.
+    - >-
+      Invalid as a held-out figure, because items that were in the selection set are also in the
+      set you are quoting as unseen.
+    - >-
+      Invalid, and the fix is to discard the test split entirely and re-label a fresh one from
+      production traces over the next month.
+  correct: 2
+  explanation: >-
+    The overlap check is the contamination defence you own, and it costs two lines. Those three
+    items were in the set the choice was made on, so a number computed over both splits is a
+    number about the selection set wearing a held-out label.
+
+- id: q4
+  question: >-
+    A judge scores kappa 1.000 on a slice of nine items and 0.494 over the whole 57-item dev set.
+    What is the largest claim you can make from the nine-item figure?
+  options:
+    - >-
+      The judge is reliable on that category of question, because perfect agreement on nine items
+      is nine independent confirmations of the same behaviour.
+    - >-
+      The judge is unreliable on that category, because the whole-set figure is lower and the two
+      numbers describe the same underlying competence.
+    - >-
+      The nine items are contaminated, because a score that high on a slice this small cannot be
+      produced by chance on an uncontaminated set.
+    - >-
+      The judge agreed with the labels on those nine items, and the figure says nothing about the
+      other forty-eight or about any slice larger than nine.
+  correct: 3
+  explanation: >-
+    Kappa 1.000 on nine items means agreed on all nine and nothing more. On the shipped menu one
+    judge scores exactly that on the how_to slice and 0.494 overall, which is what a leaderboard
+    looks like from the inside.
+
+- id: q5
+  question: >-
+    A colleague points out that a published score is a single number. Which of these can you not
+    do with it, however much you would like to?
+  options:
+    - >-
+      Cut it by slice, by category or by difficulty, because the aggregate arrived without the
+      per-item records that any such breakdown is computed from.
+    - >-
+      Quote it, with the set named, the score named, the publisher named and the items attributed
+      to whoever published them.
+    - >-
+      Compare two submissions from two different labs, since the protocol and the question set
+      are fixed and published and are the whole point of the number.
+    - >-
+      Check its licence and cite it correctly, because the datasets behind these scores are
+      released under terms such as CC-BY-4.0 or MIT.
+  correct: 0
+  explanation: >-
+    Intervals, slices, paired comparisons and gates are all functions of the item list, and the
+    item list is exactly what an aggregate discards. That is why a suite you own can be
+    re-analysed six months later and a score in a model card cannot.

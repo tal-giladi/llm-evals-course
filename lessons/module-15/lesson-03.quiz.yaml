@@ -1,0 +1,113 @@
+- id: q1
+  question: >-
+    You need 600 labelled items instead of 57, and you engage three annotators instead of one.
+    What has changed, given that both decisions were discussed only as throughput?
+  options:
+    - >-
+      Nothing that is measurable. Throughput tripled and the item count rose, so the suite now has
+      the resolution the tolerance in the release gate has always assumed.
+    - >-
+      Throughput went up and so did disagreement, which means the adjudication queue grows with
+      the volume and is paid for by whoever writes the instructions.
+    - >-
+      Throughput went up and disagreement went down, because three annotators comparing notes over
+      a shared queue reach a more consistent standard than one annotator alone ever could.
+    - >-
+      Throughput went up by a factor of three and disagreement stayed exactly as it was, because
+      disagreement between annotators is a property of the item set and not of the people.
+  correct: 1
+  explanation: >-
+    The price is silent unless you measure it: every disagreement is an item somebody has to
+    adjudicate, and the queue scales with the item count while the reviewer stays the most
+    expensive person on the team. That is the number to put in the planning document.
+
+- id: q2
+  question: >-
+    Five instruction sets are scored against the same human labels on the same 57 items, with the
+    model held fixed. Disagreement runs from 0.0% to 21.1%. What does that spread establish?
+  options:
+    - >-
+      That the plainest prompt is worst and the most elaborate prompt is best, so the winning
+      instruction set should be adopted and the other four retired immediately.
+    - >-
+      That the annotators or label sources are capable of 0.0% agreement and simply need the
+      better prompt pointed out to them, which is a training problem rather than a design one.
+    - >-
+      That agreement is a property of the instructions as much as of the sources, since everything
+      else in the comparison was held still and the disagreement rate still moved fourfold.
+    - >-
+      That fifty-seven items cannot distinguish instruction sets at all, and the spread is item
+      noise that would disappear on a set three times this size.
+  correct: 2
+  explanation: >-
+    This is the design claim of the lesson, and the experiment that supports it: hold the items
+    and the model fixed, change only the instructions, watch the rate move. The ranking does
+    transfer to the held-out split, which is what makes it a finding rather than a coincidence.
+
+- id: q3
+  question: >-
+    Your overlap sample gives kappa 0.894 with a 95% interval of 0.787 to 1.000 on 57 items.
+    Which claim does that number actually support?
+  options:
+    - >-
+      That agreement is high, and that 0.894 is an estimate whose uncertainty is about plus or
+      minus 0.11, so 0.78 and 0.89 are not distinguishable on this set.
+    - >-
+      That agreement is 0.894 to three decimals, because a bootstrap interval on a statistic
+      computed over every item carries no uncertainty about the statistic itself.
+    - >-
+      That the round is below the usual 0.9 floor and must be re-run, because the point estimate
+      is the figure a floor is written against and the interval is only for the appendix.
+    - >-
+      That agreement is high on dev and unmeasured elsewhere, so the number should be quoted with
+      its item count and nothing else, since the interval of a bounded statistic is misleading.
+  correct: 0
+  explanation: >-
+    One label out of 57 moves this figure by 0.036, a third of the half-width, so the third
+    decimal is decoration. Note also that the top of the interval is pinned at 1.000, which is an
+    artefact of kappa being bounded rather than a real upper bound on agreement.
+
+- id: q4
+  question: >-
+    You add one category to the labelling instructions. What has to be true before the new labels
+    go into the suite?
+  options:
+    - >-
+      Nothing extra, because adding a category only extends the taxonomy and leaves the earlier
+      decisions exactly as they were, so the previous agreement figure still applies.
+    - >-
+      The whole set must be relabelled from scratch, because a taxonomy change invalidates every
+      label that was written under the old one, including the ones that came out right.
+    - >-
+      Only the new items need checking, because the old items were labelled under a rule that the
+      new category does not change and their agreement figure carries over unchanged.
+    - >-
+      Agreement must be re-measured on the new instructions, since the change is the same kind of
+      event as a prompt change and invalidates the judge's cached verdicts too.
+  correct: 3
+  explanation: >-
+    An instruction change is a new round, not an extension: the disagreement rate is a property of
+    the instructions and the items together, and it has to be measured again. It is also a
+    `prompt_hash` change, so the same pull request should invalidate the judge cache.
+
+- id: q5
+  question: >-
+    Your eval set needs to grow from 94 items to 600. Which change is free, and which is not?
+  options:
+    - >-
+      Stratifying is free, because putting every item in a slice somebody acts on beats sampling
+      the same volume and learning less about the parts that get shipped.
+    - >-
+      Adding annotators is free, because the disagreement rate is a property of the instructions
+      and therefore does not move when the number of people labelling changes.
+    - >-
+      Raising the tolerance is free, because a wider tolerance needs fewer items to resolve and
+      the release gate fires on a point estimate rather than on an interval.
+    - >-
+      Buying a faster annotation tool is free, because throughput scales with headcount while the
+      price is paid in the instructions and not in the time each item takes to read.
+  correct: 0
+  explanation: >-
+    Stratifying is the only throughput that costs nothing: fewer items, all of them in a slice
+    that matters. More annotators multiply the queue and faster annotators cost agreement by an
+    amount you cannot predict, so both have to be bought with a measurement attached.

@@ -1,0 +1,114 @@
+- id: q1
+  question: >-
+    A team wants to check whether a support answer states the handbook fact correctly. Which
+    question decides whether they need a verifier, a judge or a reward model?
+  options:
+    - >-
+      Whether the property is small enough to describe in a sentence, since anything larger than a
+      sentence has to be graded by a model rather than checked by a program.
+    - >-
+      Whether the judge that is already in the suite happens to agree with humans on similar
+      answers, because that fixes the calibration every new check would inherit.
+    - >-
+      Whether a preference dataset already exists for this product, because training a reward
+      model is always cheaper than writing the check by hand.
+    - >-
+      Whether the property is decidable, meaning fixed code returns the same verdict every time
+      with no model in the loop and no judgement involved.
+  correct: 3
+  explanation: >-
+    This is the module 2 test, applied to an instrument instead of a category: decidable means a
+    program settles it. "Does it state the fact correctly" needs the handbook and a comparison,
+    while "does it cite a section" is three lines of regex and costs nothing forever.
+
+- id: q2
+  question: >-
+    A reward model outputs 4.2 for one answer and 3.1 for another, and someone converts that into
+    "70% pass". What has gone wrong?
+  options:
+    - >-
+      Nothing yet, because a reward model's score is on the same zero-to-one scale as a pass rate
+      once it has been trained on preference pairs from human raters.
+    - >-
+      The reward model was trained on the wrong preferences, when the real issue is that a score
+      is an ordering and a threshold placed on an ordering is a fitted parameter.
+    - >-
+      The two answers should have been shown to the reward model in the opposite order first, so
+      that position bias can be subtracted out before any threshold is applied.
+    - >-
+      The pass rate should have been corrected for the reward model's error rate, which is what
+      the confusion matrix on your human labels is for.
+  correct: 1
+  explanation: >-
+    A reward model is trained to order, not to grade, and every deployment that turns its score
+    into a boolean adds a calibration step the training never performed. On the shipped threshold
+    knob, 0.8 maximises agreement on one variant and 0.5 on another, which is the whole failure.
+
+- id: q3
+  question: >-
+    A verifier catches 22 of 27 human failures, a judge catches 25 of the same 27, and the two
+    agree on none of the items only one of them catches. What does that combination justify?
+  options:
+    - >-
+      Dropping the verifier, because a scorer with the higher catch count has made the other one
+      redundant and every extra check costs maintenance and CI time.
+    - >-
+      Shipping the judge alone, because the three items it catches on its own are the ones the
+      verifier misses and they are therefore the ones that most need catching.
+    - >-
+      Running both and reporting the number of failures neither one catches, because the failures
+      they catch alone are disjoint and each leaves a gap the other closes.
+    - >-
+      Adding a reward model, because two scorers that disagree with each other indicate that the
+      underlying property is not yet decidable enough to score automatically at all.
+  correct: 2
+  explanation: >-
+    Disjoint misses are the argument for both scorers rather than one: on all six cells in the
+    shipped data, `missed by both` is zero while each scorer alone leaves a gap. What the table
+    funds is a list of failures no scorer catches, which is the argument for whatever you build.
+
+- id: q4
+  question: >-
+    A three-line citation verifier scores kappa 0.93 on the tuned build and 0.40 on the build
+    that stopped retrieving. What is the honest reading of that pair of numbers?
+  options:
+    - >-
+      The verifier is unreliable and should be replaced, because a scorer whose kappa varies by
+      half a point between two builds cannot be used in a regression gate at all.
+    - >-
+      The two builds are differently labelled, so the variation measures the labelling rather
+      than the check, and the check's kappa should be reported against one build only.
+    - >-
+      The verifier decides one property, and its agreement tracks whether that property is the
+      one the label depends on, which is why it degrades where the other rules break too.
+    - >-
+      The judge's numbers are the unreliable ones, because a judge's kappa also varies between
+      builds and the verifier's does not vary at all in the way models do.
+  correct: 0
+  explanation: >-
+    The pattern is what transfers, not the value: on answers that carry a confident wrong fact
+    behind a correct-looking citation, a citation check has nothing to see. Report the worst cell
+    rather than the best, and say which build each figure came from.
+
+- id: q5
+  question: >-
+    You sweep a probability threshold over five repeats of a judge. Why does every value between
+    0.4 and 0.6 produce byte-identical results?
+  options:
+    - >-
+      Because the threshold is rounded to the nearest tenth inside the judge, so 0.55 and 0.6 are
+      the same setting and the sweep has fewer distinct points than it appears to.
+    - >-
+      Because the judge's majority vote already discards the fractional part, and the threshold
+      only ever sees an integer count out of the recorded repeats.
+    - >-
+      Because a pass fraction over five repeats can only be 0, 0.2, 0.4, 0.6, 0.8 or 1.0, so any
+      threshold in that open interval selects exactly the same items.
+    - >-
+      Because the bootstrap resamples with a fixed seed, so nearby thresholds converge to the
+      same interval and the same verdict within the noise of a small item set.
+  correct: 3
+  explanation: >-
+    Six effective settings, not fifty-one. A sweep plot with fifty-one points on it is forty-five
+    runs of the same run, and the threshold you should publish is one of six, chosen with a stated
+    reason and re-fitted whenever the answer distribution moves.

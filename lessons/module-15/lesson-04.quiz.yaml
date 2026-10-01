@@ -1,0 +1,117 @@
+- id: q1
+  question: >-
+    A migration is blocked, and somebody asks for the `fixed` and `broke` counts before they will
+    look at the report. What is the trap in reading them straight off the comparison?
+  options:
+    - >-
+      The counts only include items where both systems disagreed, so ties are silently dropped and
+      the two numbers do not add up to the number of items whose verdict changed.
+    - >-
+      They are counted relative to whichever system was passed first, so swapping the two arguments
+      swaps the two names while the underlying 19-and-7 split stays exactly the same.
+    - >-
+      The bootstrap runs over the items rather than over the pairs, so the counts vary between
+      runs and cannot be quoted in a report that also contains a fixed interval.
+    - >-
+      They are reported for the majority verdict only, so the counts describe a five-repeat
+      decision and not the single verdict a reader will assume they describe.
+  correct: 1
+  explanation: >-
+    `paired_comparison` returns `A - B` and counts `fixed` as "B passed and A did not", so passing
+    the baseline first turns "this migration broke 19 items" into "this migration fixed 19 items".
+    The shipped gate docstring carries a scar from that bug; recompute the counts yourself.
+
+- id: q2
+  question: >-
+    The PR quotes the current build at 57.9% on dev and the candidate at 16.2% on the held-out
+    split, for a difference of 41.7 points. What is the paired answer on those held-out items?
+  options:
+    - >-
+      29.7 points, because the pairing cancels item difficulty and the unpaired figure overstates
+      the difference by counting the split change as part of the model's behaviour.
+    - >-
+      41.7 points, because both figures are pass rates from the same judge on the same dataset and
+      subtracting them is the correct way to compare two systems.
+    - >-
+      41.7 points is right and the paired comparison is wrong, because the held-out split is the
+      honest set and pairing it against a dev figure adds the wrong items to both sides.
+    - >-
+      57.9 points, because the candidate's dev rate of 36.8% belongs in the same subtraction and
+      using the held-out figure instead mixes a split change with the model change.
+  correct: 0
+  explanation: >-
+    Two evaluations subtracted is not a comparison, and the item difficulty between two splits is
+    the largest term in the error. The candidate scores 36.8% on dev and 16.2% on test, so part of
+    the quoted gap is the split and none of it is the model.
+
+- id: q3
+  question: >-
+    The migration gate finished in four seconds and reported a clean verdict. What does that
+    timing most likely mean?
+  options:
+    - >-
+      The suite is small enough that five repeats over 57 items really do complete that quickly,
+      so the timing is a sign the run is healthy rather than a warning about anything.
+    - >-
+      The gate short-circuits when the paired interval excludes zero, which is what the timing is
+      evidence of, and the full run only happens when the interval contains it.
+    - >-
+      The model build string was left out of the cache key, so the run silently reused verdicts
+      from the previous migration and every number in the report is one week stale.
+    - >-
+      The judge cache was warm from the previous build, and a cached verdict is by definition a
+      verdict this build never produced, so the run measured the old system.
+  correct: 3
+  explanation: >-
+    `cache_key` includes `model_build`, so a correct implementation makes this impossible, and a
+    four-second migration gate is the symptom of an implementation that left it out. The check is
+    to count distinct keys over the item set for two builds and watch the number double.
+
+- id: q4
+  question: >-
+    The whole-suite paired delta is 21.1 points worse and one slice is 33.3 points better. What
+    belongs in the PR title?
+  options:
+    - >-
+      The whole-suite figure of 21.1 points, because it is the number every reader can compare
+      against the last migration and against the dashboard they already have open.
+    - >-
+      The improving slice, because a change that helps a category of users is worth celebrating
+      before the categories it hurts are counted and put into a table further down.
+    - >-
+      The slice the decision actually turns on, with its size and interval, because an average
+      over a large loss and a small gain has no address and cannot be acted on.
+    - >-
+      Neither figure, because a paired comparison on 57 items is too wide to support any headline
+      and the PR should carry the interval alone with no directional claim at all.
+  correct: 2
+  explanation: >-
+    On the shipped data the slice that carries the verdict is `how_to`, at 55.6 points worse on
+    nine items with an interval excluding zero, and it has a mechanism attached to it. The
+    improving slice is three items and one flipped label, which is a story rather than a finding.
+
+- id: q5
+  question: >-
+    You run the migration gate on 20 random dev items to save time. Three seeds give drops of 10,
+    15 and 25 points, every interval contains zero, and the gate blocks all three times. What is
+    the honest description of what happened?
+  options:
+    - >-
+      Three independent confirmations of a real regression, because the point estimate dropped on
+      every seed and a paired bootstrap is by construction the right test for a paired design.
+    - >-
+      A gate that fires on a point estimate, so a small suite converts noise into a blocking
+      verdict, and the honest reading is that three blocks over one suite is one finding.
+    - >-
+      A false-alarm rate problem rather than a sample-size problem, because a gate that blocks
+      three times out of three on the same unchanged suite has an alarm rate of one hundred per
+      cent and should be switched off immediately.
+    - >-
+      A reason to raise the tolerance rather than the item count, because the intervals all
+      include zero and a wider tolerance would stop the gate firing on differences the data cannot
+      resolve on twenty items.
+  correct: 1
+  explanation: >-
+    The gate fires on the point estimate by design, so at n = 20 it blocks on 10 points with an
+    interval from minus 45 to plus 25. Either the item count or the tolerance has to change, and
+    both are costs you should have written down before choosing twenty.

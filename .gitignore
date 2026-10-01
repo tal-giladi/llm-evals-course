@@ -28,3 +28,6 @@ build/m1*.py
 
 # Cache and gate outputs the labs write while you are working through them.
 build/m13*.json
+
+# Scratch the lesson agents leave behind.
+build/m1*.txt

@@ -255,7 +255,7 @@ The procedure is the point, not the value: **re-measure the judge on the new bui
 ## Fix it
 
 1. **Fix the comparison before you fix anything.** Candidate first, baseline second, and a test that the sign of `delta` matches the sign of the raw pass-rate difference. That assertion is three lines and it catches the most expensive bug in this lesson.
-2. **Recompute `fixed` and `broke` from the two verdict lists**, where the sign of each item is visible, and print the item ids with them. Nineteen named items is a bug report; the number 19 is a statistic.
+2. **Recompute `fixed` and `broke` from the two verdict lists**, where the sign of each item is visible, and print the item ids with them. Nineteen named items is a bug report; the number 19 is a statistic. The first four are `s02`, `s03`, `s08` and `s30` — a `boundary`, a `policy_fact` and two `how_to` items, which is the point: the losses are spread across slices rather than sitting in one, so the slice table and the flip list are different artefacts and you need both.
 3. **Re-run the judge's confusion matrix on the new build's answers** before the delta is read, and put both rows in the PR. If the judge changed, the delta is not yet a fact about the model.
 4. **Put the slice table in the report, not the whole-suite number.** The table is what names the mechanism; the average is what the dashboard already shows.
 5. **Write the tolerance you set next to the resolution your suite has.** At 75% pass, 57 items give a half-width of 10.9 points and 300 items give 4.9 — [04.4](../module-04/lesson-04.md)'s arithmetic. A tolerance of 5 points on 57 items is a claim about five-point differences that the suite cannot make.
@@ -267,7 +267,7 @@ The procedure is the point, not the value: **re-measure the judge on the new bui
 **Challenge, on dev**, with the 57 dev items, judge `c-rubric-3b`, five repeats, tolerance 5 points:
 
 - **The comparison is paired and the argument order is tested.** `delta = -0.2105`, interval `[-0.3684, -0.0351]`, zero not in it, and an assertion that fails if the sign ever disagrees with the raw pass rates.
-- **`fixed` and `broke` are recomputed and printed with item ids.** 19 and 7, named. You can read `s02`, `s03`, `s08`, `s30` and know they are the `how_to` and `boundary` items that lost retrieval.
+- **`fixed` and `broke` are recomputed and printed with item ids.** 19 and 7, named. The first four are `s02`, `s03`, `s08` and `s30`, one per failure the retrieval step would explain, and you can open any one of them and read the two answers side by side.
 - **The slice table is in the report, and one slice carries the decision.** `how_to`, n = 9, −55.6 points, interval `[-88.9, -22.2]`, with a mechanism in a sentence that does not mention the number.
 - **The judge's confusion matrix appears twice**, once per build's answers, and you can say which direction it moved and what you would do in the other direction.
 - **The cost of the decision is stated in model calls and in currency**, 285 calls on dev and 185 on test, at the shipped illustrative per-call price, with the price labelled illustrative.
