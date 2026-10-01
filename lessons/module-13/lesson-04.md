@@ -245,8 +245,8 @@ py labs/module-13/solution/cost_lab.py --cache .judge-cache.json --out cost.json
 wrote cost.json
 ```
 
-The ceiling, on a fresh cache, set to the shipped size so the day somebody adds a fourth repeat is the day
-this goes red:
+The ceiling, on a fresh cache, set to 40 calls so you can watch one fire — the shipped default of 282 has
+the same shape, it is just a number a fourth repeat would push past:
 
 ```
 py labs/module-13/solution/cost_lab.py --cache fresh.json --max-calls 40 --out cost.json
@@ -287,7 +287,8 @@ healthy re-run     : PASS-WITH-WARNING: candidate is 2.1 points down, which is i
 wrote gate.json
 ```
 
-`gate.json` is what the comment is rendered from, and every field on the comment is in it:
+`gate.json` is what the comment is rendered from, and every line of that comment is a field in it. Here is
+the same file with the four long spec strings elided:
 
 ```json
 {
@@ -466,12 +467,11 @@ healthy pairs each, lesson 13.3's table). So the cheaper set is also the noisier
 | Share of the full-suite budget | 60.6% | 39.4% |
 | False alarms at 5 points, 3 repeats | 18.2% (400 pairs) | **24.2%** (400 pairs) |
 
-**A budget priced on the smaller set under-counts the suite it is protecting by 60%, and the same
-tolerance mis-fires one time in four instead of one in five on the half nobody tuned it on.** The first
-row is why you price the *whole* frozen set and not the split you happened to develop on; the last row is
-lesson 10.3's half-width arriving in the cost column instead of the pass-rate column. Neither is a reason to
-buy a bigger set — it is a reason to write down which set the budget was measured on, and to re-measure
-when the set changes.
+**Neither half of the suite is the suite, and the same tolerance mis-fires one time in four on the half
+nobody tuned it on against one in five on the half they did.** The first three rows are why you price the
+*whole* frozen set and not the split you happened to develop on; the last row is lesson 10.3's half-width
+arriving in the cost column instead of the pass-rate column. Neither is a reason to buy a bigger set — it is
+a reason to write down which set the budget was measured on, and to re-measure when the set changes.
 
 ## Use / don't use
 

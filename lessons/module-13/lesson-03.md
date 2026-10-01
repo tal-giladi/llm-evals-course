@@ -45,7 +45,7 @@ measurement fires on the measurement's noise as well as on the change.** The shi
 
 | Repeats | False alarms — healthy build, gate fires anyway | Missed — a break of one question in ten |
 |---|---|---|
-| 1 | **13.8%** (55/400) | 44.8% |
+| 1 | **13.8%** | 44.8% |
 | 3 | **9.0%** | 50.5% |
 | 5 | **7.5%** | 47.2% |
 
@@ -157,16 +157,18 @@ broken=3   drop= 5.26 pts  blocked@[0.5,2,5,10,20,30] = [T,T,T,F,F,F]
 broken=12  drop=12.28 pts  blocked@[0.5,2,5,10,20,30] = [T,T,T,T,F,F]
 ```
 
-Read row three and ask what tolerance you would need to *miss* a 12-item regression. Ten points, and the
-row goes `[T,T,T,T,F,F]` — from the fourth column on, a change that broke 12 of 57 items and cost 12.28
-points of pass rate is invisible. Now read row one and ask the same question about a 1.75-point drop, which
-is what a single item is worth. There is no tolerance that blocks one and not the other; there is only the
-column where you stopped looking.
+Read row three and ask how wide the tolerance has to get before that 12.28-point drop is invisible. Twenty
+points — the last two columns — and a change that broke 12 of 57 items and cost 12.28 points of pass rate
+stops being a regression the gate can see. Now read row one and ask the same question about a 1.75-point
+drop, which is what a single item is worth. There is no tolerance that blocks one and not the other; there
+is only the column where you stopped looking.
 
 **Here is the honest limit, and it is a real one: from inside the gate, a widened tolerance and a hidden
-regression are the same number.** A 5-point tolerance that passes a 5.26-point real drop and a 10-point
-tolerance that passes a 12.28-point one emit the same `passes:` line. Nothing in the decision distinguishes
-them, because the decision was not given the information to.
+regression are the same number.** A 10-point tolerance passes a 5.26-point real drop; a 20-point tolerance
+passes a 12.28-point one. Both emit the same `passes:` line, and the widest healthy gap this measurement
+produced on its own was **17.5 points at one repeat** — so a tolerance wide enough to absorb every healthy
+move it has ever made is also wide enough to absorb the regression. Nothing in the decision tells them
+apart, because the decision was not given the information to.
 
 The only procedure that distinguishes them is the one lesson 13.1 already runs: **plant a regression of a
 size you have named and check it is still caught.** That is not a workaround; it is the reason a tolerance
@@ -180,8 +182,8 @@ suite quietly.
 The first two tools adjust a number. The third records a belief. A failing eval is a claim, and sometimes
 the claim is right and the code is wrong; sometimes the eval has drifted from what the product does;
 occasionally the eval itself is broken and cannot be made to run again this quarter. **A quarantine list is
-how you say which of those you currently believe, in a file, where a pull request can see it.** Here is
-[`evallab/gate.py`](../../labs/common/evallab/gate.py), in full:
+how you say which of those you currently believe, in a file, where a pull request can see it.** Here is the
+`Quarantine` class from [`evallab/gate.py`](../../labs/common/evallab/gate.py), in full:
 
 ```python
 @dataclass
@@ -352,18 +354,19 @@ ValueError: quarantining s01 needs a reason, an owner and a review date; an entr
    on 94 items is the change rather than the noise?
 2. You raise the repeats from 1 to 3. Name the one failure rate it improves, name the one it leaves roughly
    where it was, and give the sentence explaining why the second one cannot be bought with repeats.
-3. A colleague wants to set the tolerance to 12 points because the noise is around 10. Predict what happens
-   to a change that breaks 12 of 57 items, and say what you would have to run to know whether the tolerance
-   is safe.
+3. A colleague wants to set the tolerance to 20 points, because the widest healthy move the suite has ever
+   made is 17.5. Predict what happens to a change that breaks 12 of 57 items, and say what you would have to
+   run to know whether the tolerance is safe.
 4. You quarantine `s05` with the reason "flaky". The `add` call raises. Say which of the three fields is
    missing, then say what the review date is actually for.
 
 [Lab: evallab package](../../labs/common/)
 
-1. **Count your own noise before you tune anything.** Run the 24.5% measurement on your judge, on your
-   dev split, and split the items into "all recorded samples agree" and "they do not". Write down the two
-   counts. Now compute the pass rate of the *unanimous* items only and compare it with the pass rate of
-   the split ones. Say in one sentence which of those two numbers is a measurement and which is a coin.
+1. **Count your own noise before you tune anything.** Run the disagreement measurement from the table above
+   on your own judge and your own dev split, and split the items into "all recorded samples agree" and "they
+   do not". Write down the two counts. Now compute the pass rate of the *unanimous* items only and compare it
+   with the pass rate of the split ones. Say in one sentence which of those two numbers is a measurement and
+   which is a coin.
 2. **Price the arity, not the knob.** Use `majority_vote` on `samples[:1]`, `[:2]`, `[:3]`, `[:4]` and
    `[:5]` for every item and write the five pass rates down. Find the ones that are lower than their
    neighbours and explain each in terms of the tie rule. Then decide: what is the cheapest repeat count
@@ -388,11 +391,11 @@ ValueError: quarantining s01 needs a reason, an owner and a review date; an entr
 
 ## Break it
 
-**Set the tolerance to whatever stopped the noise.** The healthy re-run moves the pass rate by about 4
-points, so the tolerance goes to 10, and the gate goes quiet forever. The 12-item regression above costs
-12.28 points and is now invisible too. The lie: **a threshold wide enough to absorb the noise is a threshold
-wide enough to absorb the thing the gate was for**, and inside the gate the two look identical — which is
-why a gate tuned by feel stops catching regressions without anything going red.
+**Set the tolerance to whatever stopped the noise.** The widest healthy move this suite has ever made is
+17.5 points, so the tolerance goes to 20, and the gate goes quiet forever. The 12-item regression above
+costs 12.28 points and is now inside the band. The lie: **a threshold wide enough to absorb the noise is a
+threshold wide enough to absorb the thing the gate was for**, and inside the gate the two look identical —
+which is why a gate tuned by feel stops catching regressions without anything going red.
 
 **Buy repeats as if they were items.** Going from 1 repeat to 3 costs three times the calls and takes the
 healthy-drop sd from 5.87 points to 4.85, while the miss rate on a 3-item break goes 54.8% → 58.8%. The
@@ -414,11 +417,11 @@ list genuinely does change the verdict, and enjoy a suite that passes while 12 o
 lie: **a gate that can be talked out of a regression by a list someone wrote in advance is not a gate**,
 and the list is written by the person who is most tired.
 
-**Treat "one in seven healthy builds blocked" as a rounding error.** It is 55 blocked runs out of 400 on
-identical code, and the cost is not the 55 mornings — it is that the 400th engineer to be re-run learns
-that the red X is a thing you retry. The lie: **a required check with a known false-alarm rate does not
-train people to trust it, it trains them to re-run it**, and the second habit is what eventually deletes
-the check.
+**Treat "one in seven healthy builds blocked" as a rounding error.** It is roughly one run in seven on
+identical code, and the cost is not the morning each engineer loses — it is that the four-hundredth engineer
+to be re-run learns that the red X is a thing you retry. The lie: **a required check with a known
+false-alarm rate does not train people to trust it, it trains them to re-run it**, and the second habit is
+what eventually deletes the check.
 
 ## Fix it
 
@@ -479,10 +482,10 @@ and tolerance you just fixed. It is worse on every axis, and that is the finding
 repeats went 18.2% to 24.2%** — and the same tolerance now blocks roughly one healthy build in four. That
 is lesson 10.3's half-width story arriving from the other direction: the dev split is a noisier place to
 measure than the whole suite, and a tolerance tuned on it is tuned against a measurement that was too
-quiet. The last two rows are the counterweight to reading that as bad news. On 37 items a 12-item break
-costs **8.11 points, not 12.28**, because a third of the set is smaller and the items in it are not average
-items — so the signal shrank *and* the noise grew, and the miss rate is worse on held-out data for the same
-reason it always is.
+quiet. The last two rows are the counterweight to reading that as bad news. On the 37 held-out items a
+12-item break costs **8.11 points, not 12.28**, because the set is smaller and the items in it are not
+average items — so the signal shrank *and* the noise grew, and the miss rate is worse on held-out data for
+the same reason it always is.
 
 ## Use / don't use
 
@@ -490,9 +493,10 @@ reason it always is.
 answers it, and it is the difference between a gate and a coin with a threshold. Record it in the pull
 request that adds the gate.
 
-**Do buy false-alarm reduction with items before you buy it with repeats.** On this data the item axis
-takes the 94-item false-alarm rate from 31.0% to 13.8%; the repeat axis takes it from 13.8% to 7.5% at
-three to five times the calls per run. Repeats are the per-item, per-run cost that never stops.
+**Do buy false-alarm reduction with items before you buy it with repeats.** On this data, at one repeat, the
+item axis takes the false-alarm rate from 31.0% at 20 items to 13.8% at 94; the repeat axis takes it from
+13.8% to 7.5% at three to five times the calls per run. Repeats are the per-item, per-run cost that never
+stops.
 
 **Do keep the tolerance's test in the suite.** A planted regression of a named size, asserted at every
 tolerance the gate might be set to, is the only procedure that separates "I widened this until the noise
@@ -531,7 +535,7 @@ folklore is what survives a rebase and loses the argument.
 1. The grid reads `false alarms 13.8% / missed 44.8%` at one repeat and `7.5% / 47.2%` at five. Write the
    two sentences that explain to a team why the second column went the wrong way when they spent money on
    the first, and say which knob you would actually spend on.
-2. A 12.28-point regression and a 1.75-point drop both pass at a 10-point tolerance and print the same
+2. A 12.28-point regression and a 1.75-point drop both pass at a 20-point tolerance and print the same
    line. Write the paragraph you would send to the person who set that tolerance, and say what you would
    put in the code so the next person cannot do it by accident.
 3. `quarantine.json` has one entry out of 94. Somebody adds four more "until we fix the judge". Write the

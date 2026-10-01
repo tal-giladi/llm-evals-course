@@ -1,6 +1,6 @@
 - id: q1
   question: >-
-    The gate blocks 13.8% of healthy builds at one repeat. The team widens the tolerance to 10 points and
+    The gate blocks 13.8% of healthy builds at one repeat. The team widens the tolerance to 20 points and
     the false alarms stop. What does that change cost on the same 57 dev items?
   options:
     - >-
@@ -17,10 +17,9 @@
       compare two pass rates.
   correct: 1
   explanation: >-
-    Sweeping the tolerance on those items gives `[T,T,T,T,F,F]` at 0.5, 2, 5, 10, 20 and 30 points, so a
-    10-point threshold has already stopped seeing the 12.28-point drop. Inside the gate a widened tolerance
-    and a hidden regression produce the same line of output, which is why the planted regression has to be
-    a test.
+    Sweeping the tolerance on those items gives `[T,T,T,T,F,F]` at 0.5, 2, 5, 10, 20 and 30 points, so by
+    20 points the 12.28-point drop is inside the band. Inside the gate a widened tolerance and a hidden
+    regression produce the same line of output, which is why the planted regression has to be a test.
 
 - id: q2
   question: >-

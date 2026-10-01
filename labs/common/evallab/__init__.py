@@ -42,6 +42,9 @@ from .tracing import (
 )
 from .observe import TraceStore, instrumented_run, record, summary
 from .gate import Budget, GateResult, Quarantine, run_gate
+from .online import (
+    Band, Regression, mix, psi, regressions_from, sample_for_review, sample_queries,
+)
 
 __version__ = "1.1.0"
 
@@ -65,6 +68,10 @@ __all__ = [
     "TraceStore", "instrumented_run", "record", "summary",
     # release gate, module 13
     "run_gate", "GateResult", "Budget", "Quarantine",
+    # online evals, module 14
+    "Band", "psi", "mix", "sample_queries", "sample_for_review",
+    "Regression", "regressions_from",
 ]
+
 
 
