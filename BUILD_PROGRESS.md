@@ -24,20 +24,16 @@ Modules 11–15 (production path: Python, Docker, tracing UI, CI, online monitor
 ## Units
 
 - [x] Repo spine (`BUILD_PROGRESS.md`, `curriculum/`, `.gitignore`, status logs)
-- [ ] Lab kit — statistics engine (`simulations/common/stats.js`)
-- [ ] Lab kit — code evaluators (`simulations/common/codemetrics.js`)
-- [ ] Lab kit — shared UI + trace viewer (`simulations/common/ui.js`, `sim.css`)
-- [ ] Build pipeline (`build/`) + `datasets/`
-- [ ] Simulation `judge-lab` (M5, M6, M7) — reference implementation
-- [ ] Simulation `tour` (M1)
-- [ ] Simulation `error-analysis` (M2)
-- [ ] Simulation `code-checks` (M3)
-- [ ] Simulation `eval-set` (M4)
-- [ ] Simulation `rag-evals` (M8)
-- [ ] Simulation `agent-evals` (M9)
-- [ ] Simulation `ab-gates` (M10)
-- [ ] Simulation `device-check` (setup)
-- [ ] Shared docs: `README.md`, `_sidebar.md`, `glossary.md`, `templates/`, `references/`, `COURSE-MAP.md`, `TODO_FOR_TAL.md`
+- [x] Lab kit — statistics engine (`simulations/common/stats.js`)
+- [x] Lab kit — code evaluators (`simulations/common/codemetrics.js`)
+- [x] Lab kit — shared UI + trace viewer (`simulations/common/ui.js`, `sim.css`)
+- [x] Build pipeline (`build/generate.mjs`) + generated datasets
+- [x] All nine simulations (judge-lab, tour, error-analysis, code-checks, eval-set, rag-evals, agent-evals, ab-gates, device-check)
+- [x] Browser smoke test (`build/smoke.mjs`) — all 9 labs clean in Edge
+- [x] Dataset verification (`build/verify.mjs`) — all checks pass
+- [x] Lesson/quiz validator (`build/check-lessons.mjs`)
+- [x] Shared docs: `README.md`, `_sidebar.md`, `glossary.md`, `templates/`, `references/`, `COURSE-MAP.md`, `TODO_FOR_TAL.md`
+- [x] Writing brief for agents (`curriculum/AGENT-BRIEF.md`)
 - [ ] Module 1 — Why evals (4 lessons)
 - [ ] Module 2 — Error analysis (4)
 - [ ] Module 3 — Code-based checks (4)
@@ -49,8 +45,7 @@ Modules 11–15 (production path: Python, Docker, tracing UI, CI, online monitor
 - [ ] Module 9 — Evaluating agents and conversations (4)
 - [ ] Module 10 — Comparing systems and release gates (4)
 - [ ] Module quizzes M1–M10 (`assessments/`)
-- [ ] Capstone brief (`projects/`)
-- [ ] Final QA — `npm run check-course` → `0 problems`
+- [ ] Final QA — all four build checks green
 
 ## Who is working on what right now
 
@@ -81,3 +76,4 @@ Modules 11–15 (production path: Python, Docker, tracing UI, CI, online monitor
 - Plan §12.5 (who labels our datasets) — our educational-model labels are synthetic; real labelling pass is Tal's call.
 - Plan §12.9 (Hebrew judging set) — not in this pass.
 - Plan §12.2/§12.3 (shared lab kit with rag-course, Academy network access) — this pass vendors a standalone copy into `simulations/common/`; sharing is not decided.
+

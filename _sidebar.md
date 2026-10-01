@@ -1,0 +1,73 @@
+- [Home](/)
+- [Glossary](glossary.md)
+- [Course map](COURSE-MAP.md)
+- [Readings](references/README.md)
+
+- Part 1 — Look at it (browser only, no install)
+- **Module 1 — Why evals**
+  - [01 · Vibes versus evals](lessons/module-01/lesson-01.md)
+  - [02 · What "good" means for one feature](lessons/module-01/lesson-02.md)
+  - [03 · The loop: analyse, measure, improve](lessons/module-01/lesson-03.md)
+  - [04 · A tour of the Eval Lab](lessons/module-01/lesson-04.md)
+  - [Module 1 quiz](assessments/module-01-quiz.md)
+- **Module 2 — Error analysis: look at your data**
+  - [05 · Reading a trace](lessons/module-02/lesson-01.md)
+  - [06 · Open coding: writing notes on failures](lessons/module-02/lesson-02.md)
+  - [07 · Axial coding: building a failure taxonomy](lessons/module-02/lesson-03.md)
+  - [08 · Sampling: which traces to read, and when to stop](lessons/module-02/lesson-04.md)
+  - [Module 2 quiz](assessments/module-02-quiz.md)
+- **Module 3 — Code-based checks**
+  - [09 · Assertions: the cheapest check there is](lessons/module-03/lesson-01.md)
+  - [10 · Regex and JSON schema](lessons/module-03/lesson-02.md)
+  - [11 · Reference metrics and their traps](lessons/module-03/lesson-03.md)
+  - [12 · Choosing code, judge or human](lessons/module-03/lesson-04.md)
+  - [Module 3 quiz](assessments/module-03-quiz.md)
+- **Module 4 — Building the eval set**
+  - [13 · From taxonomy to test cases](lessons/module-04/lesson-01.md)
+  - [14 · Dev, test, and the one-validation rule](lessons/module-04/lesson-02.md)
+  - [15 · Stratification and slices](lessons/module-04/lesson-03.md)
+  - [16 · Sample size and confidence intervals](lessons/module-04/lesson-04.md)
+  - [Module 4 quiz](assessments/module-04-quiz.md)
+
+- Part 2 — Judge it (browser only, no install)
+- **Module 5 — Designing an LLM judge**
+  - [17 · One failure per judge, binary first](lessons/module-05/lesson-01.md)
+  - [18 · Binary, Likert and pairwise](lessons/module-05/lesson-02.md)
+  - [19 · Rubrics that decide something](lessons/module-05/lesson-03.md)
+  - [20 · Few-shot examples](lessons/module-05/lesson-04.md)
+  - [21 · Verdict-first or critique-first](lessons/module-05/lesson-05.md)
+  - [Module 5 quiz](assessments/module-05-quiz.md)
+- **Module 6 — Validating the judge**
+  - [22 · Who writes the human labels](lessons/module-06/lesson-01.md)
+  - [23 · TPR, TNR and the confusion matrix](lessons/module-06/lesson-02.md)
+  - [24 · Cohen's kappa and the disagreement review](lessons/module-06/lesson-03.md)
+  - [25 · Thresholds and the probability-weighted score](lessons/module-06/lesson-04.md)
+  - [26 · Correcting a pass rate for judge error](lessons/module-06/lesson-05.md)
+  - [Module 6 quiz](assessments/module-06-quiz.md)
+- **Module 7 — Judge biases, models and cost**
+  - [27 · Position bias](lessons/module-07/lesson-01.md)
+  - [28 · Verbosity bias](lessons/module-07/lesson-02.md)
+  - [29 · Self-preference](lessons/module-07/lesson-03.md)
+  - [30 · Judge size, agreement and cost](lessons/module-07/lesson-04.md)
+  - [31 · Repeats, temperature and majority vote](lessons/module-07/lesson-05.md)
+  - [Module 7 quiz](assessments/module-07-quiz.md)
+
+- Part 3 — Apply it (browser only, no install)
+- **Module 8 — Evaluating RAG answers**
+  - [32 · Retrieval failures and answer failures](lessons/module-08/lesson-01.md)
+  - [33 · Grounding judges, claim by claim](lessons/module-08/lesson-02.md)
+  - [34 · Abstention and over-refusal](lessons/module-08/lesson-03.md)
+  - [35 · Validating RAG metrics against humans](lessons/module-08/lesson-04.md)
+  - [Module 8 quiz](assessments/module-08-quiz.md)
+- **Module 9 — Evaluating agents and conversations**
+  - [36 · End state versus trajectory](lessons/module-09/lesson-01.md)
+  - [37 · Tool-call correctness](lessons/module-09/lesson-02.md)
+  - [38 · Multi-turn conversations and simulated users](lessons/module-09/lesson-03.md)
+  - [39 · Finding the failing step](lessons/module-09/lesson-04.md)
+  - [Module 9 quiz](assessments/module-09-quiz.md)
+- **Module 10 — Comparing systems and release gates**
+  - [40 · A/B on the same items](lessons/module-10/lesson-01.md)
+  - [41 · Paired versus unpaired](lessons/module-10/lesson-02.md)
+  - [42 · Setting a gate under noise](lessons/module-10/lesson-03.md)
+  - [43 · Slices as their own gates](lessons/module-10/lesson-04.md)
+  - [Module 10 quiz](assessments/module-10-quiz.md)
