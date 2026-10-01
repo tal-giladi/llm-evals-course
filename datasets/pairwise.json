@@ -1,0 +1,778 @@
+{
+ "dataset": "pairwise",
+ "title": "Pairwise preference pairs",
+ "items": [
+  {
+   "id": "p01",
+   "question": "Explain what a Wilson score interval is for.",
+   "a": "It gives a range for a proportion that stays sensible when the sample is small or the proportion is near 1, which the normal approximation does not.",
+   "b": "It is a way of checking whether two models produce the same answers."
+  },
+  {
+   "id": "p02",
+   "question": "My agent used the wrong tool but got the right answer. Is that a failure?",
+   "a": "It depends on your risk appetite: if the route matters for cost, safety or audit, yes; if only the answer matters and the wrong tool is harmless, record it but do not fail the run.",
+   "b": "No, the user only cares about the answer, so any route that works is fine."
+  },
+  {
+   "id": "p03",
+   "question": "Why bootstrap the confidence interval instead of using a formula?",
+   "a": "Because the distribution of most eval statistics is not known in closed form, so resampling estimates it directly for whatever estimator you use.",
+   "b": "Because bootstrap is more accurate for large samples."
+  },
+  {
+   "id": "p04",
+   "question": "Should I use ROUGE-L to score a recipe extraction?",
+   "a": "Only for prose fields. For quantities and temperatures it rewards the wrong answer, because overlapping tokens say nothing about whether 230 is the right number.",
+   "b": "Yes, ROUGE-L is the standard metric for extraction tasks."
+  },
+  {
+   "id": "p05",
+   "question": "What is position bias in an LLM judge?",
+   "a": "A tendency to prefer whichever answer it read first, so the same pair judged as A-B and B-A can give opposite verdicts.",
+   "b": "A tendency to prefer longer answers regardless of their order."
+  },
+  {
+   "id": "p06",
+   "question": "How many eval items do I need?",
+   "a": "Enough that the interval is narrower than the difference you need to detect; start at 50 and widen until the interval stops changing your decision.",
+   "b": "Exactly 100, which is the standard minimum for LLM evaluation."
+  },
+  {
+   "id": "p07",
+   "question": "My judge scores 0.92 and humans agree 60% of the time. What now?",
+   "a": "Check whether the set is mostly passes; at 90% prevalence a judge that always says pass scores 0.9, so look at TNR and kappa before trusting it.",
+   "b": "The score is high, so the judge is working — ship it."
+  },
+  {
+   "id": "p08",
+   "question": "When is a code check better than a judge?",
+   "a": "Whenever correctness is decidable: exact values, valid JSON, required fields, a regex. Code is free, instant and explains its own failures.",
+   "b": "Whenever the project already has a test framework."
+  },
+  {
+   "id": "p09",
+   "question": "What does a kappa of 0.2 mean?",
+   "a": "Barely better than what you would get by guessing the majority class, so the judge is not usable as a gate.",
+   "b": "20% of judgements are wrong, which is acceptable for a first version."
+  },
+  {
+   "id": "p10",
+   "question": "Should the same items be in the eval set every release?",
+   "a": "Keep a fixed suite so results are comparable, and add new cases when a real failure appears; changing the set every release makes every number incomparable.",
+   "b": "Rebuild the set each quarter from recent traffic so it stays relevant."
+  },
+  {
+   "id": "p11",
+   "question": "What is the cheapest way to cut judge cost?",
+   "a": "Ask for a verdict and a short reason in one call, and cache by prompt hash, model and item so repeats are free.",
+   "b": "Use a smaller model; the cost difference is the whole story."
+  },
+  {
+   "id": "p12",
+   "question": "A prompt change raised the pass rate from 0.80 to 0.86 on 20 items. Ship it?",
+   "a": "Not yet — on 20 items that move sits inside the interval. Widen the sample until the interval separates the two.",
+   "b": "Yes, six points is a clear improvement."
+  }
+ ],
+ "models": [
+  {
+   "id": "qwen3-1.7b",
+   "label": "Qwen3 1.7B"
+  },
+  {
+   "id": "llama-3.2-3b",
+   "label": "Llama 3.2 3B"
+  },
+  {
+   "id": "flow-judge-3.8b",
+   "label": "Flow-Judge 3.8B"
+  },
+  {
+   "id": "prometheus-7b",
+   "label": "Prometheus 2 7B"
+  }
+ ],
+ "runs": {
+  "qwen3-1.7b": {
+   "p01": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "A",
+     "B",
+     "A"
+    ]
+   },
+   "p02": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ]
+   },
+   "p03": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "A",
+     "B"
+    ]
+   },
+   "p04": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "B",
+     "A"
+    ]
+   },
+   "p05": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "A",
+     "A",
+     "B"
+    ]
+   },
+   "p06": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "A",
+     "B",
+     "A"
+    ]
+   },
+   "p07": {
+    "AB": [
+     "A",
+     "A",
+     "B",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "A",
+     "B"
+    ]
+   },
+   "p08": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ]
+   },
+   "p09": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "A",
+     "B",
+     "A"
+    ]
+   },
+   "p10": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "A",
+     "B"
+    ]
+   },
+   "p11": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "B",
+     "A",
+     "B"
+    ]
+   },
+   "p12": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "B",
+     "A"
+    ]
+   }
+  },
+  "llama-3.2-3b": {
+   "p01": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "A",
+     "B",
+     "B"
+    ]
+   },
+   "p02": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "A",
+     "A",
+     "B"
+    ]
+   },
+   "p03": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "B",
+     "B",
+     "B"
+    ]
+   },
+   "p04": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "A",
+     "B",
+     "B"
+    ]
+   },
+   "p05": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "B",
+     "A"
+    ]
+   },
+   "p06": {
+    "AB": [
+     "B",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ]
+   },
+   "p07": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "B",
+     "A"
+    ]
+   },
+   "p08": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "B",
+     "B"
+    ]
+   },
+   "p09": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "A",
+     "A",
+     "A"
+    ]
+   },
+   "p10": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "B",
+     "B",
+     "B"
+    ]
+   },
+   "p11": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "A",
+     "B",
+     "A"
+    ]
+   },
+   "p12": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "B",
+     "B",
+     "A"
+    ]
+   }
+  },
+  "flow-judge-3.8b": {
+   "p01": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "B",
+     "A",
+     "B"
+    ]
+   },
+   "p02": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "B",
+     "B",
+     "A"
+    ]
+   },
+   "p03": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "B",
+     "A",
+     "A"
+    ]
+   },
+   "p04": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ]
+   },
+   "p05": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "A",
+     "B"
+    ]
+   },
+   "p06": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "A",
+     "B",
+     "A"
+    ]
+   },
+   "p07": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "B",
+     "B",
+     "B"
+    ]
+   },
+   "p08": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "A",
+     "B"
+    ]
+   },
+   "p09": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ]
+   },
+   "p10": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ]
+   },
+   "p11": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ]
+   },
+   "p12": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "B",
+     "A",
+     "A"
+    ]
+   }
+  },
+  "prometheus-7b": {
+   "p01": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "B",
+     "B"
+    ]
+   },
+   "p02": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "A",
+     "B"
+    ]
+   },
+   "p03": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "B",
+     "B",
+     "A"
+    ]
+   },
+   "p04": {
+    "AB": [
+     "A",
+     "B",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "A",
+     "A",
+     "A"
+    ]
+   },
+   "p05": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "A",
+     "B",
+     "B"
+    ]
+   },
+   "p06": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "A",
+     "A",
+     "B"
+    ]
+   },
+   "p07": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "A",
+     "B",
+     "A"
+    ]
+   },
+   "p08": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "B",
+     "A",
+     "B"
+    ]
+   },
+   "p09": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "B",
+     "B",
+     "B"
+    ]
+   },
+   "p10": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "B",
+     "A",
+     "A",
+     "A"
+    ]
+   },
+   "p11": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "B",
+     "B",
+     "A"
+    ]
+   },
+   "p12": {
+    "AB": [
+     "A",
+     "A",
+     "A",
+     "A"
+    ],
+    "BA": [
+     "A",
+     "B",
+     "A",
+     "A"
+    ]
+   }
+  }
+ }
+}

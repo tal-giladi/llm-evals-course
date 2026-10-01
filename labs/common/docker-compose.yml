@@ -1,0 +1,44 @@
+# A pinned judge, so verdicts are the same on every machine.
+#
+# Lesson 11.3 is about the failure where a suite passes locally and fails in
+# CI because the judge changed underneath it. The usual cause is the model:
+# a different build or quantisation gives different verdicts on the same item.
+#
+# So the judge runs in a container with a pinned model tag. The tag is the
+# pin — change it and every recorded number in your report stops being
+# reproducible, which is exactly the bug this file exists to prevent.
+
+services:
+  ollama:
+    image: ollama/ollama:0.5.7
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    environment:
+      # Keep the server on the CPU. The course targets a laptop with no GPU,
+      # and a 1.7B judge on CPU is slow but finishes.
+      OLLAMA_KEEP_ALIVE: "5m"
+    healthcheck:
+      # Wait for the server, not the container: `up` returns before Ollama is
+      # actually listening, and a judge call in that window fails for a reason
+      # that has nothing to do with the learner's code.
+      test: ["CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  # Pull the pinned model once, so the first judge call does not time out.
+  #   docker compose run --rm pull-model
+  pull-model:
+    image: ollama/ollama:0.5.7
+    depends_on:
+      ollama:
+        condition: service_healthy
+    entrypoint: ["sh", "-c", "ollama pull qwen3:1.7b"]
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+
+volumes:
+  ollama-models:

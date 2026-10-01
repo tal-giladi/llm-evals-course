@@ -1,0 +1,2331 @@
+{
+ "dataset": "agent",
+ "title": "Kitchen assistant agent runs",
+ "runs": [
+  {
+   "id": "a01",
+   "task": "Scale a banana bread recipe from 1 tin to 3 tins and set a timer for the bake.",
+   "trace_id": "tr_a01",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "scale_quantities",
+    "set_timer"
+   ],
+   "steps": [
+    "search_recipe(bread)",
+    "scale_quantities(1→3)",
+    "set_timer(50 min)"
+   ],
+   "spans": [
+    {
+     "id": "a01-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Scale a banana bread recipe from 1 tin to 3 ",
+     "start_ms": 122,
+     "duration_ms": 2214
+    },
+    {
+     "id": "a01-1",
+     "parent": "a01-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(bread)",
+     "tool": "search_recipe",
+     "start_ms": 122,
+     "duration_ms": 428
+    },
+    {
+     "id": "a01-2",
+     "parent": "a01-1",
+     "kind": "execute_tool",
+     "name": "scale_quantities(1→3)",
+     "tool": "scale_quantities",
+     "start_ms": 583,
+     "duration_ms": 1008
+    },
+    {
+     "id": "a01-3",
+     "parent": "a01-2",
+     "kind": "execute_tool",
+     "name": "set_timer(50 min)",
+     "tool": "set_timer",
+     "start_ms": 1644,
+     "duration_ms": 273
+    },
+    {
+     "id": "a01-final",
+     "parent": "a01-3",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1936,
+     "duration_ms": 455,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a02",
+   "task": "Convert 350 g flour to cups for the pancake recipe.",
+   "trace_id": "tr_a02",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "convert_units"
+   ],
+   "steps": [
+    "search_recipe(pancakes)",
+    "convert_units(350 g→cup)"
+   ],
+   "spans": [
+    {
+     "id": "a02-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Convert 350 g flour to cups for the pancake ",
+     "start_ms": 273,
+     "duration_ms": 1737
+    },
+    {
+     "id": "a02-1",
+     "parent": "a02-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(pancakes)",
+     "tool": "search_recipe",
+     "start_ms": 273,
+     "duration_ms": 284
+    },
+    {
+     "id": "a02-2",
+     "parent": "a02-1",
+     "kind": "execute_tool",
+     "name": "convert_units(350 g→cup)",
+     "tool": "convert_units",
+     "start_ms": 595,
+     "duration_ms": 971
+    },
+    {
+     "id": "a02-final",
+     "parent": "a02-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1610,
+     "duration_ms": 375,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a03",
+   "task": "Find a gluten-free main and tell me the cook time.",
+   "trace_id": "tr_a03",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "read_recipe"
+   ],
+   "steps": [
+    "search_recipe(tags=gluten-free)",
+    "read_recipe(id)"
+   ],
+   "spans": [
+    {
+     "id": "a03-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Find a gluten-free main and tell me the cook",
+     "start_ms": 220,
+     "duration_ms": 1335
+    },
+    {
+     "id": "a03-1",
+     "parent": "a03-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(tags=gluten-free)",
+     "tool": "search_recipe",
+     "start_ms": 220,
+     "duration_ms": 617
+    },
+    {
+     "id": "a03-2",
+     "parent": "a03-1",
+     "kind": "execute_tool",
+     "name": "read_recipe(id)",
+     "tool": "read_recipe",
+     "start_ms": 855,
+     "duration_ms": 251
+    },
+    {
+     "id": "a03-final",
+     "parent": "a03-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1155,
+     "duration_ms": 403,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a04",
+   "task": "Scale the beef stew from 6 to 2 servings.",
+   "trace_id": "tr_a04",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "scale_quantities"
+   ],
+   "steps": [
+    "search_recipe(stew)",
+    "scale_quantities(6→2)"
+   ],
+   "spans": [
+    {
+     "id": "a04-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Scale the beef stew from 6 to 2 servings.",
+     "start_ms": 168,
+     "duration_ms": 1867
+    },
+    {
+     "id": "a04-1",
+     "parent": "a04-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(stew)",
+     "tool": "search_recipe",
+     "start_ms": 168,
+     "duration_ms": 731
+    },
+    {
+     "id": "a04-2",
+     "parent": "a04-1",
+     "kind": "execute_tool",
+     "name": "scale_quantities(6→2)",
+     "tool": "scale_quantities",
+     "start_ms": 943,
+     "duration_ms": 649
+    },
+    {
+     "id": "a04-final",
+     "parent": "a04-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1635,
+     "duration_ms": 261,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a05",
+   "task": "Find a vegan soup and convert 400 ml coconut milk to cups.",
+   "trace_id": "tr_a05",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "convert_units"
+   ],
+   "steps": [
+    "search_recipe(tags=vegan,soup)",
+    "convert_units(400 ml→cup)"
+   ],
+   "spans": [
+    {
+     "id": "a05-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Find a vegan soup and convert 400 ml coconut",
+     "start_ms": 300,
+     "duration_ms": 1690
+    },
+    {
+     "id": "a05-1",
+     "parent": "a05-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(tags=vegan,soup)",
+     "tool": "search_recipe",
+     "start_ms": 300,
+     "duration_ms": 883
+    },
+    {
+     "id": "a05-2",
+     "parent": "a05-1",
+     "kind": "execute_tool",
+     "name": "convert_units(400 ml→cup)",
+     "tool": "convert_units",
+     "start_ms": 1238,
+     "duration_ms": 309
+    },
+    {
+     "id": "a05-final",
+     "parent": "a05-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1590,
+     "duration_ms": 446,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a06",
+   "task": "Double the brownies and remind me to take them out.",
+   "trace_id": "tr_a06",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "scale_quantities",
+    "set_timer"
+   ],
+   "steps": [
+    "search_recipe(brownies)",
+    "scale_quantities(1→2)",
+    "set_timer(25 min)"
+   ],
+   "spans": [
+    {
+     "id": "a06-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Double the brownies and remind me to take th",
+     "start_ms": 192,
+     "duration_ms": 1725
+    },
+    {
+     "id": "a06-1",
+     "parent": "a06-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(brownies)",
+     "tool": "search_recipe",
+     "start_ms": 192,
+     "duration_ms": 329
+    },
+    {
+     "id": "a06-2",
+     "parent": "a06-1",
+     "kind": "execute_tool",
+     "name": "scale_quantities(1→2)",
+     "tool": "scale_quantities",
+     "start_ms": 556,
+     "duration_ms": 752
+    },
+    {
+     "id": "a06-3",
+     "parent": "a06-2",
+     "kind": "execute_tool",
+     "name": "set_timer(25 min)",
+     "tool": "set_timer",
+     "start_ms": 1337,
+     "duration_ms": 158
+    },
+    {
+     "id": "a06-final",
+     "parent": "a06-3",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1517,
+     "duration_ms": 334,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a07",
+   "task": "What temperature do I roast the chicken at, and how long?",
+   "trace_id": "tr_a07",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "read_recipe"
+   ],
+   "steps": [
+    "search_recipe(roast chicken)",
+    "read_recipe(id)"
+   ],
+   "spans": [
+    {
+     "id": "a07-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: What temperature do I roast the chicken at, ",
+     "start_ms": 141,
+     "duration_ms": 1486
+    },
+    {
+     "id": "a07-1",
+     "parent": "a07-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(roast chicken)",
+     "tool": "search_recipe",
+     "start_ms": 141,
+     "duration_ms": 876
+    },
+    {
+     "id": "a07-2",
+     "parent": "a07-1",
+     "kind": "execute_tool",
+     "name": "read_recipe(id)",
+     "tool": "read_recipe",
+     "start_ms": 1061,
+     "duration_ms": 127
+    },
+    {
+     "id": "a07-final",
+     "parent": "a07-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1227,
+     "duration_ms": 505,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a08",
+   "task": "Find a dessert that uses apples and halve the quantities.",
+   "trace_id": "tr_a08",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "scale_quantities"
+   ],
+   "steps": [
+    "search_recipe(apple)",
+    "scale_quantities(6→3)"
+   ],
+   "spans": [
+    {
+     "id": "a08-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Find a dessert that uses apples and halve th",
+     "start_ms": 236,
+     "duration_ms": 1767
+    },
+    {
+     "id": "a08-1",
+     "parent": "a08-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(apple)",
+     "tool": "search_recipe",
+     "start_ms": 236,
+     "duration_ms": 881
+    },
+    {
+     "id": "a08-2",
+     "parent": "a08-1",
+     "kind": "execute_tool",
+     "name": "scale_quantities(6→3)",
+     "tool": "scale_quantities",
+     "start_ms": 1169,
+     "duration_ms": 408
+    },
+    {
+     "id": "a08-final",
+     "parent": "a08-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1603,
+     "duration_ms": 598,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a09",
+   "task": "Convert 1.6 kg chicken to pounds and set a timer for 80 minutes.",
+   "trace_id": "tr_a09",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "convert_units",
+    "set_timer"
+   ],
+   "steps": [
+    "convert_units(1.6 kg→lb)",
+    "set_timer(80 min)"
+   ],
+   "spans": [
+    {
+     "id": "a09-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Convert 1.6 kg chicken to pounds and set a t",
+     "start_ms": 127,
+     "duration_ms": 1610
+    },
+    {
+     "id": "a09-1",
+     "parent": "a09-0",
+     "kind": "execute_tool",
+     "name": "convert_units(1.6 kg→lb)",
+     "tool": "convert_units",
+     "start_ms": 127,
+     "duration_ms": 824
+    },
+    {
+     "id": "a09-2",
+     "parent": "a09-1",
+     "kind": "execute_tool",
+     "name": "set_timer(80 min)",
+     "tool": "set_timer",
+     "start_ms": 977,
+     "duration_ms": 312
+    },
+    {
+     "id": "a09-final",
+     "parent": "a09-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1337,
+     "duration_ms": 588,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a10",
+   "task": "Find a side that takes under 15 minutes and list the ingredients.",
+   "trace_id": "tr_a10",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "read_recipe"
+   ],
+   "steps": [
+    "search_recipe(tags=side)",
+    "read_recipe(id)"
+   ],
+   "spans": [
+    {
+     "id": "a10-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Find a side that takes under 15 minutes and ",
+     "start_ms": 225,
+     "duration_ms": 1798
+    },
+    {
+     "id": "a10-1",
+     "parent": "a10-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(tags=side)",
+     "tool": "search_recipe",
+     "start_ms": 225,
+     "duration_ms": 814
+    },
+    {
+     "id": "a10-2",
+     "parent": "a10-1",
+     "kind": "execute_tool",
+     "name": "read_recipe(id)",
+     "tool": "read_recipe",
+     "start_ms": 1091,
+     "duration_ms": 495
+    },
+    {
+     "id": "a10-final",
+     "parent": "a10-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1623,
+     "duration_ms": 227,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a11",
+   "task": "Scale the risotto to 8 and tell me when it is ready.",
+   "trace_id": "tr_a11",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "scale_quantities",
+    "set_timer"
+   ],
+   "steps": [
+    "search_recipe(risotto)",
+    "scale_quantities(4→8)",
+    "set_timer(25 min)"
+   ],
+   "spans": [
+    {
+     "id": "a11-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Scale the risotto to 8 and tell me when it i",
+     "start_ms": 191,
+     "duration_ms": 1876
+    },
+    {
+     "id": "a11-1",
+     "parent": "a11-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(risotto)",
+     "tool": "search_recipe",
+     "start_ms": 191,
+     "duration_ms": 529
+    },
+    {
+     "id": "a11-2",
+     "parent": "a11-1",
+     "kind": "execute_tool",
+     "name": "scale_quantities(4→8)",
+     "tool": "scale_quantities",
+     "start_ms": 743,
+     "duration_ms": 312
+    },
+    {
+     "id": "a11-3",
+     "parent": "a11-2",
+     "kind": "execute_tool",
+     "name": "set_timer(25 min)",
+     "tool": "set_timer",
+     "start_ms": 1080,
+     "duration_ms": 567
+    },
+    {
+     "id": "a11-final",
+     "parent": "a11-3",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1667,
+     "duration_ms": 543,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a12",
+   "task": "Find a main with no gluten and convert 700 g to pounds.",
+   "trace_id": "tr_a12",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "convert_units"
+   ],
+   "steps": [
+    "search_recipe(tags=main,gluten-free)",
+    "convert_units(700 g→lb)"
+   ],
+   "spans": [
+    {
+     "id": "a12-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Find a main with no gluten and convert 700 g",
+     "start_ms": 308,
+     "duration_ms": 1680
+    },
+    {
+     "id": "a12-1",
+     "parent": "a12-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(tags=main,gluten-free)",
+     "tool": "search_recipe",
+     "start_ms": 308,
+     "duration_ms": 625
+    },
+    {
+     "id": "a12-2",
+     "parent": "a12-1",
+     "kind": "execute_tool",
+     "name": "convert_units(700 g→lb)",
+     "tool": "convert_units",
+     "start_ms": 968,
+     "duration_ms": 581
+    },
+    {
+     "id": "a12-final",
+     "parent": "a12-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1588,
+     "duration_ms": 570,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a13",
+   "task": "Halve the lemon cake and set a timer for the bake.",
+   "trace_id": "tr_a13",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "scale_quantities",
+    "set_timer"
+   ],
+   "steps": [
+    "search_recipe(lemon cake)",
+    "scale_quantities(1→0.5)",
+    "set_timer(40 min)"
+   ],
+   "spans": [
+    {
+     "id": "a13-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Halve the lemon cake and set a timer for the",
+     "start_ms": 153,
+     "duration_ms": 2180
+    },
+    {
+     "id": "a13-1",
+     "parent": "a13-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(lemon cake)",
+     "tool": "search_recipe",
+     "start_ms": 153,
+     "duration_ms": 182
+    },
+    {
+     "id": "a13-2",
+     "parent": "a13-1",
+     "kind": "execute_tool",
+     "name": "scale_quantities(1→0.5)",
+     "tool": "scale_quantities",
+     "start_ms": 372,
+     "duration_ms": 913
+    },
+    {
+     "id": "a13-3",
+     "parent": "a13-2",
+     "kind": "execute_tool",
+     "name": "set_timer(40 min)",
+     "tool": "set_timer",
+     "start_ms": 1325,
+     "duration_ms": 591
+    },
+    {
+     "id": "a13-final",
+     "parent": "a13-3",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1933,
+     "duration_ms": 390,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a14",
+   "task": "Find a vegan main and list its cook time.",
+   "trace_id": "tr_a14",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "read_recipe"
+   ],
+   "steps": [
+    "search_recipe(tags=main,vegan)",
+    "read_recipe(id)"
+   ],
+   "spans": [
+    {
+     "id": "a14-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Find a vegan main and list its cook time.",
+     "start_ms": 254,
+     "duration_ms": 1391
+    },
+    {
+     "id": "a14-1",
+     "parent": "a14-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(tags=main,vegan)",
+     "tool": "search_recipe",
+     "start_ms": 254,
+     "duration_ms": 188
+    },
+    {
+     "id": "a14-2",
+     "parent": "a14-1",
+     "kind": "execute_tool",
+     "name": "read_recipe(id)",
+     "tool": "read_recipe",
+     "start_ms": 492,
+     "duration_ms": 726
+    },
+    {
+     "id": "a14-final",
+     "parent": "a14-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1245,
+     "duration_ms": 519,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a15",
+   "task": "Convert 300 ml red wine to cups for the stew.",
+   "trace_id": "tr_a15",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "convert_units"
+   ],
+   "steps": [
+    "search_recipe(stew)",
+    "convert_units(300 ml→cup)"
+   ],
+   "spans": [
+    {
+     "id": "a15-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Convert 300 ml red wine to cups for the stew",
+     "start_ms": 127,
+     "duration_ms": 1820
+    },
+    {
+     "id": "a15-1",
+     "parent": "a15-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(stew)",
+     "tool": "search_recipe",
+     "start_ms": 127,
+     "duration_ms": 685
+    },
+    {
+     "id": "a15-2",
+     "parent": "a15-1",
+     "kind": "execute_tool",
+     "name": "convert_units(300 ml→cup)",
+     "tool": "convert_units",
+     "start_ms": 848,
+     "duration_ms": 665
+    },
+    {
+     "id": "a15-final",
+     "parent": "a15-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1547,
+     "duration_ms": 335,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a16",
+   "task": "Double the garlic bread and set a timer.",
+   "trace_id": "tr_a16",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "scale_quantities",
+    "set_timer"
+   ],
+   "steps": [
+    "search_recipe(garlic bread)",
+    "scale_quantities(4→8)",
+    "set_timer(10 min)"
+   ],
+   "spans": [
+    {
+     "id": "a16-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Double the garlic bread and set a timer.",
+     "start_ms": 130,
+     "duration_ms": 2354
+    },
+    {
+     "id": "a16-1",
+     "parent": "a16-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(garlic bread)",
+     "tool": "search_recipe",
+     "start_ms": 130,
+     "duration_ms": 724
+    },
+    {
+     "id": "a16-2",
+     "parent": "a16-1",
+     "kind": "execute_tool",
+     "name": "scale_quantities(4→8)",
+     "tool": "scale_quantities",
+     "start_ms": 871,
+     "duration_ms": 950
+    },
+    {
+     "id": "a16-3",
+     "parent": "a16-2",
+     "kind": "execute_tool",
+     "name": "set_timer(10 min)",
+     "tool": "set_timer",
+     "start_ms": 1846,
+     "duration_ms": 197
+    },
+    {
+     "id": "a16-final",
+     "parent": "a16-3",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 2084,
+     "duration_ms": 394,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a17",
+   "task": "Find a vegetarian soup and halve the portions.",
+   "trace_id": "tr_a17",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "scale_quantities"
+   ],
+   "steps": [
+    "search_recipe(tags=vegetarian,soup)",
+    "scale_quantities(6→3)"
+   ],
+   "spans": [
+    {
+     "id": "a17-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Find a vegetarian soup and halve the portion",
+     "start_ms": 190,
+     "duration_ms": 2066
+    },
+    {
+     "id": "a17-1",
+     "parent": "a17-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(tags=vegetarian,soup)",
+     "tool": "search_recipe",
+     "start_ms": 190,
+     "duration_ms": 754
+    },
+    {
+     "id": "a17-2",
+     "parent": "a17-1",
+     "kind": "execute_tool",
+     "name": "scale_quantities(6→3)",
+     "tool": "scale_quantities",
+     "start_ms": 992,
+     "duration_ms": 823
+    },
+    {
+     "id": "a17-final",
+     "parent": "a17-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1856,
+     "duration_ms": 399,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a18",
+   "task": "How long do the tacos take and at what temperature?",
+   "trace_id": "tr_a18",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "read_recipe"
+   ],
+   "steps": [
+    "search_recipe(tacos)",
+    "read_recipe(id)"
+   ],
+   "spans": [
+    {
+     "id": "a18-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: How long do the tacos take and at what tempe",
+     "start_ms": 81,
+     "duration_ms": 1394
+    },
+    {
+     "id": "a18-1",
+     "parent": "a18-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(tacos)",
+     "tool": "search_recipe",
+     "start_ms": 81,
+     "duration_ms": 731
+    },
+    {
+     "id": "a18-2",
+     "parent": "a18-1",
+     "kind": "execute_tool",
+     "name": "read_recipe(id)",
+     "tool": "read_recipe",
+     "start_ms": 856,
+     "duration_ms": 183
+    },
+    {
+     "id": "a18-final",
+     "parent": "a18-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1075,
+     "duration_ms": 335,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a19",
+   "task": "Scale the French onion soup to 4 and set a timer for the bake.",
+   "trace_id": "tr_a19",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "scale_quantities",
+    "set_timer"
+   ],
+   "steps": [
+    "search_recipe(onion soup)",
+    "scale_quantities(4→4)",
+    "set_timer(60 min)"
+   ],
+   "spans": [
+    {
+     "id": "a19-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Scale the French onion soup to 4 and set a t",
+     "start_ms": 299,
+     "duration_ms": 2708
+    },
+    {
+     "id": "a19-1",
+     "parent": "a19-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(onion soup)",
+     "tool": "search_recipe",
+     "start_ms": 299,
+     "duration_ms": 589
+    },
+    {
+     "id": "a19-2",
+     "parent": "a19-1",
+     "kind": "execute_tool",
+     "name": "scale_quantities(4→4)",
+     "tool": "scale_quantities",
+     "start_ms": 903,
+     "duration_ms": 801
+    },
+    {
+     "id": "a19-3",
+     "parent": "a19-2",
+     "kind": "execute_tool",
+     "name": "set_timer(60 min)",
+     "tool": "set_timer",
+     "start_ms": 1727,
+     "duration_ms": 838
+    },
+    {
+     "id": "a19-final",
+     "parent": "a19-3",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 2607,
+     "duration_ms": 377,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a20",
+   "task": "Convert 120 g of oats to tablespoons.",
+   "trace_id": "tr_a20",
+   "end_state": "ok",
+   "first_bad_step": -1,
+   "tools_expected": [
+    "search_recipe",
+    "convert_units"
+   ],
+   "steps": [
+    "search_recipe(pancakes)",
+    "convert_units(120 g→tbsp)"
+   ],
+   "spans": [
+    {
+     "id": "a20-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Convert 120 g of oats to tablespoons.",
+     "start_ms": 338,
+     "duration_ms": 1631
+    },
+    {
+     "id": "a20-1",
+     "parent": "a20-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(pancakes)",
+     "tool": "search_recipe",
+     "start_ms": 338,
+     "duration_ms": 391
+    },
+    {
+     "id": "a20-2",
+     "parent": "a20-1",
+     "kind": "execute_tool",
+     "name": "convert_units(120 g→tbsp)",
+     "tool": "convert_units",
+     "start_ms": 745,
+     "duration_ms": 791
+    },
+    {
+     "id": "a20-final",
+     "parent": "a20-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1569,
+     "duration_ms": 313,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a21",
+   "task": "Scale the banana bread from 1 tin to 3 tins.",
+   "trace_id": "tr_a21",
+   "end_state": "wrong",
+   "first_bad_step": 1,
+   "tools_expected": [
+    "search_recipe",
+    "scale_quantities"
+   ],
+   "steps": [
+    "search_recipe(bread)",
+    "scale_quantities(1→4)"
+   ],
+   "spans": [
+    {
+     "id": "a21-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Scale the banana bread from 1 tin to 3 tins.",
+     "start_ms": 80,
+     "duration_ms": 1769
+    },
+    {
+     "id": "a21-1",
+     "parent": "a21-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(bread)",
+     "tool": "search_recipe",
+     "start_ms": 80,
+     "duration_ms": 770
+    },
+    {
+     "id": "a21-2",
+     "parent": "a21-1",
+     "kind": "execute_tool",
+     "name": "scale_quantities(1→4)",
+     "tool": "scale_quantities",
+     "start_ms": 903,
+     "duration_ms": 497
+    },
+    {
+     "id": "a21-final",
+     "parent": "a21-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1449,
+     "duration_ms": 425,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003,
+     "error": "final answer contradicted the requested conversion"
+    }
+   ]
+  },
+  {
+   "id": "a22",
+   "task": "Convert 350 g of flour to cups.",
+   "trace_id": "tr_a22",
+   "end_state": "wrong",
+   "first_bad_step": 0,
+   "tools_expected": [
+    "convert_units"
+   ],
+   "steps": [
+    "convert_units(350 g→oz)"
+   ],
+   "spans": [
+    {
+     "id": "a22-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Convert 350 g of flour to cups.",
+     "start_ms": 340,
+     "duration_ms": 1149
+    },
+    {
+     "id": "a22-1",
+     "parent": "a22-0",
+     "kind": "execute_tool",
+     "name": "convert_units(350 g→oz)",
+     "tool": "convert_units",
+     "start_ms": 340,
+     "duration_ms": 713
+    },
+    {
+     "id": "a22-final",
+     "parent": "a22-1",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1089,
+     "duration_ms": 488,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003,
+     "error": "final answer contradicted the requested conversion"
+    }
+   ]
+  },
+  {
+   "id": "a23",
+   "task": "Find a gluten-free main.",
+   "trace_id": "tr_a23",
+   "end_state": "wrong",
+   "first_bad_step": 0,
+   "tools_expected": [
+    "search_recipe"
+   ],
+   "steps": [
+    "search_recipe(tags=vegetarian)"
+   ],
+   "spans": [
+    {
+     "id": "a23-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Find a gluten-free main.",
+     "start_ms": 78,
+     "duration_ms": 733
+    },
+    {
+     "id": "a23-1",
+     "parent": "a23-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(tags=vegetarian)",
+     "tool": "search_recipe",
+     "start_ms": 78,
+     "duration_ms": 289
+    },
+    {
+     "id": "a23-final",
+     "parent": "a23-1",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 411,
+     "duration_ms": 324,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003,
+     "error": "final answer contradicted the requested conversion"
+    }
+   ]
+  },
+  {
+   "id": "a24",
+   "task": "Scale the beef stew from 6 to 2 servings.",
+   "trace_id": "tr_a24",
+   "end_state": "wrong",
+   "first_bad_step": 1,
+   "tools_expected": [
+    "search_recipe",
+    "scale_quantities"
+   ],
+   "steps": [
+    "search_recipe(stew)",
+    "scale_quantities(6→6)"
+   ],
+   "spans": [
+    {
+     "id": "a24-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Scale the beef stew from 6 to 2 servings.",
+     "start_ms": 275,
+     "duration_ms": 1128
+    },
+    {
+     "id": "a24-1",
+     "parent": "a24-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(stew)",
+     "tool": "search_recipe",
+     "start_ms": 275,
+     "duration_ms": 427
+    },
+    {
+     "id": "a24-2",
+     "parent": "a24-1",
+     "kind": "execute_tool",
+     "name": "scale_quantities(6→6)",
+     "tool": "scale_quantities",
+     "start_ms": 733,
+     "duration_ms": 216
+    },
+    {
+     "id": "a24-final",
+     "parent": "a24-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1003,
+     "duration_ms": 587,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003,
+     "error": "final answer contradicted the requested conversion"
+    }
+   ]
+  },
+  {
+   "id": "a25",
+   "task": "Find a vegan soup.",
+   "trace_id": "tr_a25",
+   "end_state": "wrong",
+   "first_bad_step": 0,
+   "tools_expected": [
+    "search_recipe"
+   ],
+   "steps": [
+    "search_recipe(tags=vegan)"
+   ],
+   "spans": [
+    {
+     "id": "a25-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Find a vegan soup.",
+     "start_ms": 270,
+     "duration_ms": 728
+    },
+    {
+     "id": "a25-1",
+     "parent": "a25-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(tags=vegan)",
+     "tool": "search_recipe",
+     "start_ms": 270,
+     "duration_ms": 274
+    },
+    {
+     "id": "a25-final",
+     "parent": "a25-1",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 598,
+     "duration_ms": 243,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003,
+     "error": "final answer contradicted the requested conversion"
+    }
+   ]
+  },
+  {
+   "id": "a26",
+   "task": "Set a timer for the brownie bake.",
+   "trace_id": "tr_a26",
+   "end_state": "wrong",
+   "first_bad_step": 1,
+   "tools_expected": [
+    "search_recipe",
+    "set_timer"
+   ],
+   "steps": [
+    "search_recipe(brownies)",
+    "set_timer(45 min)"
+   ],
+   "spans": [
+    {
+     "id": "a26-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Set a timer for the brownie bake.",
+     "start_ms": 179,
+     "duration_ms": 1409
+    },
+    {
+     "id": "a26-1",
+     "parent": "a26-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(brownies)",
+     "tool": "search_recipe",
+     "start_ms": 179,
+     "duration_ms": 447
+    },
+    {
+     "id": "a26-2",
+     "parent": "a26-1",
+     "kind": "execute_tool",
+     "name": "set_timer(45 min)",
+     "tool": "set_timer",
+     "start_ms": 672,
+     "duration_ms": 499
+    },
+    {
+     "id": "a26-final",
+     "parent": "a26-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1188,
+     "duration_ms": 393,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003,
+     "error": "final answer contradicted the requested conversion"
+    }
+   ]
+  },
+  {
+   "id": "a27",
+   "task": "What temperature do I roast the chicken at?",
+   "trace_id": "tr_a27",
+   "end_state": "wrong",
+   "first_bad_step": 1,
+   "tools_expected": [
+    "search_recipe",
+    "read_recipe"
+   ],
+   "steps": [
+    "search_recipe(roast chicken)",
+    "read_recipe(id=brownies)"
+   ],
+   "spans": [
+    {
+     "id": "a27-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: What temperature do I roast the chicken at?",
+     "start_ms": 228,
+     "duration_ms": 1231
+    },
+    {
+     "id": "a27-1",
+     "parent": "a27-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(roast chicken)",
+     "tool": "search_recipe",
+     "start_ms": 228,
+     "duration_ms": 605
+    },
+    {
+     "id": "a27-2",
+     "parent": "a27-1",
+     "kind": "execute_tool",
+     "name": "read_recipe(id=brownies)",
+     "tool": "read_recipe",
+     "start_ms": 864,
+     "duration_ms": 156
+    },
+    {
+     "id": "a27-final",
+     "parent": "a27-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1059,
+     "duration_ms": 333,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003,
+     "error": "final answer contradicted the requested conversion"
+    }
+   ]
+  },
+  {
+   "id": "a28",
+   "task": "Halve the apple crumble.",
+   "trace_id": "tr_a28",
+   "end_state": "wrong",
+   "first_bad_step": 1,
+   "tools_expected": [
+    "search_recipe",
+    "scale_quantities"
+   ],
+   "steps": [
+    "search_recipe(apple)",
+    "scale_quantities(6→1)"
+   ],
+   "spans": [
+    {
+     "id": "a28-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Halve the apple crumble.",
+     "start_ms": 282,
+     "duration_ms": 1519
+    },
+    {
+     "id": "a28-1",
+     "parent": "a28-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(apple)",
+     "tool": "search_recipe",
+     "start_ms": 282,
+     "duration_ms": 620
+    },
+    {
+     "id": "a28-2",
+     "parent": "a28-1",
+     "kind": "execute_tool",
+     "name": "scale_quantities(6→1)",
+     "tool": "scale_quantities",
+     "start_ms": 935,
+     "duration_ms": 432
+    },
+    {
+     "id": "a28-final",
+     "parent": "a28-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1401,
+     "duration_ms": 376,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003,
+     "error": "final answer contradicted the requested conversion"
+    }
+   ]
+  },
+  {
+   "id": "a29",
+   "task": "Scale the risotto to 8 servings.",
+   "trace_id": "tr_a29",
+   "end_state": "wrong",
+   "first_bad_step": 1,
+   "tools_expected": [
+    "search_recipe",
+    "scale_quantities"
+   ],
+   "steps": [
+    "search_recipe(risotto)",
+    "scale_quantities(4→4)"
+   ],
+   "spans": [
+    {
+     "id": "a29-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Scale the risotto to 8 servings.",
+     "start_ms": 107,
+     "duration_ms": 1488
+    },
+    {
+     "id": "a29-1",
+     "parent": "a29-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(risotto)",
+     "tool": "search_recipe",
+     "start_ms": 107,
+     "duration_ms": 678
+    },
+    {
+     "id": "a29-2",
+     "parent": "a29-1",
+     "kind": "execute_tool",
+     "name": "scale_quantities(4→4)",
+     "tool": "scale_quantities",
+     "start_ms": 811,
+     "duration_ms": 340
+    },
+    {
+     "id": "a29-final",
+     "parent": "a29-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1195,
+     "duration_ms": 364,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003,
+     "error": "final answer contradicted the requested conversion"
+    }
+   ]
+  },
+  {
+   "id": "a30",
+   "task": "Convert 700 g of chicken to pounds.",
+   "trace_id": "tr_a30",
+   "end_state": "wrong",
+   "first_bad_step": 0,
+   "tools_expected": [
+    "convert_units"
+   ],
+   "steps": [
+    "convert_units(700 g→kg)"
+   ],
+   "spans": [
+    {
+     "id": "a30-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Convert 700 g of chicken to pounds.",
+     "start_ms": 144,
+     "duration_ms": 589
+    },
+    {
+     "id": "a30-1",
+     "parent": "a30-0",
+     "kind": "execute_tool",
+     "name": "convert_units(700 g→kg)",
+     "tool": "convert_units",
+     "start_ms": 144,
+     "duration_ms": 146
+    },
+    {
+     "id": "a30-final",
+     "parent": "a30-1",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 333,
+     "duration_ms": 410,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003,
+     "error": "final answer contradicted the requested conversion"
+    }
+   ]
+  },
+  {
+   "id": "a31",
+   "task": "Find a vegan main and list its cook time.",
+   "trace_id": "tr_a31",
+   "end_state": "ok_but_wrong_path",
+   "first_bad_step": 1,
+   "tools_expected": [
+    "search_recipe",
+    "read_recipe"
+   ],
+   "steps": [
+    "search_recipe(tags=main)",
+    "read_recipe(id=garlic bread)",
+    "read_recipe(id=vegetable curry)"
+   ],
+   "spans": [
+    {
+     "id": "a31-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Find a vegan main and list its cook time.",
+     "start_ms": 144,
+     "duration_ms": 2322
+    },
+    {
+     "id": "a31-1",
+     "parent": "a31-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(tags=main)",
+     "tool": "search_recipe",
+     "start_ms": 144,
+     "duration_ms": 774
+    },
+    {
+     "id": "a31-2",
+     "parent": "a31-1",
+     "kind": "execute_tool",
+     "name": "read_recipe(id=garlic bread)",
+     "tool": "read_recipe",
+     "start_ms": 957,
+     "duration_ms": 533
+    },
+    {
+     "id": "a31-3",
+     "parent": "a31-2",
+     "kind": "execute_tool",
+     "name": "read_recipe(id=vegetable curry)",
+     "tool": "read_recipe",
+     "start_ms": 1523,
+     "duration_ms": 495
+    },
+    {
+     "id": "a31-final",
+     "parent": "a31-3",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 2066,
+     "duration_ms": 278,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a32",
+   "task": "Scale the lemon cake to 2 and set a timer.",
+   "trace_id": "tr_a32",
+   "end_state": "ok_but_wrong_path",
+   "first_bad_step": 1,
+   "tools_expected": [
+    "search_recipe",
+    "set_timer",
+    "scale_quantities"
+   ],
+   "steps": [
+    "search_recipe(lemon cake)",
+    "set_timer(40 min)",
+    "scale_quantities(1→2)"
+   ],
+   "spans": [
+    {
+     "id": "a32-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Scale the lemon cake to 2 and set a timer.",
+     "start_ms": 181,
+     "duration_ms": 1940
+    },
+    {
+     "id": "a32-1",
+     "parent": "a32-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(lemon cake)",
+     "tool": "search_recipe",
+     "start_ms": 181,
+     "duration_ms": 674
+    },
+    {
+     "id": "a32-2",
+     "parent": "a32-1",
+     "kind": "execute_tool",
+     "name": "set_timer(40 min)",
+     "tool": "set_timer",
+     "start_ms": 909,
+     "duration_ms": 218
+    },
+    {
+     "id": "a32-3",
+     "parent": "a32-2",
+     "kind": "execute_tool",
+     "name": "scale_quantities(1→2)",
+     "tool": "scale_quantities",
+     "start_ms": 1142,
+     "duration_ms": 543
+    },
+    {
+     "id": "a32-final",
+     "parent": "a32-3",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1721,
+     "duration_ms": 358,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a33",
+   "task": "Convert 1.6 kg of chicken to pounds.",
+   "trace_id": "tr_a33",
+   "end_state": "ok_but_wrong_path",
+   "first_bad_step": 2,
+   "tools_expected": [
+    "search_recipe",
+    "convert_units"
+   ],
+   "steps": [
+    "search_recipe(roast chicken)",
+    "convert_units(1600 g→lb)",
+    "convert_units(1.6 kg→oz)"
+   ],
+   "spans": [
+    {
+     "id": "a33-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Convert 1.6 kg of chicken to pounds.",
+     "start_ms": 198,
+     "duration_ms": 2116
+    },
+    {
+     "id": "a33-1",
+     "parent": "a33-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(roast chicken)",
+     "tool": "search_recipe",
+     "start_ms": 198,
+     "duration_ms": 667
+    },
+    {
+     "id": "a33-2",
+     "parent": "a33-1",
+     "kind": "execute_tool",
+     "name": "convert_units(1600 g→lb)",
+     "tool": "convert_units",
+     "start_ms": 893,
+     "duration_ms": 735
+    },
+    {
+     "id": "a33-3",
+     "parent": "a33-2",
+     "kind": "execute_tool",
+     "name": "convert_units(1.6 kg→oz)",
+     "tool": "convert_units",
+     "start_ms": 1667,
+     "duration_ms": 201
+    },
+    {
+     "id": "a33-final",
+     "parent": "a33-3",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1914,
+     "duration_ms": 384,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a34",
+   "task": "Find a side that takes under 15 minutes.",
+   "trace_id": "tr_a34",
+   "end_state": "ok_but_wrong_path",
+   "first_bad_step": 0,
+   "tools_expected": [
+    "search_recipe",
+    "read_recipe"
+   ],
+   "steps": [
+    "search_recipe(tags=main)",
+    "read_recipe(id=garlic bread)",
+    "read_recipe(id=mashed potato)"
+   ],
+   "spans": [
+    {
+     "id": "a34-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Find a side that takes under 15 minutes.",
+     "start_ms": 326,
+     "duration_ms": 1959
+    },
+    {
+     "id": "a34-1",
+     "parent": "a34-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(tags=main)",
+     "tool": "search_recipe",
+     "start_ms": 326,
+     "duration_ms": 328
+    },
+    {
+     "id": "a34-2",
+     "parent": "a34-1",
+     "kind": "execute_tool",
+     "name": "read_recipe(id=garlic bread)",
+     "tool": "read_recipe",
+     "start_ms": 694,
+     "duration_ms": 215
+    },
+    {
+     "id": "a34-3",
+     "parent": "a34-2",
+     "kind": "execute_tool",
+     "name": "read_recipe(id=mashed potato)",
+     "tool": "read_recipe",
+     "start_ms": 946,
+     "duration_ms": 923
+    },
+    {
+     "id": "a34-final",
+     "parent": "a34-3",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1885,
+     "duration_ms": 275,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a35",
+   "task": "Find a vegetarian soup and halve it.",
+   "trace_id": "tr_a35",
+   "end_state": "ok_but_wrong_path",
+   "first_bad_step": 0,
+   "tools_expected": [
+    "search_recipe",
+    "read_recipe",
+    "scale_quantities"
+   ],
+   "steps": [
+    "search_recipe(tags=vegetarian)",
+    "read_recipe(id=french onion soup)",
+    "scale_quantities(4→2)"
+   ],
+   "spans": [
+    {
+     "id": "a35-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Find a vegetarian soup and halve it.",
+     "start_ms": 110,
+     "duration_ms": 2166
+    },
+    {
+     "id": "a35-1",
+     "parent": "a35-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(tags=vegetarian)",
+     "tool": "search_recipe",
+     "start_ms": 110,
+     "duration_ms": 624
+    },
+    {
+     "id": "a35-2",
+     "parent": "a35-1",
+     "kind": "execute_tool",
+     "name": "read_recipe(id=french onion soup)",
+     "tool": "read_recipe",
+     "start_ms": 773,
+     "duration_ms": 297
+    },
+    {
+     "id": "a35-3",
+     "parent": "a35-2",
+     "kind": "execute_tool",
+     "name": "scale_quantities(4→2)",
+     "tool": "scale_quantities",
+     "start_ms": 1114,
+     "duration_ms": 727
+    },
+    {
+     "id": "a35-final",
+     "parent": "a35-3",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1876,
+     "duration_ms": 285,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a36",
+   "task": "Double the garlic bread and set a timer.",
+   "trace_id": "tr_a36",
+   "end_state": "ok_but_wrong_path",
+   "first_bad_step": 2,
+   "tools_expected": [
+    "search_recipe",
+    "scale_quantities",
+    "set_timer"
+   ],
+   "steps": [
+    "search_recipe(garlic bread)",
+    "scale_quantities(4→8)",
+    "set_timer(90 min)"
+   ],
+   "spans": [
+    {
+     "id": "a36-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Double the garlic bread and set a timer.",
+     "start_ms": 278,
+     "duration_ms": 1908
+    },
+    {
+     "id": "a36-1",
+     "parent": "a36-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(garlic bread)",
+     "tool": "search_recipe",
+     "start_ms": 278,
+     "duration_ms": 555
+    },
+    {
+     "id": "a36-2",
+     "parent": "a36-1",
+     "kind": "execute_tool",
+     "name": "scale_quantities(4→8)",
+     "tool": "scale_quantities",
+     "start_ms": 861,
+     "duration_ms": 313
+    },
+    {
+     "id": "a36-3",
+     "parent": "a36-2",
+     "kind": "execute_tool",
+     "name": "set_timer(90 min)",
+     "tool": "set_timer",
+     "start_ms": 1213,
+     "duration_ms": 518
+    },
+    {
+     "id": "a36-final",
+     "parent": "a36-3",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1786,
+     "duration_ms": 284,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a37",
+   "task": "Convert 300 ml of red wine to cups.",
+   "trace_id": "tr_a37",
+   "end_state": "ok_but_wrong_path",
+   "first_bad_step": 2,
+   "tools_expected": [
+    "search_recipe",
+    "convert_units"
+   ],
+   "steps": [
+    "search_recipe(stew)",
+    "convert_units(300 ml→cup)",
+    "convert_units(300 ml→tbsp)"
+   ],
+   "spans": [
+    {
+     "id": "a37-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Convert 300 ml of red wine to cups.",
+     "start_ms": 142,
+     "duration_ms": 2708
+    },
+    {
+     "id": "a37-1",
+     "parent": "a37-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(stew)",
+     "tool": "search_recipe",
+     "start_ms": 142,
+     "duration_ms": 551
+    },
+    {
+     "id": "a37-2",
+     "parent": "a37-1",
+     "kind": "execute_tool",
+     "name": "convert_units(300 ml→cup)",
+     "tool": "convert_units",
+     "start_ms": 728,
+     "duration_ms": 984
+    },
+    {
+     "id": "a37-3",
+     "parent": "a37-2",
+     "kind": "execute_tool",
+     "name": "convert_units(300 ml→tbsp)",
+     "tool": "convert_units",
+     "start_ms": 1759,
+     "duration_ms": 641
+    },
+    {
+     "id": "a37-final",
+     "parent": "a37-3",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 2450,
+     "duration_ms": 533,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a38",
+   "task": "How long do the tacos take?",
+   "trace_id": "tr_a38",
+   "end_state": "ok_but_wrong_path",
+   "first_bad_step": 0,
+   "tools_expected": [
+    "search_recipe",
+    "read_recipe"
+   ],
+   "steps": [
+    "search_recipe(tags=main)",
+    "read_recipe(id=fish tacos)"
+   ],
+   "spans": [
+    {
+     "id": "a38-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: How long do the tacos take?",
+     "start_ms": 97,
+     "duration_ms": 2419
+    },
+    {
+     "id": "a38-1",
+     "parent": "a38-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(tags=main)",
+     "tool": "search_recipe",
+     "start_ms": 97,
+     "duration_ms": 983
+    },
+    {
+     "id": "a38-2",
+     "parent": "a38-1",
+     "kind": "execute_tool",
+     "name": "read_recipe(id=fish tacos)",
+     "tool": "read_recipe",
+     "start_ms": 1104,
+     "duration_ms": 961
+    },
+    {
+     "id": "a38-final",
+     "parent": "a38-2",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 2116,
+     "duration_ms": 360,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a39",
+   "task": "Scale the French onion soup to 4.",
+   "trace_id": "tr_a39",
+   "end_state": "ok_but_wrong_path",
+   "first_bad_step": 1,
+   "tools_expected": [
+    "search_recipe",
+    "scale_quantities"
+   ],
+   "steps": [
+    "search_recipe(onion soup)",
+    "scale_quantities(4→8)",
+    "scale_quantities(8→4)"
+   ],
+   "spans": [
+    {
+     "id": "a39-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Scale the French onion soup to 4.",
+     "start_ms": 79,
+     "duration_ms": 2374
+    },
+    {
+     "id": "a39-1",
+     "parent": "a39-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(onion soup)",
+     "tool": "search_recipe",
+     "start_ms": 79,
+     "duration_ms": 357
+    },
+    {
+     "id": "a39-2",
+     "parent": "a39-1",
+     "kind": "execute_tool",
+     "name": "scale_quantities(4→8)",
+     "tool": "scale_quantities",
+     "start_ms": 459,
+     "duration_ms": 594
+    },
+    {
+     "id": "a39-3",
+     "parent": "a39-2",
+     "kind": "execute_tool",
+     "name": "scale_quantities(8→4)",
+     "tool": "scale_quantities",
+     "start_ms": 1069,
+     "duration_ms": 938
+    },
+    {
+     "id": "a39-final",
+     "parent": "a39-3",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 2053,
+     "duration_ms": 313,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  },
+  {
+   "id": "a40",
+   "task": "Convert 120 g of oats to tablespoons.",
+   "trace_id": "tr_a40",
+   "end_state": "ok_but_wrong_path",
+   "first_bad_step": 1,
+   "tools_expected": [
+    "search_recipe",
+    "convert_units"
+   ],
+   "steps": [
+    "search_recipe(pancakes)",
+    "convert_units(120 g→oz)",
+    "convert_units(120 g→tbsp)"
+   ],
+   "spans": [
+    {
+     "id": "a40-0",
+     "parent": null,
+     "kind": "agent",
+     "name": "run: Convert 120 g of oats to tablespoons.",
+     "start_ms": 223,
+     "duration_ms": 2103
+    },
+    {
+     "id": "a40-1",
+     "parent": "a40-0",
+     "kind": "execute_tool",
+     "name": "search_recipe(pancakes)",
+     "tool": "search_recipe",
+     "start_ms": 223,
+     "duration_ms": 380
+    },
+    {
+     "id": "a40-2",
+     "parent": "a40-1",
+     "kind": "execute_tool",
+     "name": "convert_units(120 g→oz)",
+     "tool": "convert_units",
+     "start_ms": 635,
+     "duration_ms": 370
+    },
+    {
+     "id": "a40-3",
+     "parent": "a40-2",
+     "kind": "execute_tool",
+     "name": "convert_units(120 g→tbsp)",
+     "tool": "convert_units",
+     "start_ms": 1026,
+     "duration_ms": 881
+    },
+    {
+     "id": "a40-final",
+     "parent": "a40-3",
+     "kind": "chat",
+     "name": "final answer",
+     "model": "qwen3-1.7b",
+     "start_ms": 1926,
+     "duration_ms": 414,
+     "input_tokens": 500,
+     "output_tokens": 120,
+     "cost_usd": 0.00003
+    }
+   ]
+  }
+ ]
+}

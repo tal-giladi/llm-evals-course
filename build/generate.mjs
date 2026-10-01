@@ -576,8 +576,17 @@ window.EvalLabData = window.EvalLabData || {};
 window.EvalLabData[${JSON.stringify(name)}] = ${JSON.stringify(payload)};
 `;
   writeFileSync(join(ROOT, path), body);
+
+  // The same payload as plain JSON, for the Python labs in modules 11-15.
+  // A sandboxed iframe cannot fetch() a sibling file, so the browser has to
+  // receive its data as a script; Python has no such constraint and would
+  // rather not parse JavaScript.
+  const jsonPath = join(ROOT, "datasets", `${name}.json`);
+  mkdirSync(dirname(jsonPath), { recursive: true });
+  writeFileSync(jsonPath, JSON.stringify(payload, null, 1));
+
   const kb = Math.round(body.length / 1024);
-  console.log(`  ${path.padEnd(42)} ${String(kb).padStart(5)} KB`);
+  console.log(`  ${path.padEnd(42)} ${String(kb).padStart(5)} KB   -> datasets/${name}.json`);
 }
 
 function main() {
