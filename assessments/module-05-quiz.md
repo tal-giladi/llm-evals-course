@@ -12,18 +12,18 @@ wrong.
 
 What it covers, in the order the lessons build it:
 
-- [05.1 · One failure per judge, binary first](lessons/module-05/lesson-01.md) — one question per taxonomy
+- [05.1 · One failure per judge, binary first](../lessons/module-05/lesson-01.md) — one question per taxonomy
   row, why a judge asked "is this good?" produces four coins instead of a decision, and what four
   per-category judges cost.
-- [05.2 · Binary, Likert and pairwise](lessons/module-05/lesson-02.md) — what each scale can answer, why a
+- [05.2 · Binary, Likert and pairwise](../lessons/module-05/lesson-02.md) — what each scale can answer, why a
   graded score still collapses to a line you have to write down, and the swap test that makes position
   bias visible.
-- [05.3 · Rubrics that decide something](lessons/module-05/lesson-03.md) — the four prompt texts the lab
+- [05.3 · Rubrics that decide something](../lessons/module-05/lesson-03.md) — the four prompt texts the lab
   ships, the test that separates a clause from a restatement, the rule-to-category mapping, and the
   refusal to show you another prompt's numbers.
-- [05.4 · Few-shot examples](lessons/module-05/lesson-04.md) — how many, which ones, and why an exemplar
+- [05.4 · Few-shot examples](../lessons/module-05/lesson-04.md) — how many, which ones, and why an exemplar
   set is a rubric clause you did not write down.
-- [05.5 · Verdict-first or critique-first](lessons/module-05/lesson-05.md) — what a recorded reason buys,
+- [05.5 · Verdict-first or critique-first](../lessons/module-05/lesson-05.md) — what a recorded reason buys,
   what it costs, and why the critique is the fastest route into Module 6's disagreement review.
 
 Two reminders before you start. First, the lab behind these lessons is unusual: **every judge verdict on

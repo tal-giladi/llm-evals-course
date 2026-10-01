@@ -12,16 +12,16 @@ attempt is worth taking only after you have re-read the lesson behind the one yo
 
 What it covers, in the order the lessons build it:
 
-- [08.1 · Retrieval failures and answer failures](lessons/module-08/lesson-01.md) — the chain from "a passage
+- [08.1 · Retrieval failures and answer failures](../lessons/module-08/lesson-01.md) — the chain from "a passage
   came back" to "the answer is grounded", the failure taxonomy you build by reading passages, and why a green
   context-recall number is not evidence the feature works.
-- [08.2 · Grounding judges, claim by claim](lessons/module-08/lesson-02.md) — atomic claims, the ungrounded-claim
+- [08.2 · Grounding judges, claim by claim](../lessons/module-08/lesson-02.md) — atomic claims, the ungrounded-claim
   rate with its denominator, the 33-point TNR gap between two prompts, and why zero claims is a routing signal
   rather than a good grade.
-- [08.3 · Abstention and over-refusal](lessons/module-08/lesson-03.md) — two rates with two denominators, a tile
+- [08.3 · Abstention and over-refusal](../lessons/module-08/lesson-03.md) — two rates with two denominators, a tile
   that measures the label instead of the behaviour, and the case where a passage came back and declining was
   still right.
-- [08.4 · Validating RAG metrics against humans](lessons/module-08/lesson-04.md) — the module-6 procedure applied
+- [08.4 · Validating RAG metrics against humans](../lessons/module-08/lesson-04.md) — the module-6 procedure applied
   to a metric you did not write, a leaderboard the metric gets wrong, and a knob that takes a prefix rather
   than a draw.
 

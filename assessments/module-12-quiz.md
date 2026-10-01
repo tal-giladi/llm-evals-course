@@ -12,19 +12,19 @@ second attempt is worth taking only after you have re-read the lesson behind the
 
 What it covers, in the order the lessons build it:
 
-- [12.1 · OpenTelemetry in twenty minutes](lessons/module-12/lesson-01.md) — the six fields every span
+- [12.1 · OpenTelemetry in twenty minutes](../lessons/module-12/lesson-01.md) — the six fields every span
   carries, why `parent_id` and `kind` are the two that turn records into a tree and an error rate into a
   ticket, and the two ways the shipped CLI is taught to lie to you.
-- [12.2 · The GenAI semantic conventions](lessons/module-12/lesson-02.md) — what an absent key reads like,
+- [12.2 · The GenAI semantic conventions](../lessons/module-12/lesson-02.md) — what an absent key reads like,
   why a rename is a breaking change to everyone *reading* your traces rather than writing them, and what
   a Development-status spec obliges you to do before every upgrade.
-- [12.3 · Instrumenting the support bot by hand](lessons/module-12/lesson-03.md) — the four spans around
+- [12.3 · Instrumenting the support bot by hand](../lessons/module-12/lesson-03.md) — the four spans around
   one support request, the one line that decides whether a tracer reports failures or only successes, and
   why a dashboard that gets faster as the model gets worse is the most dangerous artefact in the module.
-- [12.4 · Auto-instrumentation, and when to stop trusting it](lessons/module-12/lesson-04.md) — one span of
+- [12.4 · Auto-instrumentation, and when to stop trusting it](../lessons/module-12/lesson-04.md) — one span of
   four that the patch can give you, the question it can never answer, and the silent failure where an
   end-to-end column quietly reports a model number.
-- [12.5 · Reading traces: cost, latency, sessions, PII](lessons/module-12/lesson-05.md) — four headline
+- [12.5 · Reading traces: cost, latency, sessions, PII](../lessons/module-12/lesson-05.md) — four headline
   numbers and four traps, a session id as a personal identifier, redaction at export rather than at
   capture, and the sampling rule you can actually keep.
 

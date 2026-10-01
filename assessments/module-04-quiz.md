@@ -12,16 +12,16 @@ got wrong.
 
 What it covers, in the order the lessons build it:
 
-- [04.1 · From taxonomy to test cases](lessons/module-04/lesson-01.md) — the failure clause on every
+- [04.1 · From taxonomy to test cases](../lessons/module-04/lesson-01.md) — the failure clause on every
   item, why `out_of_scope` takes 2 of 2 while `no_citation` takes 12 of 27, and the interval a
   category with two examples can support.
-- [04.2 · Dev, test, and the one-validation rule](lessons/module-04/lesson-02.md) — what a legitimate
+- [04.2 · Dev, test, and the one-validation rule](../lessons/module-04/lesson-02.md) — what a legitimate
   split balances and what it deliberately does not, and why "keep whichever prompt read higher on
   test" measures the search rather than the system.
-- [04.3 · Stratification and slices](lessons/module-04/lesson-03.md) — the `none seen` row, why a
+- [04.3 · Stratification and slices](../lessons/module-04/lesson-03.md) — the `none seen` row, why a
   slice with zero failures is worse than a slice with zero items, and why keeping the slice mix does
   not produce the failures.
-- [04.4 · Sample size and confidence intervals](lessons/module-04/lesson-04.md) — the Wilson interval
+- [04.4 · Sample size and confidence intervals](../lessons/module-04/lesson-04.md) — the Wilson interval
   worked out by hand, why the width only halves when you quadruple the sample, and how to say out
   loud what resolution your set actually has.
 

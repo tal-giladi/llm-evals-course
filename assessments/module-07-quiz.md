@@ -12,15 +12,15 @@ attempt is worth taking only after you have re-read the lesson behind the one yo
 
 What it covers, in the order the lessons build it:
 
-- [07.1 · Position bias](lessons/module-07/lesson-01.md) — why a one-order pairwise run adds position to
+- [07.1 · Position bias](../lessons/module-07/lesson-01.md) — why a one-order pairwise run adds position to
   quality instead of separating them, the both-orders rule, the tie rate, and what doubling the calls buys.
-- [07.2 · Verbosity bias](lessons/module-07/lesson-02.md) — the padding probe, why direction rather than
+- [07.2 · Verbosity bias](../lessons/module-07/lesson-02.md) — the padding probe, why direction rather than
   size is what proves an effect, and why the biased judge reads *stricter* on short answers.
-- [07.3 · Self-preference](lessons/module-07/lesson-03.md) — a judge kinder to its own family, the paired
+- [07.3 · Self-preference](../lessons/module-07/lesson-03.md) — a judge kinder to its own family, the paired
   probe that isolates it, why the judge menu cannot, and the noise floor every bias reading has to clear.
-- [07.4 · Judge size, agreement and cost](lessons/module-07/lesson-04.md) — a five-rung ladder that is not
+- [07.4 · Judge size, agreement and cost](../lessons/module-07/lesson-04.md) — a five-rung ladder that is not
   monotone, choosing against a target instead of a ranking, and spending a judge upgrade on eval items.
-- [07.5 · Repeats, temperature and majority vote](lessons/module-07/lesson-05.md) — one greedy verdict as a
+- [07.5 · Repeats, temperature and majority vote](../lessons/module-07/lesson-05.md) — one greedy verdict as a
   single draw, where majority voting saturates, why four repeats is stricter than five, and what a
   1.00–1.00 interval actually means.
 

@@ -94,3 +94,20 @@
   - [54 · Caching judge calls](lessons/module-13/lesson-02.md)
   - [55 · Flaky evals: repeats, tolerances, quarantine](lessons/module-13/lesson-03.md)
   - [56 · The eval budget, and the report on the pull request](lessons/module-13/lesson-04.md)
+  - [Module 13 quiz](assessments/module-13-quiz.md)
+- **Module 14 — Online evals and monitoring**
+  - [57 · Sampling production traces](lessons/module-14/lesson-01.md)
+  - [58 · Guardrails versus evals](lessons/module-14/lesson-02.md)
+  - [59 · Drift in the input mix, and the alert band](lessons/module-14/lesson-03.md)
+  - [60 · Trace, labelled failure, new test case](lessons/module-14/lesson-04.md)
+  - [Module 14 quiz](assessments/module-14-quiz.md)
+
+- Optional, and safe to skip
+- **Module 15 — Advanced topics**
+  - [61 · Public benchmarks and contamination](lessons/module-15/lesson-01.md)
+  - [62 · Reward models, judges and verifiers](lessons/module-15/lesson-02.md)
+  - [63 · Annotation at scale, and inter-annotator agreement](lessons/module-15/lesson-03.md)
+  - [64 · Evaluating a model migration](lessons/module-15/lesson-04.md)
+  - [Module 15 quiz](assessments/module-15-quiz.md)
+- **Capstone**
+  - [Your own feature, end to end](projects/capstone.md)

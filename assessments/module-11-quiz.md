@@ -12,16 +12,16 @@ second attempt is worth taking only after you have re-read the lesson behind the
 
 What it covers, in the order the lessons build it:
 
-- [11.1 · Your first eval run in Python](lessons/module-11/lesson-01.md) — `doctor` as the first command on
+- [11.1 · Your first eval run in Python](../lessons/module-11/lesson-01.md) — `doctor` as the first command on
   every machine, one report read field by field, and the knobs that move a pass rate without changing what
   is being measured.
-- [11.2 · Porting the statistics, and proving they agree](lessons/module-11/lesson-02.md) — closed-form
+- [11.2 · Porting the statistics, and proving they agree](../lessons/module-11/lesson-02.md) — closed-form
   statistics against `1e-9` and bootstrap intervals against no equality at all, the fixture generated from
   the reference engine, and the shape that does not throw and is entirely wrong.
-- [11.3 · A judge through Ollama on your laptop](lessons/module-11/lesson-03.md) — the nine components of the
+- [11.3 · A judge through Ollama on your laptop](../lessons/module-11/lesson-03.md) — the nine components of the
   cache key, the one a container can pin, and what a judge that is no longer the same judge does to a suite
   that passed validation six weeks ago.
-- [11.4 · Mapping the same suite onto a framework](lessons/module-11/lesson-04.md) — what promptfoo, Inspect
+- [11.4 · Mapping the same suite onto a framework](../lessons/module-11/lesson-04.md) — what promptfoo, Inspect
   and DeepEval hand you and what they do not, and the difference between a framework's `expected_output`
   and a verdict a person reached.
 

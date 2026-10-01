@@ -12,16 +12,16 @@ attempt is worth taking only after you have re-read the lesson behind the one yo
 
 What it covers, in the order the lessons build it:
 
-- [09.1 · End state versus trajectory](lessons/module-09/lesson-01.md) — the same 40 runs scored 75.0% by end
+- [09.1 · End state versus trajectory](../lessons/module-09/lesson-01.md) — the same 40 runs scored 75.0% by end
   state and 50.0% by trajectory, the ten runs in the gap, the paired comparison that resolves a difference the
   two marginal intervals cannot, and the in-order split that puts every failure in the held-out half.
-- [09.2 · Tool-call correctness](lessons/module-09/lesson-02.md) — 91 string comparisons against the tool name on
+- [09.2 · Tool-call correctness](../lessons/module-09/lesson-02.md) — 91 string comparisons against the tool name on
   the span, why a check that scores 100.0% while flagging none of the 20 failures is not a good check, and the
   ladder that gets from a count comparison to a judge.
-- [09.3 · Multi-turn conversations and simulated users](lessons/module-09/lesson-03.md) — why this lesson quotes no
+- [09.3 · Multi-turn conversations and simulated users](../lessons/module-09/lesson-03.md) — why this lesson quotes no
   rate at all, what the shipped 40 runs do and do not contain, and what has to be validated before a model is
   allowed to play the user.
-- [09.4 · Finding the failing step](lessons/module-09/lesson-04.md) — the first-bad-step distribution over the 20
+- [09.4 · Finding the failing step](../lessons/module-09/lesson-04.md) — the first-bad-step distribution over the 20
   failing runs, the partial-credit metric's missing interval, and twenty hand labels turning a score into three
   tickets.
 

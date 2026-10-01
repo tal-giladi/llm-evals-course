@@ -12,14 +12,14 @@ got wrong.
 
 What it covers, in the order the lessons build it:
 
-- [03.1 · Assertions: the cheapest check there is](lessons/module-03/lesson-01.md) — what an assertion
+- [03.1 · Assertions: the cheapest check there is](../lessons/module-03/lesson-01.md) — what an assertion
   is, and why a 100% pass rate is the symptom of a broken check rather than a healthy system.
-- [03.2 · Regex and JSON schema](lessons/module-03/lesson-02.md) — shape against structure, the
+- [03.2 · Regex and JSON schema](../lessons/module-03/lesson-02.md) — shape against structure, the
   error message that names `$.ingredients[0]`, and the lenient parser that is making a product
   decision on your behalf.
-- [03.3 · Reference metrics and their traps](lessons/module-03/lesson-03.md) — ROUGE-L and token F1,
+- [03.3 · Reference metrics and their traps](../lessons/module-03/lesson-03.md) — ROUGE-L and token F1,
   the corruption that leaves recall untouched, and why 0.0% can be as uninformative as 100%.
-- [03.4 · Choosing code, judge or human](lessons/module-03/lesson-04.md) — the ladder, the decision
+- [03.4 · Choosing code, judge or human](../lessons/module-03/lesson-04.md) — the ladder, the decision
   table with a reason in every row, and what a check stretched onto the wrong category looks like.
 
 Two reminders before you start. First, the lab behind these lessons is unusual: **every evaluator on

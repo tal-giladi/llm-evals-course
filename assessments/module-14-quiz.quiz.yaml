@@ -1,0 +1,256 @@
+- id: q1
+  question: >-
+    The online judge keeps every request that already failed and samples the rest. On one window the
+    failure count is 5 at 100%, at 25% and at 5% sampling, while the reported rate moves 8.8%, then
+    31.2%, then 55.6%. What is going on?
+  options:
+    - >-
+      The sampler is drifting between windows, so the rising rate is the draw rather than the population
+      and the fix is to reseed it once a day and re-measure the whole quarter.
+    - >-
+      The keep rule is leaking at low rates, because at 5% the hash takes four of the five failures and
+      the constant count is only holding steady by luck on a window this small.
+    - >-
+      The denominator is shrinking: the kept set is a draw plus every failure in the window, so the count
+      is fixed and the rate is computed over a set that was partly selected for its failures.
+    - >-
+      Both numbers are real and the larger one is the one to alert on, because a rate that moves when you
+      sample less is by definition closer to what the user actually experienced that day.
+  correct: 2
+  explanation: >-
+    The numerator is 5 at every rate, and that is the rule holding — the outcome is decided before the
+    sample is drawn, so a failing request is kept at any rate including zero. What moves is the
+    denominator, which is now a set chosen partly for the thing you are measuring. `5/57` estimates the
+    traffic and `5/9` is a work queue; no interval closes the gap, because the gap is the selection and
+    not the noise.
+
+- id: q2
+  question: >-
+    The team replaces `should_sample(rate, f"tr_{item.id}")` with `random.random() < rate`, seeded once so
+    a run is repeatable. The realised share still lands near the requested rate and the failures are still
+    kept. Which question can nobody answer any more?
+  options:
+    - >-
+      Which requests were dropped, and why this one is not here. A hashed decision is a pure function of
+      the id, so the requests outside the band can be named after the fact.
+    - >-
+      Whether the failures survived the sample. A coin cannot be conditioned on an outcome, so keeping
+      them would have to be re-implemented from scratch on top of the new sampler.
+    - >-
+      Whether the realised share matches what was requested. Independent draws reproduce the requested
+      share on a window of 57 requests at least as faithfully as a hash of the ids does.
+    - >-
+      Nothing that matters, because the seeded draw repeats within a single run and the failure count
+      stays at five whatever the sampler underneath it happens to be doing.
+  correct: 0
+  explanation: >-
+    Hashing the request id is what makes the drop list computable: the same id always lands on the same
+    side of the band, so you can say whether a particular request was kept, and an on-call engineer can find
+    the trace for a named complaint. A draw has the same expected composition and none of that — a request
+    that was dropped cannot be told from a request that was never made. Reproducibility within a run is not
+    the property; membership you can compute is.
+
+- id: q3
+  question: >-
+    The panel has one tile labelled "failure rate". It reads 35.1%, which is the post-check firing on 20 of
+    57 requests, while the judge fails 23 of 57 and the humans mark 27 of 57. Which set of tiles is right?
+  options:
+    - >-
+      One tile for the guardrail's 35.1% and one for the eval's 40.4%, since two instruments reading the
+      same traffic are two noisy readings of one underlying quantity.
+    - >-
+      One tile for the humans' 47.4% and one for the eval's 40.4%, because only the eval's number moves
+      when the system genuinely gets worse, and the other two never will.
+    - >-
+      One tile for the guardrail's 35.1% and one for the eval's 40.4%, because 35.1% and 40.4% are close
+      enough that averaging them gives a better estimate of the same thing.
+    - >-
+      A `block rate` for the guardrail, a `pass rate` for the eval, and an explicit "not monitored" line
+      naming the failure categories that no check was written for at all.
+  correct: 3
+  explanation: >-
+    A guardrail counts a property and an eval judges an answer; they do not estimate each other's
+    quantity, and the guardrail's 35.1% is not a noisy version of the humans' 47.4%. All ten of its misses
+    are `wrong_fact` or `over_refusal`, the two categories nobody wrote a check for — a blind spot that is
+    a property of the check rather than of the sample, and so transfers to a split nobody scored. A panel
+    with one green number and no blind-spot line is indistinguishable from a panel where everything is fine.
+
+- id: q4
+  question: >-
+    The post-check blocks 20 of 57 requests, and 3 of those were answers a human marked correct. Someone
+    proposes adding a `wrong_fact` guardrail that asks the model to verify its own answer once, inside the
+    request path. What is the honest objection?
+  options:
+    - >-
+      The cost is one extra model call per request, which is real but bounded, so the check is affordable
+      and only the block rate needs tuning once it has been running for a while.
+    - >-
+      That it is an eval by another name: no threshold to tune, no measured false-block rate, and its
+      errors are now felt by a user rather than by a dashboard nobody has to act on.
+    - >-
+      The block rate will fall, because a self-check fires only on answers it is confident are wrong, so
+      fewer correct answers will be refused than the retrieval check refuses today.
+    - >-
+      The check belongs in the sample rather than the path, because the whole point of the sample is that
+      it can afford to be wrong about a judgement rather than only about a shape.
+  correct: 1
+  explanation: >-
+    A check that needs a model call is not free and is not deterministic, so it cannot be made stricter or
+    looser without a rate for both directions — which needs a sample and human labels. That makes it an
+    eval, and putting an eval in the request path moves the mistake from a known number to an unknown one
+    and puts it in front of a user. The honest move for a property that costs too much on the path is to
+    take it off the path and onto the sample, not to add a second check beside the first.
+
+- id: q5
+  question: >-
+    A monitor is built on the dev intent mix, and the same team also uses the held-out test split as a
+    second validation. Measured against dev, the test split's PSI is 0.762, and 0.572 of that is one
+    category that was 5.3% of dev and is absent from test entirely. What does that row say?
+  options:
+    - >-
+      The test split is a different population rather than a second sample of dev, so a monitor built on
+      dev's mix reads it correctly and fires on the very first window it is pointed at.
+    - >-
+      The split is badly built, since a held-out set scoring 0.762 against dev cannot serve as validation
+      and has to be resampled until its mix matches the baseline it is judged against.
+    - >-
+      The drift metric is too sensitive here, because a category that vanishes should be floored at zero
+      rather than contributing its full logarithmic share to the summed score.
+    - >-
+      The threshold should be raised to 0.8, since a healthy validation split is expected to sit just
+      under the level at which the monitor would tell you to re-baseline entirely.
+  correct: 0
+  explanation: >-
+    The vanished `exception` slice — three items of 57 in dev, none of 37 in test — is three quarters of
+    the number, and flooring it at `eps` points the right way: the thing that disappeared is exactly what
+    you want to be told about. Lesson 04.2's rule that the split should not match dev is the same fact
+    read as a virtue; here it is physics, because the population moves and a second reading of "test" is a
+    reading of a different week.
+
+- id: q6
+  question: >-
+    A monitor's band is 5 points either side of a pass rate whose baseline is 0.90, and the daily sample
+    is 20 requests. The Wilson half-width at that baseline and size is 0.137, and `Band.explain` prints
+    its noise warning. What is the fix?
+  options:
+    - >-
+      Narrow the band to two points, so it sits comfortably inside the measurement's own width and only a
+      real regression of the size you care about can reach the threshold at all.
+    - >-
+      Raise the judge sample rate to 100%, so every request is judged and the measurement has the
+      smallest denominator available to it at the start of the window.
+    - >-
+      Keep the five-point band and grow the window until the half-width is at or under it, because
+      sensitivity is bought with sample size rather than with a threshold chosen in advance.
+    - >-
+      Average the daily rates across a week, which cuts the noise by roughly the square root of seven
+      without changing what is being measured or what a reader of the panel would be told.
+  correct: 2
+  explanation: >-
+    At n=20 the same five-point band fires on about 25.45% of healthy days and catches a real ten-point
+    drop only 60% of the time — both bad at once, for the same reason: twenty requests cannot measure a
+    rate. At n=200 the false-alarm rate is 1.30% and the catch rate 95.7%. A narrower band, a cleverer
+    aggregation or a bigger model all move the cost somewhere else or hide it, so the window is the knob
+    and the band is the thing you derive afterwards.
+
+- id: q7
+  question: >-
+    The pass rate is comfortably inside its band, but PSI against the dated baseline reads 0.485. The
+    on-call tool alerts on the pass rate by default. What should it do instead?
+  options:
+    - >-
+      Page on the rate as usual, because a rate inside its band is a rate the gate has already cleared
+      and a large PSI is a re-baseline task for somebody rather than an incident for on-call.
+    - >-
+      Do not page on the rate at all; treat the drift as a gate on it and re-baseline deliberately, with
+      the old and new mixes printed together, before the rate is comparable again.
+    - >-
+      Page on both numbers, because a move that large in the input mix is exactly the kind of change a
+      system should never absorb quietly without waking somebody to decide what it means.
+    - >-
+      Hold both alerts until the next full window, since a PSI this size is usually a change in traffic
+      season rather than a change in the system, and the rate will settle on its own by then.
+  correct: 1
+  explanation: >-
+    Above 0.25 the rate is a number about a population the baseline no longer describes, so it cannot
+    answer the question the alert asked. The action is a deliberate re-baseline on a date, with the old and
+    new mixes printed side by side, which is also what stops a season change from being readable as a
+    regression a year later. Paging on either number alone spends the team's attention, and attention is
+    the only budget a monitor has.
+
+- id: q8
+  question: >-
+    The nightly job pulls the day's traces and reports 0 failing traces on a day whose planted rate says
+    there were 24. The extractor's error helper reads `s.get("error")` on each span. What is happening?
+  options:
+    - >-
+      The job ran before the spans closed, so the error attributes were written after the extractor read
+      them and the following night's run will find all of them without a change.
+    - >-
+      The extractor is right and the planted rate is misleading, because the rate is applied after
+      sampling and a low sample rate therefore moves the count without moving the rate.
+    - >-
+      The traces are larger than the exporter allows, so the failing spans were dropped for size and
+      what survived is the 33 traces that carried no error attributes at all.
+    - >-
+      `error.type` lives in a span's `attributes` and not on the span itself, so the read finds nothing
+      and an empty list is indistinguishable from a night in which nothing went wrong.
+  correct: 3
+  explanation: >-
+    The GenAI convention puts `error.type` in the span's attributes, so reading `span["error"]` returns
+    nothing: 0 on the naive read and 24 on the correct one, from the same window. An empty list is the
+    shape of both a quiet night and a broken loop, which is why the loop's first assertion is
+    non-emptiness, before any assertion about what is inside the list. The monitor's default failure mode
+    is silence, and silence is what a healthy system looks like too.
+
+- id: q9
+  question: >-
+    `as_test_case` is called with `human_label=0` and `judge_verdict=1` for an answer a person has
+    confirmed is wrong, and the resulting item is labelled 0. Why does the signature accept the verdict at
+    all?
+  options:
+    - >-
+      So the judge's opinion can be filed next to the label and compared against it later, which is how a
+      judge that has drifted becomes visible instead of quietly changing the ground truth.
+    - >-
+      So a whole batch of regressions can be converted before anybody reads them, with the human labels
+      filled in later as a second pass over the queue once a week.
+    - >-
+      To keep both values visible in the call while the label written into the case is the human's, since
+      a test case's label is the thing the whole suite is scored against and nothing else is.
+    - >-
+      So a reviewer can see at a glance what the system claimed about the request, and reject the case
+      when the judge and the person who read the trace disagree with each other.
+  correct: 2
+  explanation: >-
+    `judge_verdict` is accepted and never read — the test asserts that the human's 0 lands in the case and
+    that the 1 appears nowhere in the object. A test case's label is what the suite is scored against, so
+    putting the judge there would make the suite grade its own homework and a drifted judge would relabel
+    the ground truth rather than disagreeing with it. The human label is the one field in the whole
+    course that nothing computes for you, and it is the field the loop exists to fill.
+
+- id: q10
+  question: >-
+    Six of the 24 regressions have no question on them, because the model call raised before the chat span
+    recorded the request. The weekly report has said "24 new production failures" for five weeks running,
+    and `in_suite` is False for every one of them. What is wrong?
+  options:
+    - >-
+      Two problems at once: the id join is wrong, so nothing is ever recognised as already covered, and
+      the six empty-question items would do no real work even if they were added to the suite.
+    - >-
+      Only the join is wrong — hand the function the dataset's item ids instead of the trace ids and
+      the six will show up as duplicates of cases the suite is already running today.
+    - >-
+      Only the count is wrong — the extraction window undercounts, and the loop should retry each of the
+      six until a question has been attached before the report is published.
+    - >-
+      Neither, as written — the six are real failures and belong in the suite, and the duplicate report
+      is simply what a suite that is growing from production traffic is supposed to look like.
+  correct: 0
+  explanation: >-
+    The loop's key is the trace id, `tr_s01`, and the suite's is the item id, `s01`; hand it the dataset's
+    ids and every regression reports `in_suite: False`, which reads as a healthy stream of genuinely new
+    failures and is wrong in the direction that looks like progress. The six are a sensor bug rather than a
+    product bug, because the request was recorded on the chat span, which is only reached if the call
+    succeeds — so they belong in the incident view and the recorder has to move.

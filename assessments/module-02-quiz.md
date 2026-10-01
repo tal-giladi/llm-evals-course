@@ -12,13 +12,13 @@ got wrong.
 
 What it covers, in the order the lessons build it:
 
-- [02.1 · Reading a trace](lessons/module-02/lesson-01.md) — the span tree, and the failure classes
+- [02.1 · Reading a trace](../lessons/module-02/lesson-01.md) — the span tree, and the failure classes
   that live in the pipeline rather than in the answer text.
-- [02.2 · Open coding: writing notes on failures](lessons/module-02/lesson-02.md) — observation before
+- [02.2 · Open coding: writing notes on failures](../lessons/module-02/lesson-02.md) — observation before
   label, and what a taxonomy with one row is really telling you.
-- [02.3 · Axial coding: building a failure taxonomy](lessons/module-02/lesson-03.md) — naming the rows,
+- [02.3 · Axial coding: building a failure taxonomy](../lessons/module-02/lesson-03.md) — naming the rows,
   counting them, and ranking on frequency, severity and cost to fix.
-- [02.4 · Sampling: which traces to read, and when to stop](lessons/module-02/lesson-04.md) — random,
+- [02.4 · Sampling: which traces to read, and when to stop](../lessons/module-02/lesson-04.md) — random,
   error-filtered and complaint-filtered batches, and coverage instead of a quota of 30.
 
 Two reminders before you start. First, the labs use a **seeded educational model** for traces and

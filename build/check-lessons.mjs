@@ -281,6 +281,17 @@ for (let m = 1; m <= LAST_MODULE; m++) {
       fail(`module-${id}-quiz.md`, "has an Answers heading, which switches the importer to the old format");
     }
     if (src.length > 6000) notes.push(`module-${id}-quiz.md: intro page is long (${src.length} chars)`);
+
+    // Every relative link on an assessment page has to resolve too. All
+    // fifteen quiz pages once linked lessons as `lessons/module-NN/...`,
+    // which from `assessments/` resolves to a path that does not exist —
+    // and nothing here was checking, so it shipped silently in every module.
+    for (const m of src.matchAll(/\]\((\.\.\/[^)#\s]+|lessons\/[^)#\s]+)\)/g)) {
+      const target = join(ROOT, "assessments", m[1].split(/[?#]/)[0]);
+      if (!existsSync(target)) {
+        fail(`module-${id}-quiz.md`, `link "${m[1]}" does not resolve from assessments/`);
+      }
+    }
   }
   if (existsSync(qy)) {
     let data;

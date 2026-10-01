@@ -1,0 +1,258 @@
+- id: q1
+  question: >-
+    A required status check is wired to the gate with `exit 1 if g.blocked else 0`. This run's reason
+    string is `passes, but the candidate is 1.8 points worse, inside the 5-point tolerance. A real drop
+    that you have chosen to allow`. What has to change?
+  options:
+    - >-
+      Print the whole reason string into the job log and on the pull request, and keep exiting 0 — the
+      check stays green and the sentence survives the flattening.
+    - >-
+      Exit 1 instead, because a real drop inside the tolerance is still a regression and the default
+      branch has to be protected from every one of them.
+    - >-
+      Exit 0 and drop the sentence, because a two-state check has nothing to say about a drop it was told
+      to allow and the extra line would only alarm readers.
+    - >-
+      Exit with a distinct code, because a third exit status is the only way to keep the middle outcome
+      from collapsing into either green or red in the check's UI.
+  correct: 0
+  explanation: >-
+    "Not blocked" and "fine" are different claims: the pass rate fell, the fall is smaller than the line,
+    and the team chose the line. Two states cannot say that, so the sentence has to move somewhere a human
+    reads it. Collapsing it to red is the wall 13.3 is about; dropping it teaches the team that the gate
+    has nothing to say about small regressions, which is how a gate gets disabled rather than retuned.
+
+- id: q2
+  question: >-
+    The dev baseline passes 34 of 57. A change breaks the first six dev items, and the judge already
+    failed two of those six at baseline. The pull-request template asks for the number of broken items;
+    the gate reports a 7.02-point drop. Which account is right?
+  options:
+    - >-
+      Ten and a half points, because six out of fifty-seven items is 10.5% of the population and the
+      tolerance should then decide what happens to that number.
+    - >-
+      Seven points, and the same six edits would cost seven points on any 57-item split, since the
+      denominator is fixed and only the numerator moves between builds.
+    - >-
+      Seven points, because four of the six edits cost a pass; a run that flipped six items the judge had
+      already failed would move the metric by exactly zero.
+    - >-
+      Both numbers, so the reviewer can see the size of the diff next to the size of the move it caused
+      on the pass rate, and judge the tolerance against the larger one.
+  correct: 2
+  explanation: >-
+    A drop is a drop in passes, so the two edits that flip an already-failing item cost nothing and the
+    metric never learns they were touched. 10.5 counts items, which is why it is the larger and wrong
+    number. The count and the metric also come apart by a factor of three across the suite: a four-item
+    break costs 5.26 points on dev and 2.70 on the 37 held-out items, where three of those four passes
+    were already lost — the set you gate on decides what a regression is worth.
+
+- id: q3
+  question: >-
+    A colleague rewrites the gate to decide on the bootstrap: `blocked = ci.lo < tolerance`. Swept over
+    four broken sizes, fourteen tolerances and four repeat windows, it blocks 224 of 224 configurations,
+    including a ten-point regression at every tolerance from 2 to 15 points. What has happened?
+  options:
+    - >-
+      The bootstrap is broken, because a percentile interval on a sample mean ought to sit around the
+      point estimate rather than below it on nearly every run.
+    - >-
+      The tolerance has stopped being a knob; the rule reads the interval, the interval sits low almost
+      always, and the gate now has one setting nobody chose.
+    - >-
+      The sign has flipped, because `ci.lo` is negative for a worse candidate while the comparison on the
+      right is written against a positive tolerance in points.
+    - >-
+      The gate is simply stricter, and a stricter-looking rule that catches more planted regressions is
+      worth the extra red builds it produces on healthy ones.
+  correct: 1
+  explanation: >-
+    A percentile bootstrap of a sample mean puts its 2.5th percentile below the point estimate almost
+    always, so comparing that percentile against a tolerance fires on nearly every drop and the tolerance
+    stops mattering. A knob that does not move the output is not a knob. The defence is the assertion that
+    the tolerance is the only thing that trades — `[True, True, True, True, False, False]` across six
+    tolerances — so a future edit cannot turn the gate into a coin without failing the suite.
+
+- id: q4
+  question: >-
+    The judge cache has run for a month at a 100% per-run hit rate. The gate's false-alarm rate is a
+    perfect zero, and the four healthy re-score windows that used to move the pass rate by up to 3.51
+    points now move it by 0.00. Which field is most likely missing from the key?
+  options:
+    - >-
+      `sample_index` — the three repeats share one key, so the majority vote is one cached value read
+      three times and the measured spread has gone to zero.
+    - >-
+      `prompt_hash` — the key ignores the rubric text, so every run after a prompt edit is scored against
+      the rubric it replaced rather than the one being shipped.
+    - >-
+      `model_build` — the key holds the model name but not the digest, so a quantisation change would
+      leave the old build's verdicts sitting behind the new one's label.
+    - >-
+      `variant` — the key omits which output is being graded, so `v1` and `v1padded` are scored as one
+      answer and the two rows of the report have to match.
+  correct: 0
+  explanation: >-
+    Three repeats that share a key read the same cached verdict, so the majority of three identical values
+    is that value: run-to-run noise goes to exactly zero, the false-alarm rate is a perfect zero, and
+    every dashboard you would build to watch the gate gets flatter. `prompt_hash` would also produce a
+    100% hit rate but would not silence the repeat windows. The only alarm is `misses` — on a healthy
+    suite the per-run hit rate must fall to zero whenever a field in the key changes.
+
+- id: q5
+  question: >-
+    To get cross-branch reuse the team keys the judge-verdict cache on the commit SHA. After a week the
+    hit rate sits at 0% on every run, the bill is unchanged, and someone concludes that caching does not
+    work for a gate. What is the defensible account?
+  options:
+    - >-
+      The key is right and the window is simply too small: 171 verdicts is not enough for a restored
+      entry to be worth fetching on a busy runner, so the hit rate will climb as the suite grows.
+    - >-
+      The runner scopes its caches per branch, so a commit key can only ever hit inside the branch that
+      wrote it and any cross-branch reuse has to be configured separately in the job.
+    - >-
+      The counters being read belong to the dependency cache rather than the verdict cache, because both
+      restore under the same prefix and the hit and miss totals are being accumulated together.
+    - >-
+      The key should be a content address over the nine inputs; identity changes on every push while the
+      verdicts do not, so a key built on identity never hits and never was going to.
+  correct: 3
+  explanation: >-
+    A judge-verdict cache has to be content-addressed so that every branch can read the same entry; the
+    runner's caches being immutable and branch-scoped is an argument for keying on content, not evidence
+    that the key is fine. A commit key never hits, so you pay full price and conclude that caching
+    failed. A branch key that does get reused has the mirror bug — it serves another branch's verdicts,
+    which is the same wrong number under a different name.
+
+- id: q6
+  question: >-
+    A failing eval has been on the quarantine list for two quarters with the reason `flaky`, an owner who
+    has since moved team, and a `review_by` date in 2027. The list now holds 4 of 94. What does the
+    class actually enforce?
+  options:
+    - >-
+      That quarantined ids are filtered out before the drop is computed, so the report stops counting
+      checks that have stopped running and starts measuring the ones that did.
+    - >-
+      That every entry is removed once its review date passes, which is how the list is kept from
+      becoming a permanent graveyard of tests nobody remembers agreeing to drop.
+    - >-
+      That a reason, an owner and a review date are all required at add time, and the gate discloses the
+      quarantined ids without filtering them out of its decision.
+    - >-
+      That an entry with no named owner is refused outright, because a review date on its own leaves
+      nobody accountable for ever looking at the check again.
+  correct: 2
+  explanation: >-
+    The constructor raises unless all three fields are present, and `overdue(today)` is how the list says
+    somebody did not act — but nothing removes an entry for you. The gate computes the drop over every
+    pair it was given and intersects the quarantined ids with the list only for the report: growing the
+    list from nothing to half the suite moved not one character of the decision. A quarantine entry is a
+    claim about which failures you currently believe, and 4 of 94 is what that looks like when it is true.
+
+- id: q7
+  question: >-
+    The gate blocks roughly one healthy pull request in eight, so a colleague sets the tolerance to 20
+    points because the widest healthy move this suite has ever made is 17.5. A 12-item break costs 12.28
+    points. What can the team still learn from inside the gate?
+  options:
+    - >-
+      That the tolerance is now too wide, since a 12.28-point regression and a 1.75-point drop both sit
+      inside a 20-point band and neither of the two is evidence of anything.
+    - >-
+      Nothing from its output: a widened tolerance and a hidden regression print the same line, so only a
+      planted regression of a named size can tell the two apart.
+    - >-
+      That the noise has stopped, because a 20-point band is wider than any healthy move the suite
+      produced over four hundred independent draws at this repeat count.
+    - >-
+      That repeats were the cheaper knob all along, since the false-alarm rate falls from 23.5% to 13.8%
+      going from one repeat to five on the 57 dev items at this tolerance.
+  correct: 1
+  explanation: >-
+    The decision is one number compared against a line, and it is not given the information to separate a
+    wide line from a quiet week: the widest healthy gap this suite produced, 17.5 points, sits inside a
+    20-point band alongside the 12.28-point regression, and both emit the same `passes:` line. The only
+    procedure that separates them is the one 13.1 already runs — plant a regression of a size you have
+    named, and confirm it still blocks at the tolerance you chose.
+
+- id: q8
+  question: >-
+    On 94 items at a 5-point tolerance the measured false-alarm rate is 13.8%, 9.0% and 7.5% at 1, 3 and 5
+    repeats, while the miss rate against a break of one question in ten goes 44.8%, 50.5% and 47.2%. The
+    budget review asks what the extra spend bought. Which reading is right?
+  options:
+    - >-
+      A quieter measurement of the same signal: the false-alarm side fell, the miss side did not move,
+      because a proportional drop is as detectable at one sample as it is at five.
+    - >-
+      A gate that catches more regressions, since the extra repeats are what stopped a break of one
+      question in ten from slipping through most of the healthy runs this suite now sees.
+    - >-
+      A gate that is both safer and cheaper, since averaging three samples instead of one is what removed
+      the 1.75-point run-to-run wobble from the pass rate on unchanged code.
+    - >-
+      Neither of the two, because the missed column moved in the wrong direction, so the repeat count
+      should really have been chosen on the miss rate rather than on the false-alarm rate.
+  correct: 0
+  explanation: >-
+    Repeats shrink the noise and leave the signal alone: three of them take the standard deviation of the
+    healthy drop from 5.87 points to 4.85 for three times the calls, and the miss column does not improve.
+    That is worth having and worth naming precisely. The knob that does move detection is items, not
+    repeats, and a gate whose threshold was picked before anybody measured the judge's disagreement with
+    itself is a threshold somebody guessed.
+
+- id: q9
+  question: >-
+    With `--max-calls 40` against a fresh cache the run stops at exactly 40 calls and $1.5176,
+    `cost.json` records `verdicts_scored: 14`, and the process exits 1. What is that run allowed to
+    report?
+  options:
+    - >-
+      A pass rate over the 14 items it scored, with that denominator printed beside it, since a rate over
+      a named subset beats no rate at all.
+    - >-
+      Nothing except the spend and the ceiling, because a partial score is a measurement over a
+      population nobody in the pull request ever agreed to be measured on.
+    - >-
+      A pass rate over all 94 items with the 14 scored ones marked, so the reviewer can see how far the
+      suite actually got before the ceiling stopped it.
+    - >-
+      No pass rate at all — only that it stopped, what it had spent, and that the suite did not finish,
+      because a stopped run has no measurement to report.
+  correct: 3
+  explanation: >-
+    The suite scored 14 of 94 questions, and a pass rate over 14 items is a number about fourteen
+    questions wearing a number about ninety-four. The budget is checked before each call precisely so the
+    call that would cross the ceiling is the one never made, which is why the stop lands on 40 with a
+    limit of 40 rather than 41. A check made after the run would be a receipt for money already spent
+    rather than a control over it.
+
+- id: q10
+  question: >-
+    The pull-request comment carries a drop of 10.64 points against a 5.0-point tolerance, an interval of
+    -19.15 to -3.19, 282 judge calls, and three figures quoted from the gate's specification: 9.0%, 50.5%
+    and a 6.4-point half-width. Why are those last three on the comment?
+  options:
+    - >-
+      They are the only numbers on the comment a reviewer cannot recompute from this run, so quoting them
+      is the guard against somebody later widening the tolerance by feel.
+    - >-
+      They are the decision the drop is compared against; a bare number does not say whether the gate
+      worked, and the reader has to be able to argue with the gate and not the figure.
+    - >-
+      They are measurements this run produced as well, carried onto the comment so the accepted rates on
+      it always agree with what the suite actually observed at this tolerance.
+    - >-
+      They fill the block the workflow renders under the verdict, since a six-line comment with no
+      specification beside it leaves the gate step looking like an untested branch protection.
+  correct: 1
+  explanation: >-
+    Four numbers on that comment came from this run and three did not, and making that visible is the
+    point of the format: tolerance, must-catch regression, both accepted rates and the measurement's
+    width are what turn a drop of 10.64 points from a fact about two numbers into a decision somebody can
+    agree or disagree with. They sit unchanged on every run, which is exactly why a reader can tell them
+    apart from the drop they are being compared against.

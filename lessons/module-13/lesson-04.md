@@ -338,6 +338,11 @@ that crosses only `max_usd`, and that is the one nobody investigates.
 > and about nothing else. What travels is the *shape* — `n x repeats x price`, two ceilings, a check before
 > each call — not the dollars. The call counts, the cache behaviour, the exit codes and every statistic in
 > the comment are real, computed by running the shipped code on the shipped data.
+>
+> One seam worth naming: lesson 13.2 used a **$0.0004** call price, roughly a hundredth of the one here,
+> for the same recorded judge. Both were chosen to make a particular piece of arithmetic checkable and
+> neither is a quote. If you carry a number from one to the other you will be off by two orders of
+> magnitude, which is exactly why the price is an argument's input and never its conclusion.
 
 ## Try it
 

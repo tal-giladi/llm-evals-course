@@ -10,13 +10,13 @@ second attempt is worth taking only after you have re-read the lesson behind the
 
 What it covers, in the order the lessons build it:
 
-- [01.1 · Vibes versus evals](lessons/module-01/lesson-01.md) — the three numbers, and why the interval
+- [01.1 · Vibes versus evals](../lessons/module-01/lesson-01.md) — the three numbers, and why the interval
   is the one that decides whether a change is real.
-- [01.2 · What "good" means for one feature](lessons/module-01/lesson-02.md) — decidable criteria, the
+- [01.2 · What "good" means for one feature](../lessons/module-01/lesson-02.md) — decidable criteria, the
   citation clause, and why a vague check on a good criterion still produces confident nonsense.
-- [01.3 · The loop: analyse, measure, improve](lessons/module-01/lesson-03.md) — pinning a baseline, the
+- [01.3 · The loop: analyse, measure, improve](../lessons/module-01/lesson-03.md) — pinning a baseline, the
   noise floor, and the cost of changing three things at once.
-- [01.4 · A tour of the Eval Lab](lessons/module-01/lesson-04.md) — the labs, the device check, and the
+- [01.4 · A tour of the Eval Lab](../lessons/module-01/lesson-04.md) — the labs, the device check, and the
   honesty rule about modelled judge verdicts.
 
 Two reminders before you start. First, the labs use a **seeded educational model** for judge verdicts:

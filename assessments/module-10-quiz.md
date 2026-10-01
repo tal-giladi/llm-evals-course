@@ -11,15 +11,15 @@ second attempt is worth taking only after you have re-read the lesson behind the
 
 What it covers, in the order the lessons build it:
 
-- [10.1 · A/B on the same items](lessons/module-10/lesson-01.md) — why the flip list is the result and the
+- [10.1 · A/B on the same items](../lessons/module-10/lesson-01.md) — why the flip list is the result and the
   difference is its summary, what the interval and the sign test each answer, and why a signed number needs
   its orientation stated.
-- [10.2 · Paired versus unpaired](lessons/module-10/lesson-02.md) — what pairing actually removes, when the
+- [10.2 · Paired versus unpaired](../lessons/module-10/lesson-02.md) — what pairing actually removes, when the
   textbook version of that claim is wrong, and what a single unpaired split really is.
-- [10.3 · Setting a gate under noise](lessons/module-10/lesson-03.md) — the two failure modes every gate has,
+- [10.3 · Setting a gate under noise](../lessons/module-10/lesson-03.md) — the two failure modes every gate has,
   which knob trades them against each other, which knob only buys down one side, and why the size of the
   regression rather than the size of your eval set is what sets the miss rate.
-- [10.4 · Slices as their own gates](lessons/module-10/lesson-04.md) — why an overall rate cannot see a
+- [10.4 · Slices as their own gates](../lessons/module-10/lesson-04.md) — why an overall rate cannot see a
   caution regression, how to size a slice threshold, and what to publish when a slice reports zero.
 
 Two reminders before you start. First, the lab behind these lessons is unusual: **the 94 support questions,
