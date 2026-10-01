@@ -92,8 +92,9 @@ def test_failed_traces_survive_the_exception(data):
     """Lesson 12.3's shipped half: the spans are exported, not lost.
 
     ``keep_errors=False`` reproduces the naive exporter, and the difference
-    between the two is the whole lesson: without it, the failed requests
-    simply do not appear in the error rate.
+    is the whole lesson: without it, the failed requests simply do not
+    appear in the error rate — the rate is computed over the requests that
+    worked, and the removal leaves no trace of its own.
     """
     kept = record(data, n=20, split="dev", fail_rate=0.10, seed=1, keep_errors=True)
     lost = record(data, n=20, split="dev", fail_rate=0.10, seed=1, keep_errors=False)
@@ -150,6 +151,12 @@ def test_error_rate_is_reported_by_span_kind(store):
     assert rates["chain"]["rate"] > 0, "the planted citation errors must be visible"
     for kind, v in rates.items():
         assert v["errors"] <= v["spans"]
+
+
+def test_a_rate_is_never_reported_over_an_empty_set(store):
+    """A rate needs a denominator. 0/0 is not 0%."""
+    for kind, v in store.error_rate().items():
+        assert v["spans"] > 0, f"{kind} reported a rate with no spans in it"
 
 
 # --------------------------------------------------------------------------
