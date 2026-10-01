@@ -79,3 +79,12 @@
   - [46 · A judge through Ollama on your laptop](lessons/module-11/lesson-03.md)
   - [47 · Mapping the same suite onto a framework](lessons/module-11/lesson-04.md)
   - [Module 11 quiz](assessments/module-11-quiz.md)
+
+- Part 4 — Ship it (Python, optional Docker, CPU-only laptop)
+- **Module 12 — Tracing and observability**
+  - [48 · OpenTelemetry in twenty minutes](lessons/module-12/lesson-01.md)
+  - [49 · The GenAI semantic conventions](lessons/module-12/lesson-02.md)
+  - [50 · Instrumenting the support bot by hand](lessons/module-12/lesson-03.md)
+  - [51 · Auto-instrumentation, and when to stop trusting it](lessons/module-12/lesson-04.md)
+  - [52 · Reading traces: cost, latency, sessions, PII](lessons/module-12/lesson-05.md)
+  - [Module 12 quiz](assessments/module-12-quiz.md)

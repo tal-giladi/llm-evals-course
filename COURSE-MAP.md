@@ -51,6 +51,7 @@ automates in Python.*
 | Module | What it is for |
 |---|---|
 | **11 · From lab to code** | The same experiments in Python, reproducible on a machine you did not type on: a first suite, a port with a parity proof, a pinned judge, and the framework mapping |
+| **12 · Tracing and observability** | OpenTelemetry and the GenAI semantic conventions, instrumenting the app yourself, what auto-instrumentation cannot see, and reading traces for cost, latency, sessions and PII |
 
 Part 4 needs Python 3.10+ and a laptop. Docker is used for exactly one thing — pinning the judge —
 and **no lesson in the course requires an API key or a model download.** The default judge replays
@@ -117,4 +118,5 @@ The public datasets named in `references/README.md` (MT-Bench, HelpSteer2, Judge
 
 See [the templates](templates/README.md) for the sheets you fill in for your own feature, and
 [the readings](references/README.md) for the sources behind the method.
+
 
