@@ -49,10 +49,10 @@
     sentence belongs in the plan?
   options:
     - Both failures are the same behaviour, so one fix should be able to remove both rows at once.
+    - Split it and keep the counts separate, because the two rows need different fixes.
     - The merged row is fine, as long as its sentence names both counts inside the parentheses.
     - Split it, but only for the rows that fall below 10% of the answers you read.
-    - Split it and keep the counts separate, because the two rows need different fixes.
-  correct: 3
+  correct: 1
   explanation: >-
     One of those rows is a bot declining to answer a covered policy; the other is a bot stating a
     company salary as fact. Merged, they become a row that no single change can move, which is the merge

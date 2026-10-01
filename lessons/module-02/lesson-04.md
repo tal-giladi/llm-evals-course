@@ -117,21 +117,20 @@ The three strategies over the same 94 traces, with the shipped labels on the tra
 | Only traces with a span error | 27 | the same chip every time | `no_citation`, 27 of 27 — 100% |
 | Only thumbs down | 11 | no chips at all except one | `correct`, 6 of 11 — 55% |
 
-Three batches, three completely different pictures of the same bot, and only the middle one looks like
-a diagnosis. The random batch's largest row sits at 25%, comfortably under the 60% bar, so the callout
-appears at 20 traces. The error batch never triggers that callout at all, because its single row holds
-every trace you read — which is the same fact arriving from the other end. A table with one row at 100%
-and a table with eight rows at 12% are both telling you the shape of what you sampled, not the shape of
-the system.
+Three batches, three completely different pictures of the same bot, and only the middle one *looks* like
+a diagnosis — which is the problem with it. The random batch's largest row sits at 25%, comfortably under
+the 60% bar, so the callout appears at 20 traces. The error batch never triggers that callout at all,
+because its single row holds every trace you read. One row at 100% and five rows at 25% are both
+telling you the shape of what you sampled, not the shape of the system.
 
 Two more things the page shows that are easy to miss. The **Investing** slice holds exactly one trace out
 of 94 — a perfect record with every field populated, and no information. And feedback is thin: 10 traces
 carry a thumbs-up, 11 a thumbs-down, and 73 carry nothing at all, so any strategy that filters on a
 reaction reaches 11 traces out of 94 or fewer.
 
-For scale: 20 traces cost about **$0.585** of generation at the recorded per-token prices. The hour a day
-your analysts spend reading them is the expensive part, and it is the part a sampling decision actually
-controls.
+For scale: 20 traces cost about **$0.585** of generation at the recorded per-token prices. An hour of
+analyst time reading them costs far more than that, and the analyst time is the part a sampling decision
+actually controls.
 
 ## Try it
 

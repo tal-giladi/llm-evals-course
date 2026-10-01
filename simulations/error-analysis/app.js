@@ -35,10 +35,23 @@ const SUGGESTED_TAGS = [
   { id: "slow", label: "Unacceptably slow" },
 ];
 
+/* ------------------------------------------------------------------ *
+ * Presets — one per lesson link, so a shared link reopens the same view.
+ * ------------------------------------------------------------------ */
+
+const PRESETS = {
+  "random":     { strategy: "random",     n: 20 },
+  "errors":     { strategy: "errors",     n: 20 },
+  "thumbs-down": { strategy: "thumbs_down", n: 20 },
+  "wide":       { strategy: "random",     n: 50 },
+};
+
+const presetName = PRESETS[getPreset()] ? getPreset() : "random";
+
 const state = {
-  strategy: "random",
+  strategy: PRESETS[presetName].strategy,
   slice: "all",
-  n: 20,
+  n: PRESETS[presetName].n,
   cursor: 0,
   pool: [],
   current: null,
@@ -290,7 +303,7 @@ function render() {
   buildControls();
   renderTrace();
   renderCoding();
-  syncUrl({ preset: getPreset(), strategy: state.strategy, n: state.n, slice: state.slice });
+  syncUrl({ preset: presetName, strategy: state.strategy, n: state.n, slice: state.slice });
   announce(`${readOrder.length} traces read, ${discovered().length} failure modes.`);
 }
 
