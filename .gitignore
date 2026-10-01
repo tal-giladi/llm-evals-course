@@ -22,3 +22,6 @@ synced folder: git cannot read them, so never try to track them.
 
 # Traces the labs write while you are experimenting with them.
 *.jsonl
+
+# Measurements the agents leave behind when drafting lessons.
+build/m1*.py
