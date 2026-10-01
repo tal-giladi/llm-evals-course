@@ -21,6 +21,8 @@ const problems = [];
 const notes = [];
 const fail = (file, msg) => problems.push(`${file}: ${msg}`);
 
+const LAST_MODULE = 15;   // the production path is planned up to M15; see curriculum/module-plans-11-15.md
+
 const SECTIONS = [
   "## Why it matters", "## How it works", "## Show me", "## Try it", "## Break it",
   "## Fix it", "## How do I know it works?", "## Use / don't use", "## Reflect", "## Sources",
@@ -53,7 +55,7 @@ for (const l of links) {
 }
 
 const lessonFiles = [];
-for (let m = 1; m <= 10; m++) {
+for (let m = 1; m <= LAST_MODULE; m++) {
   const dir = join(ROOT, "lessons", `module-${String(m).padStart(2, "0")}`);
   if (!existsSync(dir)) continue;
   for (const f of readdirSync(dir)) {
@@ -267,7 +269,7 @@ function checkQuiz(path) {
  * Module quizzes
  * ------------------------------------------------------------------ */
 
-for (let m = 1; m <= 10; m++) {
+for (let m = 1; m <= LAST_MODULE; m++) {
   const id = String(m).padStart(2, "0");
   const page = join(ROOT, "assessments", `module-${id}-quiz.md`);
   const qy = join(ROOT, "assessments", `module-${id}-quiz.quiz.yaml`);

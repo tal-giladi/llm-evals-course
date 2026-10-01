@@ -1,0 +1,96 @@
+- id: m11-2-q1
+  question: >-
+    You pass `(human, judge)` tuples to the JavaScript `confusion()` instead of `{human, judge}` objects,
+    on the same 57 dev pairs. What comes back?
+  options:
+    - >-
+      A `TypeError`, because property access on an array is always an error in JavaScript.
+    - >-
+      The correct matrix, because indexing and property lookup behave the same on arrays and objects.
+    - >-
+      `tp 0, fp 0, fn 0, tn 57`, which reports a true-negative rate of 100% and accuracy of 100%.
+    - >-
+      The right four counts and a kappa of zero, because only the kappa function reads the wrong field.
+  correct: 2
+  explanation: >-
+    `p.human` is `undefined` on a tuple, every `=== 1` test is false, and control falls through to the
+    final `else`, so every pair is counted as a true negative. Nothing raises, and the report it produces
+    is better than real — which is why only a parity test can catch it.
+
+- id: m11-2-q2
+  question: >-
+    `test_parity.py` calls `paired_comparison(pa, pb, resamples=0)` when it checks the two engines against
+    each other. Why does it do that?
+  options:
+    - >-
+      Because a bootstrap interval is only meaningful over the full item set, and the fixture uses dev.
+    - >-
+      Because `paired_comparison` refuses to build an interval whenever the two lists differ in length.
+    - >-
+      Because the point estimate is an identity both engines must share, and a bootstrap is not an identity.
+    - >-
+      Because 1,000 resamples is too slow to run inside a test on every invocation of the suite.
+  correct: 3
+  explanation: >-
+    The two engines draw different resamples — the Python `mulberry32` wraps CPython's generator and is not
+    the JavaScript one at all — so their intervals can only be compared distributionally. Requiring `1e-9`
+    of a bootstrap produces a permanently red test, and red tests get deleted.
+
+- id: m11-2-q3
+  question: >-
+    The JavaScript sets `fixed` from `wins` under a comment reading "System B is better on these items",
+    while the Python counts `fixed` from the `d < 0` branch. On one comparison both give the same delta
+    and the same p, with `fixed` reading 24 in one engine and 9 in the other. What is true?
+  options:
+    - >-
+      Both are correct, since they count the same flipped items from opposite ends and the test asserts it.
+    - >-
+      The JavaScript is miscounting, because a flip list read from B's side has to count the other branch.
+    - >-
+      Both engines count each flipped item twice, which is why the two figures add up to 33.
+    - >-
+      The Python is miscounting, because `fixed` has always meant B's side in the browser lab's output.
+  correct: 0
+  explanation: >-
+    `wins` is the `d > 0` branch and `d < 0` is the other direction, so the two counts are the same items
+    under opposite names. The JavaScript comment names B's side while the line beneath it computes A's —
+    and the browser panel, which recomputes its own flip list from `p.b > p.a`, has always shown B's side.
+    That is why the parity test writes the inversion into two named assertions rather than hiding it.
+
+- id: m11-2-q4
+  question: >-
+    Every entry in the committed fixture's `confusion` block has a null `accuracy`, and no parity test
+    checks that field. What explains the nulls?
+  options:
+    - >-
+      Accuracy is undefined whenever kappa is undefined, so the generator stores null for both together.
+    - >-
+      The generator reads `c.accuracy`, and the JavaScript `confusion()` returns no field by that name.
+    - >-
+      The fixture was written before the accuracy function existed and has not been regenerated since.
+    - >-
+      Accuracy is deliberately withheld so that a learner cannot read kappa straight off the fixture.
+  correct: 1
+  explanation: >-
+    In that module `accuracy` is an exported function you call, not a property of the object `confusion()`
+    returns, so `c.accuracy` is undefined and the `?? null` fallback stores null. The fixture is code too,
+    and it inherits the generator's mistakes without inheriting its review.
+
+- id: m11-2-q5
+  question: >-
+    On the same 57 pairs, the two engines' bootstrap intervals come out identical to every digit on
+    accuracy and two points apart on the true-positive rate. What does that tell you?
+  options:
+    - >-
+      The agreement on accuracy is a coincidence of discreteness, not evidence that the draws matched.
+    - >-
+      The accuracy bootstrap is deterministic, so any seed reproduces it exactly in either language.
+    - >-
+      The TPR interval is wrong in one engine, because two estimates ought to agree more closely.
+    - >-
+      The two seeds collided by chance, since both engines index the resample from the same source.
+  correct: 0
+  explanation: >-
+    A bootstrap sum over 57 items takes only integer values, so both engines' order statistics landed on
+    the same integer by chance. Not one of the first twelve resample indices matches between the engines,
+    and this is precisely why a test must never assert equality on an interval.

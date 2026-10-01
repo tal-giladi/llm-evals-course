@@ -5,8 +5,14 @@ no ML or statistics background. Every lesson turns one knob — a judge prompt, 
 sample size, an answer order — in a browser lab and shows what changed.
 
 There are two paths. The **fundamentals path** (Modules 1–10) needs nothing but a modern browser: no
-Python, no Docker, no API key, no paid model, about 14–18 hours. The **production path** takes the same
-experiments into Python, OpenTelemetry and CI on a CPU-only laptop.
+Python, no Docker, no API key, no paid model, about 14–18 hours. The **production path** (Module 11
+and beyond) takes the same experiments into Python, OpenTelemetry and CI on a CPU-only laptop.
+
+> [!NOTE]
+> **Part 4 needs no API key either.** Module 11's default judge replays runs recorded at build time,
+> exactly as the browser labs did. A live local model is an *option* in lesson 11.3, not a
+> requirement. Docker is used for one thing — pinning the judge — and nothing in the course requires
+> a model download to complete.
 
 ## What you will learn
 
@@ -16,7 +22,9 @@ experiments into Python, OpenTelemetry and CI on a CPU-only laptop.
 - Write an LLM judge and validate it against human labels with TPR, TNR, Cohen's kappa and a disagreement review.
 - Recognise and correct judge biases: position, verbosity, self-preference.
 - Correct a measured pass rate for known judge error and report it with an interval.
+- Evaluate RAG answers for grounding and abstention, and agents for end state and trajectory.
 - Compare two systems with a paired test and set a release gate that balances false alarms against missed regressions.
+- Port the same statistics to Python and **prove** the two engines agree, rather than assuming it.
 
 ## How the course is built
 

@@ -20,6 +20,31 @@ def build_report(dataset: str = "support", judge_id: str = "c-rubric-3b",
                  variant: str = "v1", split: str = "dev") -> dict:
     data = load(dataset)
     judge = RecordedJudge(data, judge_id)
+
+    # --- 0: refuse to score a variant nobody labelled --------------------
+    # `Item.label` returns 0 for a variant it has no entry for, so a missing
+    # label set does not raise. It grades the judge against a wall of zeros
+    # and produces a report in which the pass rate is real and every
+    # agreement figure is manufactured. A missing measurement is not a
+    # failure, and this check is what keeps the two apart.
+    population = data.items_for(split)
+    unlabelled = [i.id for i in population if variant not in i.human]
+    if unlabelled:
+        return {
+            "judge": judge.label,
+            "variant": variant,
+            "split": split,
+            "refused": True,
+            "error": (
+                f"no human labels for variant {variant!r} on "
+                f"{len(unlabelled)} of {len(population)} items. The judge "
+                "verdicts are recorded, so the pass rate would be real and "
+                "the agreement figures would be invented. Refusing is the "
+                "only honest answer until the labels exist."
+            ),
+            "n": 0,
+        }
+
     result = run_suite(data, judge, variant=variant, split=split)
 
     # --- 1: the headline numbers, always with the sample size ----------
@@ -28,6 +53,11 @@ def build_report(dataset: str = "support", judge_id: str = "c-rubric-3b",
         "variant": variant,
         "split": split,
         "n": result.n,
+        "variant": variant,
+        "confusion": {
+            "tp": result.confusion.tp, "fp": result.confusion.fp,
+            "fn": result.confusion.fn, "tn": result.confusion.tn,
+        },
         "pass_rate": result.pass_rate,
         "pass_ci": [result.pass_ci[0], result.pass_ci[1]],
         "agreement": {
@@ -84,3 +114,5 @@ def main(argv=None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+

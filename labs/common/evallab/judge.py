@@ -45,7 +45,19 @@ class RecordedJudge:
     def samples(self, item: Item, variant: str) -> list[int]:
         if not self.dataset.runs or self.id not in self.dataset.runs:
             raise KeyError(f"dataset {self.dataset.name} has no runs for {self.id}")
-        return self.dataset.runs[self.id].get(f"{item.id}|{variant}", [0])
+        table = self.dataset.runs[self.id]
+        key = f"{item.id}|{variant}"
+        if key not in table:
+            # Refuse, loudly. An earlier version defaulted to [0], which made
+            # a typo in the variant name produce a confident "0.0% pass on
+            # n=57" — a wrong number that looked exactly like a right one.
+            known = sorted({k.split("|", 1)[1] for k in table if "|" in k})
+            raise KeyError(
+                f"no recorded run for {self.id} on item {item.id} variant {variant!r}. "
+                f"Recorded variants: {', '.join(known) or 'none'}. "
+                "A missing run is a missing measurement, not a failure."
+            )
+        return table[key]
 
 
 @dataclass

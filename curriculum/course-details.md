@@ -6,8 +6,8 @@ Used to register the course in the Academy and fill the Admin form.
 - **GitHub repo:** `tal-giladi/llm-evals-course` (public, unless Tal decides otherwise)
 - **Free or paid:** suggest **free**. The whole fundamentals path runs on a browser with no paid model.
   Recommend keeping it free even when the production path is added, to match the other lab courses.
-- **Risk notice:** none. No physical, legal, security or health risk. The production path asks learners
-  to run containers against their own machine only.
+- **Risk notice:** none. No physical, legal, security or health risk. Module 11 asks
+  learners to run a container on their own machine only, pinned to a model tag.
 
 ## One-line summary
 
@@ -23,7 +23,7 @@ and do not trust the scores an LLM judge gives them.
 ## Format
 
 Markdown lessons with embedded interactive simulations (tier A, static, no install) plus a module quiz
-after each module. 10 modules, 43 lessons, about 14–18 hours for the fundamentals path.
+after each module. 11 modules, 47 lessons, about 18–22 hours total: Modules 1-10 are browser-only, Module 11 is Python and ships three labs.
 
 ## Prerequisites
 
@@ -32,7 +32,8 @@ after each module. 10 modules, 43 lessons, about 14–18 hours for the fundament
 - Git.
 - Having called an LLM API at least once.
 - **Not assumed:** ML background, statistics beyond averages and percentages, any eval or tracing tool,
-  Docker.
+  Docker. Module 11 adds Python 3.10+ and uses Docker for one thing only: pinning
+  the judge. **No lesson in the course requires an API key or a model download.**
 
 ## What you will learn
 
@@ -44,3 +45,5 @@ after each module. 10 modules, 43 lessons, about 14–18 hours for the fundament
 - Correct a pass rate for measured judge error and report it with an interval.
 - Evaluate RAG answers for grounding and abstention, and agents for end state and trajectory.
 - Compare two systems on the same items and set a release gate under noise.
+
+

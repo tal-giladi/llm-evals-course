@@ -1,0 +1,96 @@
+- id: m11-1-q1
+  question: >-
+    `evallab doctor` prints `ok datasets support.json: 94 items (57 dev / 37 test), 16 recorded judges`.
+    What has that line actually established?
+  options:
+    - >-
+      That every machine running the suite resolves the same judge model build and quantisation.
+    - >-
+      That the dataset file was found and parsed, and nothing at all about how it was produced.
+    - >-
+      That all 94 items carry a human label for the variant you are about to score.
+    - >-
+      That a paid judge call will succeed on this machine as soon as the network comes back.
+  correct: 1
+  explanation: >-
+    The line is a file check. It proves the JSON loaded and has the shape the code expects, which is
+    exactly what you want before you trust a number — but a model name is not a pin, and no digest is
+    recorded for any of the sixteen judges. That gap is the subject of lesson 11.3.
+
+- id: m11-1-q2
+  question: >-
+    A suite reports `66.7% pass on n=57` and, one line below, a kappa of `0.43`. On those 57 items the
+    Wilson interval around the pass rate runs 53.7% to 77.5%. What does the interval tell you that the
+    point estimate does not?
+  options:
+    - >-
+      That the judge disagreed with the humans on 16 of the 57 items, which is what kappa 0.43 is made of.
+    - >-
+      That 66.7% sits 14 points above the true rate because the judge passes answers the humans failed.
+    - >-
+      That the 57 dev items are not a random draw, so the interval should be replaced by an exact test.
+    - >-
+      That the measured rate could honestly be 54% or 77%, so a two-point move is not evidence of anything.
+  correct: 3
+  explanation: >-
+    An interval says what the measurement could plausibly be. Nearly 24 points of width on 57 items is the
+    honest size of the evidence, and any decision that treats 66.7% as a fixed quantity is treating one
+    draw as the measurement. The disagreement count and the correction are separate numbers.
+
+- id: m11-1-q3
+  question: >-
+    You set `--threshold 0.00` on a recorded judge. The report reads `100.0% pass`, `kappa 0.00`,
+    `TPR 100.0%`, `TNR 0.0%`, accuracy `52.6%`. Which reading of that report is right?
+  options:
+    - >-
+      Accuracy of 52.6% is the humans' own pass rate, because a judge that passes everything scores the
+      prevalence.
+    - >-
+      The judge has been fixed, because a 100% pass rate means it now agrees with the humans on every item.
+    - >-
+      Kappa of 0.00 means the agreement was too small to round, so the judge is close to a coin flip.
+    - >-
+      TPR of 100% with TNR of 0% means the judge is strong on the answers that matter and weak elsewhere.
+  correct: 0
+  explanation: >-
+    A judge that passes everything is caught by nothing, so its accuracy is just the share of items the
+    humans passed — 30 of 57 here. The kappa is what says so, and it is the only figure on the line that
+    refuses to be flattered. Score up 33 points, measurement down to chance.
+
+- id: m11-1-q4
+  question: >-
+    On the same 57 items, the rubric judge reads `v1 vs v2` as +26.3 points with p = 0.014, and the plain
+    judge reads the same comparison as +1.8 points with p = 1.000. What is the correct conclusion?
+  options:
+    - >-
+      The rubric judge agrees with the humans far more often, so its +26.3 is the number to publish.
+    - >-
+      The two judges are reading different splits, so one of the two runs scored the wrong dataset half.
+    - >-
+      Neither run is trustworthy, because a 26-point swing between judges on 57 items is only noise.
+    - >-
+      Nothing about the systems changed, and the conclusion about a system depends on which judge read them.
+  correct: 2
+  explanation: >-
+    Same items, same two variants, same command with one flag changed, and the measured effect moves
+    twenty-five points and reverses its conclusion. That is a fact about the judge, not about the system,
+    and it is the reason no pass rate may be published without the judge that produced it.
+
+- id: m11-1-q5
+  question: >-
+    Setting `--repeats 2` drops the pass rate from 66.7% to 49.1% and raises kappa from 0.43 to 0.72 on the
+    same 57 items. What explains both movements?
+  options:
+    - >-
+      Two repeats average away the judge's noise, so a fairer judge passes fewer items and agrees more.
+    - >-
+      The dataset is halved, so two repeats scores only the first two of the five recorded samples per item.
+    - >-
+      A one-one split is not a majority, so it resolves to fail, making two repeats stricter than three.
+    - >-
+      The bootstrap uses half its resamples at two repeats, so the interval narrows and kappa widens.
+  correct: 2
+  explanation: >-
+    `majority_vote` requires strictly more than half the samples to pass, and one pass out of two is not
+    more than half. Every even repeat count has this property, which is why a two-repeat number looks
+    worse than the three-repeat number next to it and neither is a regression.

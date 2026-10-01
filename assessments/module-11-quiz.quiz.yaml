@@ -1,0 +1,243 @@
+- id: q1
+  question: >-
+    A held-out run prints `1 slice(s) contain no failing items, so their true-negative rate is not
+    measurable: out_of_scope`. The team has just moved to a framework dashboard, which renders that slice's
+    TNR as `0%`. Which reading is defensible?
+  options:
+    - >-
+      The dashboard is right and the run is being precious: no failing items on that slice means the judge
+      missed none of them, so `0%` is the same finding written more compactly.
+    - >-
+      The rate has no denominator on that slice, so `0%` claims a measurement nobody took, and the dashboard
+      gives its reader no way to know that.
+    - >-
+      `100%` is the better rendering instead, because a judge cannot miss a failure that was never present
+      for it to miss, so the dashboard is simply mis-set and the run is right.
+    - >-
+      Drop the slice from the report until the item set grows, because a slice with an empty denominator
+      adds noise to a page a stakeholder is already reading too quickly to want caveats.
+  correct: 1
+  explanation: >-
+    A true-negative rate is a proportion of the answers humans failed, and on this slice that denominator is
+    empty, so the number does not exist and `0%` reads exactly like a judge that caught none of them. The
+    tempting `100%` is worse still, because it invents the one value an empty denominator would produce.
+
+- id: q2
+  question: >-
+    You are writing the parity suite that checks the Python port against the JavaScript engine. Which pairing
+    of statistic to tolerance is the one this port actually justifies?
+  options:
+    - >-
+      Wilson bounds, kappa, TPR and TNR to `1e-9`, and the paired bootstrap interval to `1e-9` as well,
+      because both engines are handed the same seed and the same resample count.
+    - >-
+      Wilson bounds and kappa to `1e-9`, and the corrected pass rate to whatever the fixture happens to
+      hold, skipping any case the generator wrote as `null` so the suite stays green.
+    - >-
+      Kappa to the two decimals the CLI prints and the intervals to five points, because the report is read
+      at that resolution and a tolerance tighter than the printed page is pedantry.
+    - >-
+      Wilson bounds and kappa to `1e-9`, the paired point estimate asserted with `resamples=0`, and no
+      equality assertion on any bootstrap interval at all.
+  correct: 3
+  explanation: >-
+    A closed-form statistic is the same arithmetic in both languages, so anything looser than floating-point
+    noise leaves room for a single miscounted cell; a bootstrap is a procedure, and two generators named for
+    each other but not sharing a draw sequence make its intervals two estimates of one quantity. Matching the
+    CLI's print resolution is the tempting move and it is exactly backwards — two decimals are a display
+    decision, not a tolerance.
+
+- id: q3
+  question: >-
+    To check your port you hand the JavaScript `confusion()` the 57 dev pairs as `(human, judge)` tuples, the
+    shape Python produces. It returns `tp 0, fp 0, fn 0, tn 57`, TNR 1, accuracy 1, kappa `null`, and raises
+    nothing. What is going on?
+  options:
+    - >-
+      Every pair falls through to the `else` branch, so the engine hands back a flawless report for a judge
+      that disagrees on 16 of 57 items.
+    - >-
+      Python is passing the wrong shape, so regenerate the fixture from the JavaScript engine and the two
+      sides agree as soon as the expected values come from the same call.
+    - >-
+      The engines disagree on 15 true negatives, so one of them has a bug in `confusion()` that has to be
+      found before either number is allowed near a report or a dashboard.
+    - >-
+      Nothing is wrong with the port: the counts still sum to `n` and every rate sits between 0 and 1, so a
+      well-formed matrix is one the parity test can safely compare against.
+  correct: 0
+  explanation: >-
+    `p.human === 1` is false, `p.judge` is `undefined` and also false, and the third test fails too, so every
+    pair lands in the `else`. That is the failure the parity test exists for, and the reason it computes both
+    sides from the same pairs: it cannot produce `tn 57` on one side and `tn 15` on the other without someone
+    reading the assertion.
+
+- id: q4
+  question: >-
+    The parity test fails on two fields only. JavaScript reports `fixed 24, broke 9`; Python reports
+    `fixed 9, broke 24`; `delta`, `ties` and `p` match to every digit. What resolves it?
+  options:
+    - >-
+      Whichever side the browser lab shows is the wrong one, so delete the two fields from the port and let
+      the report print the one agreed count under a neutral, neutral-sounding name.
+    - >-
+      The engines seed their shuffles differently, so the flip counts move while the paired point estimate
+      stays put — the fix is one shared seed on both sides of the comparison.
+    - >-
+      Both engines count the same two sets of items from opposite ends, so the test should assert
+      `py.fixed == exp["broke"]` and carry the reason in the failure message.
+    - >-
+      Regenerate the fixture from the Python engine so `git status` is clean, and file the JavaScript's
+      convention as a follow-up ticket for the browser labs to sort out later.
+  correct: 2
+  explanation: >-
+    The JavaScript names those counts from A's side and the Python from B's, which is why they are each
+    other's values while the delta and the p agree exactly. Asserting the inversion writes the convention
+    down where the next reader meets it; regenerating the fixture from the port would freeze the port's
+    reading of the reference and call it the reference.
+
+- id: q5
+  question: >-
+    Six weeks after validation the same command starts failing on a handful of items. Nobody changed the
+    prompt, the code or the model on purpose. One verdict is 1.8 points of pass rate on 57 items, and the
+    run's own 95% half-width is 12.4 points. What is the diagnosis?
+  options:
+    - >-
+      Nothing has regressed: a move that small is inside the interval on every run, so a gate that fires on
+      it is set too tight and should be widened before anyone touches the judge or the container.
+    - >-
+      The judge is not the same judge: a new server build, a different quantisation or a tag that moved
+      changed what it answers, and the fix is to pin it and diff the item ids.
+    - >-
+      The item set has drifted out from under the judge, since a validated suite should reproduce its kappa
+      within noise on the same split six weeks later without any help from anybody on the team.
+    - >-
+      The threshold is doing it, because a probability-weighted threshold changes shape when the verdict
+      distribution moves, which is why the same configuration gave a different number last month.
+  correct: 1
+  explanation: >-
+    The size of the drift is the same order as the measurement's own width, which is why it accumulates
+    silently and surfaces as a red build rather than a warning. An interval that crosses zero says the run
+    cannot separate the two; it does not say the judge is innocent, and no threshold moves on its own.
+
+- id: q6
+  question: >-
+    A teammate wants the nightly re-run to drop `model_build` from its cache key, arguing that
+    `docker-compose.yml` already pins `ollama/ollama:0.5.7` and the suite only ever runs one judge. What is
+    the best response?
+  options:
+    - >-
+      Drop it from the nightly key only and document that job as deliberately unpinned, because a fully
+      pinned key would hide the very drift the nightly run exists to catch.
+    - >-
+      Drop it everywhere, since the cache stores a verdict rather than a latency, and a differently
+      quantised copy of the same weights answers the same rubric the same way.
+    - >-
+      Keep it in the key: the compose file pins the server and not the weights, so a verdict from different
+      bytes is a different judge.
+    - >-
+      Keep it but treat `qwen3:1.7b` as an intention rather than a pin, since a registry tag can be
+      re-pointed at any time and so the field can never really identify the bytes behind it.
+  correct: 2
+  explanation: >-
+    The server build identifies the process that serves verdicts, and the weights are fetched after it starts
+    listening, which is why a second service pulls the model only once the healthcheck passes. `model_build`
+    separates `qwen3-1.7b` from `qwen3-1.7b-q4_K_M` today, so writing it off as an intention throws away the
+    only component of the key that moves without anybody editing anything.
+
+- id: q7
+  question: >-
+    A learner on a locked-down laptop asks whether they can finish this module. `doctor` prints
+    `optional live judge ... lessons 11.1, 11.2 and 11.4 do not need it` and `optional docker ... lesson
+    11.3 only`. What do they give up by skipping the live-judge lesson?
+  options:
+    - >-
+      The one measurement recorded data cannot give: how their own judge behaves on their own data. The
+      default judge replays verdicts recorded at build time.
+    - >-
+      Nothing in this module — the recorded judge and the live judge are interchangeable once human labels
+      exist, since both return a pass or a fail for each item.
+    - >-
+      The parity tests, because the fixtures are generated by running the JavaScript engine against a live
+      model and cannot be rebuilt without one on the machine.
+    - >-
+      The whole suite, since `run_suite` resolves its judge through the local server before it will score a
+      single item, recorded verdict or not, and exits if nothing is listening.
+  correct: 0
+  explanation: >-
+    Recorded runs tell you how the suite behaves; they cannot tell you how your judge behaves on your
+    questions, and that difference is the whole reason the container exists. The readings that make the
+    model load-bearing are the tempting ones — the fixtures come from the JavaScript engine over the shipped
+    dataset, and the default judge never opens a socket.
+
+- id: q8
+  question: >-
+    A team adopts Inspect AI to get parallelism, retries on malformed output, caching and a log viewer. What
+    has to stay in plain Python, and why?
+  options:
+    - >-
+      Nothing: supply the human labels as `target` values and the framework's per-scorer metrics give TPR,
+      TNR and kappa for free alongside the pass rate it already prints.
+    - >-
+      The dataset reader only, because the framework wants a CSV export and every disagreement found later
+      has to be traced back to a row you can still join on by item id.
+    - >-
+      The cache and the reporter, since a framework has no way to tell you which four items it changed its
+      mind about between two runs of the same suite on the same items.
+    - >-
+      The scorer that needs your labels — TPR, TNR, kappa, the disagreements — because a framework grades
+      against `expected_output`, not against a verdict a person reached.
+  correct: 3
+  explanation: >-
+    A framework scores an output against something it is handed; your humans are a labelled file it has
+    never seen, and `expected_output` is the right answer rather than a person's verdict. That makes every
+    cell of the confusion matrix yours to keep, and it is why the split is where it is — delegate the
+    runner, keep the scorer that needs your labels.
+
+- id: q9
+  question: >-
+    The framework run and the pytest run read the same 57 items and disagree on four of them. Nothing else
+    about either run has changed. What is the defensible first move?
+  options:
+    - >-
+      Re-run both on a second seed and keep whichever set of verdicts is stable, since a disagreement like
+      this means one of the two readers is flaky rather than wrong.
+    - >-
+      Join the two results on item id and read those four, because two readers over the same items can only
+      disagree about a judge, and the ids are where that disagreement shows.
+    - >-
+      Adopt the framework's verdicts, since it is the maintained tool and the plain suite was only ever
+      kept to prove the numbers once before the migration started in earnest.
+    - >-
+      Keep whichever run agrees with last month's dashboard, since continuity with the number already on
+      the wall is what makes a release gate safe to keep trusting week after week.
+  correct: 1
+  explanation: >-
+    Two readers of the same items disagreeing is a finding about the judge, not a migration to reconcile, and
+    you cannot see it at all unless both tables carry the item id. Trading one run for the other discards
+    the only artefact that can say which reader is wrong; two reports you cannot join are two opinions
+    rather than a cross-check.
+
+- id: q10
+  question: >-
+    Someone adds `--repeats 3 --threshold 0.00` to the CI command. The report reads `100.0% pass on n=57`,
+    kappa `0.00`, TPR 100.0%, TNR 0.0%, and the build is green. What did the knob do?
+  options:
+    - >-
+      It made the suite stricter: a threshold of zero demands unanimity, so the judge now passes only the
+      items on which all three recorded repeats agreed.
+    - >-
+      It measured the same thing more carefully, and the kappa reads zero only because the report prints
+      agreement to two decimals on a larger effective sample.
+    - >-
+      It switched the variant under test, because the CLI reads the threshold from the dataset row beside
+      the variant id rather than from the flag that was passed.
+    - >-
+      It turned the judge into a constant: every item with at least one recorded sample passes, so it
+      catches none of the 27 answers the humans failed.
+  correct: 3
+  explanation: >-
+    The score rose 33 points while the measurement went to zero, and accuracy fell to 52.6%, which is what a
+    constant judge scores when it agrees with nobody in particular. Dropping the threshold is not a stricter
+    judge but the same answer for every item, and the kappa line is the only number on the report that says
+    so.

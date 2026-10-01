@@ -46,10 +46,33 @@ real — which is why it comes after you have a taxonomy and an eval set.*
 *Needs 5–7. This is the end of the fundamentals path: you have done everything by hand that module 11
 automates in Python.*
 
-## Not built yet: the production path
+## Part 4 — Ship it (Python, optional Docker, CPU-only laptop)
 
-Modules 11–15 are specified in `plan.md` but not written. They cover the same experiments in Python and
-OpenTelemetry, a regression suite in CI, online evals and drift monitoring. See `TODO_FOR_TAL.md`.
+| Module | What it is for |
+|---|---|
+| **11 · From lab to code** | The same experiments in Python, reproducible on a machine you did not type on: a first suite, a port with a parity proof, a pinned judge, and the framework mapping |
+
+Part 4 needs Python 3.10+ and a laptop. Docker is used for exactly one thing — pinning the judge —
+and **no lesson in the course requires an API key or a model download.** The default judge replays
+runs recorded at build time, exactly as the browser labs did.
+
+Three labs ship with it, in `labs/module-11/`: a machine-readable suite report, a port with its
+proof, and a cache that starts out keyed on too little. `labs/common/evallab` is the package they
+use, and `labs/common/tests/test_parity.py` proves its statistics match the ones your browser
+computed in modules 4 to 10.
+
+## Not built yet: the rest of the production path
+
+Specified in `curriculum/module-plans-11-15.md`, not yet written:
+
+| Module | What it is for |
+|---|---|
+| **12 · Tracing and observability** | OpenTelemetry, the GenAI semantic conventions, and reading traces in MLflow |
+| **13 · Regression suites in CI** | The suite in GitHub Actions, cached judge calls, flaky-eval handling, an eval budget |
+| **14 · Online evals and monitoring** | Sampling production traces, guardrails vs evals, drift bands, closing the loop |
+| **15 · Advanced topics** | Benchmarks and contamination, reward models vs judges, annotation at scale, model migration |
+
+Plus the capstone, on a feature of the learner's own. See `TODO_FOR_TAL.md`.
 
 ## Dependency graph
 
@@ -68,6 +91,12 @@ graph TD
   M7 --> M10[10 · Comparing systems and gates]
   M8 --> M10
   M9 --> M10
+  M10 --> M11[11 · From lab to code]
+  M11 --> M12["12 · Tracing"]
+  M12 --> M13["13 · Regression in CI"]
+  M13 --> M14["14 · Online evals"]
+  M14 --> M15["15 · Advanced (optional)"]
+  M14 --> CAP["Capstone"]
 ```
 
 ## The dataset behind the labs
@@ -88,3 +117,4 @@ The public datasets named in `references/README.md` (MT-Bench, HelpSteer2, Judge
 
 See [the templates](templates/README.md) for the sheets you fill in for your own feature, and
 [the readings](references/README.md) for the sources behind the method.
+

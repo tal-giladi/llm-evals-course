@@ -1,0 +1,115 @@
+- id: q1
+  question: >-
+    A judge validated at kappa 0.79 starts failing on a handful of CI items six weeks later with no code
+    change. The container is rebuilt and every cache key misses, including keys that differ only in
+    `model_build`. What does that second half tell you?
+  options:
+    - >-
+      The rubric was edited without a commit, so the keys differ for a reason no one has looked for yet.
+    - >-
+      The cache is keyed on the item id alone, so it is returning stale verdicts and disguising them as
+      misses.
+    - >-
+      The judge answering the questions is not byte-for-byte the judge the kappa was measured on, so the
+      old number no longer describes what the suite is running.
+    - >-
+      The container is healthy but the model volume is empty, so every key misses on an empty cache rather
+      than on a changed judge.
+  correct: 2
+  explanation: >-
+    A key that changes when `model_build` changes is the key working: a different quantisation or a
+    re-pulled build is a different judge, and its verdicts are evidence about something you have not
+    validated. A kappa measured on the old one cannot be carried onto the new one.
+
+- id: q2
+  question: >-
+    `docker compose up -d` returns with exit code 0 and the first judge call is refused. The compose file
+    has a healthcheck. What is that healthcheck protecting you from?
+  options:
+    - >-
+      From a container that reports itself healthy before the Ollama server behind it is accepting
+      requests, so a call in that window fails for reasons unrelated to your code.
+    - >-
+      From a model that is still being downloaded when the suite starts, which silently returns a stale
+      answer instead of refusing the connection.
+    - >-
+      From port 11434 already being bound by another Ollama install, which is the most common reason a
+      compose file needs a healthcheck at all.
+    - >-
+      From the volume mount being read-only on a laptop, which makes `ollama pull` write to a directory
+      the container cannot see.
+  correct: 0
+  explanation: >-
+    `up` returning is not the server being ready. The shipped healthcheck asks the HTTP API something
+    (`ollama list`), so it goes green only when a real request would succeed, and `pull-model` waits on
+    `condition: service_healthy` so the weights land before the first call.
+
+- id: q3
+  question: >-
+    The compose file pins `ollama/ollama:0.5.7` and pulls `qwen3:1.7b`. A reviewer asks why the second one
+    counts as a pin. What is the honest answer?
+  options:
+    - >-
+      It does, because Ollama resolves a tag to a content digest at pull time and refuses to overwrite an
+      existing local copy of that digest.
+    - >-
+      It does, because the server build that resolves the tag is itself immutable, so the resolved model
+      is fixed by the image.
+    - >-
+      It does not, strictly, but only for the first pull: once the digest is cached in the named volume
+      every later run reuses those exact bytes.
+    - >-
+      It does not, strictly: a tag is a name its publisher can re-point, so it pins the model less tightly
+      than the image tag pins the server.
+  correct: 3
+  explanation: >-
+    A registry tag is a mutable name. The compose file says so in its own comment — "the tag is the pin" —
+    which is pinning as well as this file can, and it is a real improvement over an unpinned pull. The
+    tighter version records the digest `ollama list` reports into `model_build` so the key names bytes.
+
+- id: q4
+  question: >-
+    The dev split is 57 items with a 95% pass-rate interval of 46.7% to 71.4%. A rebuilt judge changes four
+    verdicts. What is the right reading of that run?
+  options:
+    - >-
+      Four flips is a 7.0-point drop, so a 5-point gate would fire, and the gate is therefore correctly
+      configured for this size of drift.
+    - >-
+      Four flips is 7.0 points against a half-width of 12.4, so the move sits inside the measurement's own
+      width and the run cannot tell you whether the system or the judge moved.
+    - >-
+      Four flips is 7.0 points, which is far more drift than a judge should show between two runs of the
+      same suite, so the container is serving the wrong model build.
+    - >-
+      Four flips is under one tenth of the suite, which is below the 10% regression size the gate is
+      specified against, so the run is expected to be green.
+  correct: 1
+  explanation: >-
+    One item on 57 is 1.8 points, so four is 7.0, and the half-width of that interval is 12.4 points. A
+    drift the size of your own noise does not announce itself on a dashboard; it accumulates, and the first
+    place it is visible is a red build. That is why the diff belongs in the run record.
+
+- id: q5
+  question: >-
+    Now that a live judge runs on your machine, the obvious move is to make it the default in `evallab`.
+    Why is the recorded judge kept as the default instead?
+  options:
+    - >-
+      Because a default that needs a running container makes every other lesson of the module need one
+      too, and the live judge is an instrument rather than a dependency.
+    - >-
+      Because the recorded judge is more accurate than any local model, so a live judge would make the
+      suite's numbers worse for no measurable gain.
+    - >-
+      Because a live judge cannot be re-run for a second opinion, so keeping the recorded one is the only
+      way to reproduce a result after the fact.
+    - >-
+      Because the recorded judge runs against the same frozen human labels, so it is the only version of
+      the suite whose TPR and TNR mean the same thing on every machine.
+  correct: 0
+  explanation: >-
+    The recorded judge is instant, free and identical everywhere, which is what makes it usable on a
+    CPU-only CI runner. Making the live judge the default would mean nobody could check your work without a
+    1.7 GB download, and the people most likely to disagree with your judge are the ones with least
+    patience for one.

@@ -106,6 +106,15 @@ def _doctor() -> int:
 def _run(args) -> int:
     data = load(args.dataset)
     judge = RecordedJudge(data, args.judge)
+
+    # Fail before doing any work, not after printing a number. A suite that
+    # is asked about a variant nobody recorded has no result to give, and the
+    # worst thing it can do is produce a confident zero.
+    if args.variant not in [v["id"] for v in data.variants]:
+        known = ", ".join(v["id"] for v in data.variants)
+        say(f"{NO} variant       {args.variant!r} is not one of: {known}")
+        return 2
+
     if args.repeats > 1 or args.threshold is not None:
         judge = MajorityJudge(
             judge, repeats=args.repeats,

@@ -12,3 +12,10 @@ build/pytest-tmp/
 report.json
 .judge-cache.json
 
+
+# Locked scratch directories that pytest and pip can leave behind on a
+synced folder: git cannot read them, so never try to track them.
+.pytest-tmp/
+**/pytest-cache-files-*/
+**/.tmppip/
+**/lab-scratch/

@@ -71,3 +71,11 @@
   - [42 · Setting a gate under noise](lessons/module-10/lesson-03.md)
   - [43 · Slices as their own gates](lessons/module-10/lesson-04.md)
   - [Module 10 quiz](assessments/module-10-quiz.md)
+
+- Part 4 — Ship it (Python, optional Docker, CPU-only laptop)
+- **Module 11 — From lab to code**
+  - [44 · Your first eval run in Python](lessons/module-11/lesson-01.md)
+  - [45 · Porting the statistics, and proving they agree](lessons/module-11/lesson-02.md)
+  - [46 · A judge through Ollama on your laptop](lessons/module-11/lesson-03.md)
+  - [47 · Mapping the same suite onto a framework](lessons/module-11/lesson-04.md)
+  - [Module 11 quiz](assessments/module-11-quiz.md)

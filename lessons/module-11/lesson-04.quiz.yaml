@@ -1,0 +1,92 @@
+- id: q1
+  question: >-
+    A held-out run prints `43.2% pass` and `86.5% accuracy` on the same 37 items. A framework dashboard
+    leads with the second number. What has that dashboard established about the system?
+  options:
+    - >-
+      That the system is healthy, because the judge agreed with the humans on 86.5% of the items it
+      graded.
+    - >-
+      That the system passes 86.5% of its eval set, which is the number the reader will quote in the
+      release notes.
+    - >-
+      That the judge has drifted, since a healthy system should be graded at roughly the same rate it is
+      passed.
+    - >-
+      Nothing about the system's quality: 86.5% measures how often the judge matched a human, and the
+      system passed 43.2% of the same items.
+  correct: 3
+  explanation: >-
+    Accuracy is a function of the `tp`/`fp`/`fn`/`tn` cells and the pass rate is a function of `tp` and `fp`
+    alone; on this run they are 43 points apart. A judge can agree with every human and still pass fewer
+    than half the items, which is what the cells `tp 14, fp 2, fn 3, tn 18` describe.
+
+- id: q2
+  question: >-
+    A framework scorer compares an output to an `expected_output`. This course scores a judge against a
+    human label. Both are called "the reference". Why is treating them as the same field dangerous?
+  options:
+    - >-
+      The framework's field is the right answer to compare against, while the human label is a verdict
+      somebody reached, so swapping them replaces a question about the judge with one about the output.
+    - >-
+      The framework field is a string and the human label is an integer, so the two cannot be written to
+      the same column without a conversion that loses information.
+    - >-
+      Frameworks validate their reference fields at load time and reject an eval whose reference is not a
+      string, so the mistake is caught before the run rather than after it.
+    - >-
+      It is not dangerous, because both are supplied by the dataset and the two scorers are interchangeable
+      whenever the reference is written once.
+  correct: 0
+  explanation: >-
+    `expected_output` answers "is this what we wanted"; a human label answers "is this what a person
+    decided was right". Only the second one lets you measure the judge. Substituting one for the other
+    produces a number with the right name and a different population underneath it.
+
+- id: q3
+  question: >-
+    You have decided to adopt a framework, and the plan keeps the plain pytest suite as the source of truth
+    for the gate. What is the reason the course takes that order rather than migrating?
+  options:
+    - >-
+      Because the frameworks cannot produce a per-item result, so a disagreement between the two runs
+      could never be located to a question.
+    - >-
+      Because a framework's scorer is a candidate judge until it has been measured against your own human
+      labels, and the TPR, TNR and kappa that justify the gate are not things it can compute for you.
+    - >-
+      Because the plain suite is the only one of the two that runs in CI, since a framework viewer needs a
+      browser that a runner does not have.
+    - >-
+      Because migrating first means the old suite's numbers are gone, so there is no way to tell whether the
+      framework found something the old suite missed.
+  correct: 1
+  explanation: >-
+    Every one of kappa, TPR and TNR is a function of the four confusion cells, and every cell is a function
+    of a human label that lives in your repository. A framework hands you the runner and the scorer library
+    and stops there; keeping the plain suite first means the numbers the gate uses were produced by code
+    you can read.
+
+- id: q4
+  question: >-
+    The same evaluator reports a 16.4-point fall in pass rate from dev to held-out, while accuracy moves
+    only 3.0 points. Which row of the report says whether the system got worse or the judge moved?
+  options:
+    - >-
+      The pass rate, because it is the only number computed from the same scorer on both splits and so is
+      directly comparable.
+    - >-
+      The kappa, because it corrects for chance agreement and therefore isolates the judge from the
+      system.
+    - >-
+      The confusion cells, because the direction of the change — `fn` rising, `fp` falling, or both — is
+      what separates a stricter judge from a worse system.
+    - >-
+      Neither, because a fall of that size on 37 items is inside the interval and the honest answer is to
+      report nothing at all.
+  correct: 2
+  explanation: >-
+    From `tp 29, fp 5, fn 1, tn 22` to `tp 14, fp 2, fn 3, tn 18` the judge got stricter in both directions
+    at once, which moves the pass rate and the accuracy in opposite proportions. The pass rate alone reads
+    as a catastrophic regression and the accuracy alone as a non-event; four integers say which it was.

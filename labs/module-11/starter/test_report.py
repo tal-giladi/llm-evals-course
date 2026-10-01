@@ -82,3 +82,32 @@ def test_cli_writes_a_file(tmp_path, monkeypatch):
     written = json.loads((tmp_path / "report.json").read_text(encoding="utf-8"))
     assert written["n"] == 57
 
+
+
+def test_report_names_its_subject(report):
+    """Lesson 11.1. A report that does not say what it measured cannot be read.
+
+    This is a defect in the shipped CLI as well as in this lab: the run line
+    names the judge and the split but not the variant, so a number cannot be
+    reconstructed from the output. Fixing it is part of the exercise.
+    """
+    assert report["variant"], "the report has to name the variant it scored"
+
+
+def test_an_unlabelled_variant_is_refused_not_graded():
+    """The failure lesson 11.1 deliberately keeps on screen.
+
+    ``v1padded`` has recorded judge verdicts but no human labels, so scoring
+    it produces a confident report in which the pass rate is real and every
+    agreement figure beside it is manufactured. A confusion matrix with tp=0
+    *and* fn=0 is the signature: no human positives were ever present.
+    """
+    report = build_report(variant="v1padded")
+    c = report.get("confusion") or {}
+    if c:
+        assert not (c.get("tp") == 0 and c.get("fn") == 0), (
+            "a confusion matrix with no true positives and no false negatives "
+            "contains no human labels, and must not be reported as agreement")
+    else:
+        assert report.get("refused") or report.get("error"), (
+            "scoring an unlabelled variant must either be refused or flagged")

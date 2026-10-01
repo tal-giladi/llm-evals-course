@@ -13,6 +13,9 @@ Each term links to the lesson that introduces it.
 
 ## C
 
+- **Cache key** — the set of inputs a stored judge verdict is tied to. Change one of them and the
+  verdict is no longer reusable, which is what stops a cache returning a result for a prompt you
+  never ran. [Lesson 5.3](lessons/module-05/lesson-03.md), [module 11](lessons/module-11/lesson-03.md)
 - **Chances-corrected agreement** — agreement with what a coin guessing the majority class would have
   scored removed. This is what Cohen's kappa corrects for. [Lesson 6.3](lessons/module-06/lesson-03.md)
 - **Cohen's kappa** (κ) — chance-corrected agreement between two raters or a judge and a human.
@@ -34,6 +37,9 @@ Each term links to the lesson that introduces it.
   [Lesson 9.1](lessons/module-09/lesson-01.md)
 - **Error analysis** — reading outputs, naming failures in your own words, and counting them, before
   writing any metric. [Lesson 2.1](lessons/module-02/lesson-01.md)
+- **evallab** — the Python package the production path uses, in `labs/common/`. Its statistics are a
+  port of the browser engine's, and a parity test keeps the two honest.
+  [Lesson 11.1](lessons/module-11/lesson-01.md)
 - **Eval set** — the fixed set of items with known answers used to measure a system.
   [Lesson 4.1](lessons/module-04/lesson-01.md)
 
@@ -83,6 +89,9 @@ Each term links to the lesson that introduces it.
 
 - **Paired comparison** — comparing two systems on the *same* items so item difficulty cancels out.
   [Lesson 10.1](lessons/module-10/lesson-01.md)
+- **Parity test** — a test that runs the same computation in two implementations and fails when they
+  disagree. The whole cost of porting a statistic is this test; without it a port is a guess.
+  [Lesson 11.2](lessons/module-11/lesson-02.md)
 - **Pass rate** — the share of items a check marked as passing. Meaningless without its sample size and
   its agreement with humans. [Lesson 1.1](lessons/module-01/lesson-01.md)
 - **Position bias** — an LLM judge favouring whichever answer it read first.

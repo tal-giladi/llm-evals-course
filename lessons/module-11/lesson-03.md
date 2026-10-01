@@ -109,7 +109,7 @@ names a failure you will otherwise hit on your first attempt:
 `docker compose up -d` returning is not the server being ready. The file's healthcheck is a real readiness
 probe — `ollama list`, which is a request to the HTTP API and fails until the API is answering — polled
 every 5 s, 12 retries, with a 10 s start period. And the second service, `pull-model`, does not start until
-`condition: service_healthy`, so the 1.7 GB of weights are on disk before the first judge call rather than
+`condition: service_healthy`, so the model's weights are on disk before the first judge call rather than
 during it. Between them, those two lines are the difference between "my connection was refused" and "my
 judge is wrong", and only one of those is a bug in your code.
 
@@ -214,7 +214,7 @@ The suite itself, same recorded judge, dev split:
 
 ```console
 $ py -m evallab.cli run --judge c-rubric-3b --variant v1 --split dev
-eval: 59.6% pass on n=57  (dev, Llama 3.2 3B - Rubric - 0 shots)
+eval: 59.6% pass on n=57  (dev, Llama 3.2 3B · Rubric · 0 shots)
   kappa 0.79   TPR 96.7%   TNR 81.5%   accuracy 89.5%
 
 6 disagreement(s). These are the work:
@@ -233,13 +233,13 @@ And the package's own tests, which include the executable version of this lesson
 
 ```console
 $ py -m pytest tests/ -q
-17 passed, 1 warning in 0.64s
+17 passed in 0.64s
 ```
 
 > [!NOTE]
 > Two of those 17 are the whole argument. `test_cache_key_changes_when_the_prompt_changes` changes one
 > character of `prompt_hash` and asserts the key changes; `test_cache_key_varies_by_every_component` walks
-> all seven non-trivial components of the key, including `model_build` going from `qwen3-1.7b` to
+> all eight other components of the key, including `model_build` going from `qwen3-1.7b` to
 > `qwen3-1.7b-q4`, and asserts each one produces a different key. Read them in
 > `labs/common/tests/test_suite.py` — they are the cheapest correct description of lesson 5.3 anywhere in
 > the course.
@@ -298,8 +298,9 @@ eight characters: **a re-quantisation is a different judge, and the key is what 
    that you skipped it; `doctor` already told you which lessons it affects.
 5. **Decide whether you would use it.** On your own dev split, with the measured seconds-per-call from step
    4 in hand if you have it and a stated guess if you do not, write the one sentence that would go in your
-   ADR: *this suite runs the live judge on <schedule> because <reason>, and the recorded judge everywhere
-   else because <reason>.* The reason has to be a sentence a reviewer can disagree with.
+   ADR: *this suite runs the live judge on a schedule, because of one named reason, and the recorded judge
+   everywhere else, because of one named reason.* Both reasons have to be sentences a reviewer can disagree
+   with.
 
 ## Break it
 
@@ -342,7 +343,7 @@ to depend on can tell you the difference.
    a model that made the first twenty items slow and the rest fast, which is a run you cannot compare to
    anything.
 5. **Keep `RecordedJudge` as the default, deliberately.** The live judge is an *instrument*, not a
-   dependency. A suite that cannot run without a 1.7 GB download is a suite that will not be run by the
+   dependency. A suite that cannot run without a model download is a suite that will not be run by the
    person who needs to run it, and the cost of a live judge is not the dollars — it is the number of people
    who are able to check your work.
 
@@ -369,7 +370,7 @@ to depend on can tell you the difference.
 
 ```console
 $ py -m evallab.cli run --judge c-rubric-3b --variant v1 --split test
-eval: 43.2% pass on n=37  (test, Llama 3.2 3B - Rubric - 0 shots)
+eval: 43.2% pass on n=37  (test, Llama 3.2 3B · Rubric · 0 shots)
   kappa 0.73   TPR 82.4%   TNR 90.0%   accuracy 86.5%
 
   1 slice(s) contain no failing items, so their true-negative rate is not measurable: out of scope
@@ -377,9 +378,10 @@ eval: 43.2% pass on n=37  (test, Llama 3.2 3B - Rubric - 0 shots)
 
 Three things in that output are the check, and all three are about honesty rather than the number:
 
-- **The kappa fell from 0.79 to 0.73 and the TPR from 96.7% to 82.4%.** One human-passed item in thirty on
-  dev, three in seventeen on test. On 37 items the interval is wide enough to absorb that, and the point of
-  reading it once is that you now know your judge is not a 0.79 judge on data it was not tuned on.
+- **The kappa fell from 0.79 to 0.73 and the TPR from 96.7% to 82.4%.** That TPR is one human-passed item
+  in thirty on dev and three in seventeen on test — a 14-point move built out of four items in total. The
+  honest reading is that you now know your judge is not a 0.79 judge on data it was not tuned on, and that
+  17 items is not enough to tell you how much of the drop is the judge and how much is the items.
 - **A slice is reported as not measurable.** The `out_of_scope` slice has no failing items on the test split,
   so its true-negative rate cannot exist, and the run says so in words rather than printing a confident
   zero. A number that cannot fail is a number that will eventually be trusted.
@@ -407,7 +409,8 @@ disagree with your judge are the ones with the least patience for a download.
 
 **Don't quote a latency for a local judge you have not measured.** Not this lesson's, not a blog's, not a
 vendor's number for a different machine. Write `not measured` and then measure it. The arithmetic to report
-is one line: `57 calls at <n> s/call = <m> min on <hardware>`, and the hardware is part of the number.
+is one line — *57 calls at N seconds a call, on a named piece of hardware* — and the hardware is part of the
+number, so it has to be on the line with it.
 
 What teams actually do in production: the CI job runs the recorded judge, keyed on all nine components,
 which makes every run after the first a cache lookup. A live judge runs on a schedule — nightly, or weekly —
@@ -417,9 +420,9 @@ job, and it is the whole reason Docker is in the production path.
 
 ## Reflect
 
-1. The dev run prints 6 disagreements out of 57 items, and a rebuild of the judge container moved the pass
-   rate by 10.5 points. Write the two sentences you would put in the incident channel, and name the field
-   of the cache key you would print next to every number in the report.
+1. The dev run prints 6 disagreements out of 57 items, which is 10.5 points of pass rate if a judge
+   rebuild moved all of them. Write the two sentences you would put in the incident channel, and name the
+   field of the cache key you would print next to every number in the report.
 2. `qwen3:1.7b` is a tag. Write the two sentences that explain to a reviewer why you are willing to ship a
    release gate whose judge is named by a mutable string, and what one extra command would make that
    objection go away.
