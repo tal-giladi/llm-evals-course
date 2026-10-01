@@ -1,0 +1,72 @@
+- id: q1
+  question: >-
+    You delete sample_index from the judge cache key. What happens to a gate that takes the majority of
+    three repeats per item?
+  options:
+    - The three repeats become independent samples again, because the cache stores them separately.
+    - The gate's false-alarm rate rises, because the cached samples now agree more often.
+    - All three repeats return one cached value, so run-to-run noise falls to exactly zero.
+    - Every lookup misses, so the run costs three times what it cost before the change.
+  correct: 2
+  explanation: >-
+    Without sample_index all three repeats of an item hash to one key and return one stored verdict, and a
+    majority of three identical values is that value. The measurement gets quieter and no more sensitive,
+    which is why a hit rate that never moves is a bug report rather than a win.
+
+- id: q2
+  question: >-
+    Your judge cache hit rate has read 100% every day for a month. What is the most likely explanation?
+  options:
+    - The key is missing fields, so it is reusing verdicts across a change to the judge.
+    - The cache is well tuned and every run of the suite is genuinely identical.
+    - The judge is deterministic, so every repeat already returns the same verdict.
+    - The budget is set too low and the suite is refusing to spend anything.
+  correct: 0
+  explanation: >-
+    A correct key falls to a near-zero hit rate the moment a field in it changes and recovers afterwards.
+    A hit rate that never falls is the only observable signature of a key with a field missing, and the
+    verdict being served is from a configuration nobody is looking at any more.
+
+- id: q3
+  question: >-
+    Why is keying the judge cache on the commit SHA the wrong key, rather than merely an unhelpful one?
+  options:
+    - A commit identifies the code that produced the verdict, so it is always safe to key on it.
+    - Identity changes on every push while verdicts do not, so it either never hits or leaks across branches.
+    - The runner already hashes commits, which makes them a stronger key than the judge fields are.
+    - The suite stores one verdict set per commit anyway, so the key in the cache is redundant.
+  correct: 1
+  explanation: >-
+    A judge verdict is reusable when every input to it matches, so the key has to be a content address.
+    Keyed on identity, a cache that misses always pays full price, and a cache that hits is handing one
+    branch the verdicts of another.
+
+- id: q4
+  question: >-
+    One character of the judge prompt changes. On a gate over 57 items at three repeats, what should the
+    cache do on the next run, and why?
+  options:
+    - Only the item whose answer that clause touches; the other items are unrelated to it.
+    - Nothing, because the item ids did not change and verdicts are stored per item.
+    - The item.id lookup only, because the hash also covers the prompt text.
+    - All 171 lookups, because prompt_hash is one of the nine fields in the key.
+  correct: 3
+  explanation: >-
+    prompt_hash is in the key, so a one-character change moves every key in the suite and the run costs
+    171 fresh calls. That is the price of correctness: a verdict from the old prompt is not a result for
+    the new one, and the cache is what makes the cost recoverable rather than permanent.
+
+- id: q5
+  question: >-
+    Which statement about a judge cache keyed on fewer than the nine fields is true, and is the reason
+    this failure survives for months?
+  options:
+    - It gets caught the first time the suite reports a pass rate nobody can explain.
+    - It is harmless, as long as the hit rate is high and the run time stays short.
+    - It is reproducible, so the same wrong verdict is served again and reads as consistent.
+    - It saves the most money, because it never pays for a duplicate judgment.
+  correct: 2
+  explanation: >-
+    A too-loose cache has no bad output. It is fast, it is stable, and its numbers agree with last week's,
+    which is exactly the evidence a team uses to decide whether to look. Nothing in the report says the
+    prompt changed, so nothing says the verdict should have changed either.

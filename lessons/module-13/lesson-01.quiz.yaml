@@ -1,0 +1,74 @@
+- id: q1
+  question: >-
+    A pull request's gate prints "passes, but the candidate is 1.8 points worse, inside the 5-point
+    tolerance". What should the CI job do with that sentence?
+  options:
+    - Exit non-zero, because a real drop happened and the tolerance did not prevent it.
+    - Exit 0, and put the whole sentence on the pull request where somebody reads it.
+    - Exit 0 and print nothing, because the gate did not block and the check is green.
+    - Exit non-zero only if the paired interval excludes zero, and exit 0 in every other case.
+  correct: 1
+  explanation: >-
+    A CI check has two states and this gate has three, so the middle outcome cannot be a verdict. It is a
+    report: the drop is real, it is inside the line, and the team chose the line. Exit 0 keeps the check
+    green; printing the sentence keeps the information.
+
+- id: q2
+  question: >-
+    The baseline build passes 34 of 57 dev items, and a change breaks the first six of them. How far does
+    the pass rate actually move?
+  options:
+    - 7.02 points, because two of those six were already failing at baseline.
+    - 10.53 points, because six of the fifty-seven items changed.
+    - 1.75 points, because only the front of the item list carries signal.
+    - 0 points, because the judge had already failed most of the frozen set.
+  correct: 0
+  explanation: >-
+    A drop is a drop in passes, not a count of edits. Two of the six items were already failing, so four
+    edits cost four passes: 4/57 is 7.02 points. A gate that counted broken items would report 10.53
+    here, and would report zero for the run that flips six already-failing items.
+
+- id: q3
+  question: >-
+    A gate version that decides on the bootstrap interval blocked a ten-point regression at every
+    tolerance from 2 to 15 points. Why does reading the interval instead of the point estimate do that?
+  options:
+    - The interval is always wider than the drop, so it never crosses any threshold at all.
+    - The bootstrap is resampled on every run, so no two runs produce the same bound.
+    - The 2.5th percentile sits below the point estimate, so it clears almost any tolerance line.
+    - The interval is in fractions and the tolerance is in points, so the units disagree.
+  correct: 2
+  explanation: >-
+    A percentile bootstrap of a sample mean puts its lower percentile below the point estimate almost
+    always. Compare that bound against a positive threshold and it clears the line whatever the threshold
+    is, which is why the sweep is flat and the tolerance is decoration.
+
+- id: q4
+  question: >-
+    A pull request that only edits documentation produces a CI log line reading "missing datasets".
+    What has that line established?
+  options:
+    - The pull request removed the dataset file from the repository.
+    - The dataset is corrupt, so the suite skipped the items it could not parse.
+    - The judge's recorded runs do not cover the items in the committed file.
+    - The runner could not find the file, so this run says nothing about the change.
+  correct: 3
+  explanation: >-
+    This is the first-CI-run failure from module 11.1 arriving in a new place: the working directory, the
+    committed files and the judge build are all environment, and none of them is the feature under test.
+    A missing data line means the machine is not the one the gate was tuned on.
+
+- id: q5
+  question: >-
+    An earlier version of this gate blocked improvements and passed regressions while its output still
+    read "7.0 points below the current build". Which check would have caught it?
+  options:
+    - Printing the paired interval beside the decision on every run.
+    - Tightening the tolerance so that a sign error cannot hide inside the noise.
+    - Running the gate twice and comparing the two reason strings for equality.
+    - Asserting the sign of the delta separately from the blocked flag.
+  correct: 3
+  explanation: >-
+    The reason strings formatted a signed quantity through abs(), so the words stayed right while the
+    branch underneath them was backwards. Only a test that checks the sign of the delta on its own, plus a
+    separate assertion on the outcome, distinguishes the two.

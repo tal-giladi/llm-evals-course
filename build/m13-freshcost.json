@@ -1,0 +1,26 @@
+{
+  "ok": false,
+  "items": 94,
+  "repeats": 3,
+  "calls": 40,
+  "hits": 0,
+  "misses": 41,
+  "hit_rate": 0.0,
+  "cost_per_call": 0.03794,
+  "usd": 1.5176,
+  "stopped_early": true,
+  "stop_reason": "budget ceiling reached: 40 call(s) and $1.5176 so far, limit is 40 call(s) and $10.70. The suite did not finish, so it has no result to report.",
+  "verdicts_scored": 14,
+  "config": {
+    "repeats": 3,
+    "suite_key": "4fa9ed62",
+    "model_build": "qwen3-1.7b-q4_K_M",
+    "prompt_hash": "grade-the-answer-against-these-rules-9f2c",
+    "fewshot": "none",
+    "answer_order": "AB",
+    "decoding": "temperature=0.0",
+    "judge_id": "c-rubric-3b",
+    "variant": "v1",
+    "dataset": "support"
+  }
+}

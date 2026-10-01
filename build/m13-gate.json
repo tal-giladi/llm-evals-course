@@ -1,0 +1,26 @@
+{
+  "status": "blocked",
+  "blocked": true,
+  "reason": "candidate is 10.6 points below the current build. Interval -19.1 to -3.2 points; tolerance 5.",
+  "drop_points": 10.64,
+  "interval": [
+    -19.15,
+    -3.19
+  ],
+  "calls": 282,
+  "usd": 10.69908,
+  "quarantined": [
+    "s05"
+  ],
+  "spec": {
+    "tolerance_points": 5.0,
+    "repeats": 3,
+    "items": 94,
+    "judge": "c-rubric-3b",
+    "variant": "v1",
+    "measurement_half_width": "median 6.4 points on a healthy re-run (94 items, 3 repeats, judge c-rubric-3b). One item is 1.06 points.",
+    "accepted_false_alarm_rate": "9.0% of healthy builds, at this tolerance (400 trials, `gate_lab.py --grid`)",
+    "accepted_miss_rate": "50.5% of a break of one question in ten, planted as the first tenth of the item list",
+    "must_catch": "a change that breaks one question in ten. Planted as the first tenth of the list that costs 4.87 points; planted across the 52 questions this build passes it costs 9.57."
+  }
+}

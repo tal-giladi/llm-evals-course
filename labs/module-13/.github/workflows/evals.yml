@@ -1,0 +1,239 @@
+# The regression gate, as a GitHub Actions workflow.
+#
+# Copy this file to `.github/workflows/evals.yml` at the ROOT of your repository
+# and change the four `labs/module-13/...` paths below to wherever your suite
+# lives. GitHub only reads workflows from the repository root, so the copy that
+# sits in this folder is a template and nothing here runs until you move it.
+#
+# It needs no API key, no model and no network. The judge is the recorded one
+# in `datasets/`, and the gate is a point estimate on two pass rates, so the
+# required path installs nothing at all: no `pip install`, no container, no
+# service. That is not tidiness, it is the reason the suite still runs on the
+# machine of the person most likely to disagree with your judge.
+#
+# What it does, in order, and why the order is the design:
+#
+#   1. name the judge configuration        — the key everything else is filed under
+#   2. restore the judge-call cache        — safe only because of step 1
+#   3. run the suite, under a budget       — a run that cannot pay does not report
+#   4. run the gate                        — blocks, warns, or passes
+#   5. post the verdict on the PR          — even when the answer is "blocked"
+#   6. fail the job                        — after the comment, not before it
+
+name: evals
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:          # re-run a gate without pushing anything
+
+# One gate per branch. Without this, a push straight after a pull request runs
+# the same suite twice and posts the second answer on top of the first.
+concurrency:
+  group: evals-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Read the repository, comment on the pull request, nothing else. The default
+# `GITHUB_TOKEN` is supplied automatically — there is no secret to configure.
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  gate:
+    name: regression gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # The lab modules put `labs/common` on sys.path themselves, so this is
+      # belt and braces. If your suite lives somewhere else, this is the line
+      # that changes.
+      - name: Put the eval package on the path
+        run: echo "$PWD/labs/common:$PWD/labs/module-13/solution" >> "$GITHUB_PATH"
+
+      # ---------------------------------------------------------------------
+      # 1. Name the judge.
+      #
+      # `cost_lab.py key` hashes all eight non-item components of the lesson
+      # 5.3 key: dataset, judge id, variant, model build, prompt hash, few-shot
+      # ids and order, answer order, decoding settings.
+      #
+      # This step is the whole safety argument for step 2. A verdict is only
+      # reusable by a run that would have produced it, and "would have produced
+      # it" is exactly this string. Key the cache on the commit, or the branch,
+      # or the date, and it will cheerfully serve a pull request verdicts from
+      # a prompt nobody ran — silently, because the numbers will look exactly
+      # right and nothing about a number says when it was measured.
+      # ---------------------------------------------------------------------
+      - name: Name the judge configuration
+        id: judge
+        run: echo "key=$(python labs/module-13/solution/cost_lab.py key)" >> "$GITHUB_OUTPUT"
+
+      # ---------------------------------------------------------------------
+      # 2. Restore the judge-call cache.
+      #
+      # `${{ github.run_id }}` is in the key on purpose. A static key is written
+      # once and never written again — the second run of the course would
+      # restore the first run's verdicts and no run after that would ever save
+      # anything. With the run id in the key, every run saves under its own
+      # name and `restore-keys` finds the most recent one for the same judge.
+      # That is what "restores the cache between runs" means in practice.
+      # ---------------------------------------------------------------------
+      - name: Restore the judge-call cache
+        uses: actions/cache@v4
+        with:
+          path: .judge-cache.json
+          key: judge-${{ steps.judge.outputs.key }}-${{ github.run_id }}
+          restore-keys: |
+            judge-${{ steps.judge.outputs.key }}-
+
+      # ---------------------------------------------------------------------
+      # 3. The suite, under a ceiling.
+      #
+      # 282 calls is 94 items x 3 repeats, which is what the shipped
+      # configuration costs when nothing is cached. Set the ceiling to the
+      # number, with no slack: the day somebody adds a fourth repeat without
+      # raising it, this step goes red and says so, and that is a pull request
+      # somebody can argue with. A ceiling with room in it is a ceiling nobody
+      # has thought about.
+      #
+      # A warm cache makes this free — the ceiling counts judge *calls*, and a
+      # cache hit is a lookup, not a call.
+      # ---------------------------------------------------------------------
+      - name: Run the suite and report what it cost
+        id: suite
+        run: |
+          python labs/module-13/solution/cost_lab.py \
+            --cache .judge-cache.json \
+            --max-calls 282 \
+            --max-usd 10.70 \
+            --out cost.json
+
+      # ---------------------------------------------------------------------
+      # 4. The gate.
+      #
+      # `continue-on-error` plus step 6 is deliberate. A gate that turns the
+      # job red here never reaches step 5, so the engineer who pushed gets a
+      # red X and no explanation, and then they re-run the suite by hand to find
+      # out what it saw. Post the reason first; block the merge second.
+      #
+      # The exit code is 0 for a pass *and* for a pass-with-warning. A warning
+      # is a drop the suite can see and cannot resolve, and it belongs in the
+      # comment rather than in a red X nobody has agreed to be scared of yet.
+      # ---------------------------------------------------------------------
+      - name: Run the gate
+        id: gate
+        continue-on-error: true
+        run: |
+          python labs/module-13/solution/gate_lab.py \
+            --out gate.json \
+            --tolerance 0.05 \
+            --repeats 3 \
+            --seed 4242
+
+      # ---------------------------------------------------------------------
+      # 5. The comment. A human should be able to read this in ten seconds
+      # without opening a log.
+      # ---------------------------------------------------------------------
+      - name: Post the verdict on the pull request
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const read = (p) => fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : null;
+
+            const gate = read('gate.json');
+            const cost = read('cost.json');
+            if (!gate) {
+              core.warning('gate.json was never written; the gate step did not run.');
+              return;
+            }
+
+            const s = gate.spec || {};
+            const mark = (v) => v === null || v === undefined ? '—' : v;
+            const lines = [
+              '### Eval gate',
+              '',
+              `**${gate.status}** — ${gate.reason}`,
+              '',
+              '| | |',
+              '|---|---|',
+              `| Drop | ${mark(gate.drop_points)} points (tolerance ${mark(s.tolerance_points)}) |`,
+              `| Paired 95% interval | ${gate.interval ? gate.interval.join(' to ') + ' points' : '—'} |`,
+              `| Judge calls | ${mark(gate.calls)} |`,
+              `| Quarantined | ${(gate.quarantined || []).length ? gate.quarantined.join(', ') : 'none'} |`,
+              '',
+              '**The gate specification**',
+              '',
+              `- Judge \`${mark(s.judge)}\`, variant \`${mark(s.variant)}\`, ${mark(s.items)} frozen items, ${mark(s.repeats)} repeats`,
+              `- Must catch: ${mark(s.must_catch)}`,
+              `- Accepted false-alarm rate: ${mark(s.accepted_false_alarm_rate)}`,
+              `- Accepted miss rate: ${mark(s.accepted_miss_rate)}`,
+              `- Measurement half-width: ${mark(s.measurement_half_width)}`,
+            ];
+
+            if (cost) {
+              lines.push(
+                '',
+                '**What the run cost**',
+                '',
+                `- ${cost.calls} judge call(s), ${cost.hits} cache hit(s) (hit rate ${cost.hit_rate})`,
+                `- $${cost.usd} at $${cost.cost_per_call} a verdict`,
+                cost.ok ? '- Inside the per-run budget.'
+                        : `- **Over budget and stopped:** ${cost.stop_reason}`,
+              );
+            }
+
+            const marker = '<!-- eval-gate -->';
+            const body = `${marker}\n${lines.join('\n')}\n${marker}`;
+
+            // One comment per pull request, updated in place. Without the
+            // delete, a PR with nine pushes has nine verdicts on it and the
+            // reader has to work out which one the merge button is talking to.
+            const { data: existing } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            });
+            const mine = existing.filter((c) => c.body && c.body.includes(marker));
+            for (const c of mine) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner, repo: context.repo.repo, comment_id: c.id, body,
+              });
+            }
+            if (!mine.length) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: context.issue.number, body,
+              });
+            }
+
+      # ---------------------------------------------------------------------
+      # 6. And only now, block the merge.
+      # ---------------------------------------------------------------------
+      - name: Fail the job if the gate blocked or the suite went over budget
+        if: steps.gate.outcome == 'failure' || steps.suite.outcome == 'failure'
+        run: |
+          echo "::error::the regression gate blocked this pull request - see the comment above"
+          exit 1
+
+      # ---------------------------------------------------------------------
+      # Optional. The gate above installs nothing; this step is the one that
+      # needs a package, and it is here so the suite's own tests run on every
+      # pull request too. Drop it if you have no tests to run.
+      # ---------------------------------------------------------------------
+      - name: Install pytest and run the suite's own tests
+        run: |
+          python -m pip install --disable-pip-version-check -q pytest
+          python -m pytest labs/module-13/solution -q
