@@ -1,0 +1,78 @@
+- id: q1
+  question: >-
+    A judge returns a score from 0 to 1 and the pipeline needs a pass or a fail. Where does the binary
+    decision you were trying to avoid actually end up?
+  options:
+    - It disappears, because a graded score carries more information than a pass or a fail.
+    - >-
+      At the threshold, and it is now an unwritten rule rather than a reviewed rubric — which is worse,
+      not better, because nobody validated it.
+    - In the logging layer, where the threshold can be recomputed later from the stored score.
+    - In the eval set, because the human labels are converted to scores and thresholded the same way.
+  correct: 1
+  explanation: >-
+    Grading does not remove the gate, it moves it into a control nobody wrote a sentence about. On this
+    corpus the same five-sample rubric judge reads kappa 0.36 at threshold 0.20, 0.94 at 0.50 and 0.57
+    at 1.00 — three different judges from one judge, chosen by a number in a config file.
+
+- id: q2
+  question: >-
+    You set Repeats to 1 and move the threshold across its whole range. What happens to the pass/fail
+    verdict, and why?
+  options:
+    - >-
+      The verdict improves smoothly, because a single sample taken at temperature averages out the
+      judge's noise on its own.
+    - The pass rate rises steadily as the threshold rises, because a higher bar rejects fewer answers.
+    - The kappa improves at every threshold, since a stricter judge always agrees more with the humans.
+    - >-
+      Nothing useful can happen: with one sample the score is only ever 0 or 1, so a graded judge run
+      once is a binary judge wearing a decimal point.
+  correct: 3
+  explanation: >-
+    Each sample is a 0 or a 1, so their mean can only be 0 or 1 and the threshold can only reproduce the
+    greedy verdict or its complement. A graded score needs more than one sample to exist, and the repeats
+    that produce it cost five times as much — $7.5880 instead of $1.5176 at 40 items here.
+
+- id: q3
+  question: >-
+    A pairwise judge picks the known-better answer on 97.9% of comparisons when it reads it first, and
+    gives the same winner in both orders on 47.9%. What does that combination say?
+  options:
+    - >-
+      The judge changes its mind more often than a coin would when the two answers trade places, and a
+      single-order run cannot reveal it because bias and quality point the same way.
+    - >-
+      The judge is excellent on quality and mildly biased towards the first position, so a small
+      correction will fix it.
+    - The two numbers disagree, so one of them is a recording error and the eval should be rerun.
+    - >-
+      Swap consistency is the metric to optimise, because it measures the judge directly rather than
+      through the quality of the items it was given.
+  correct: 0
+  explanation: >-
+    Below 50% swap consistency means the verdict is anti-correlated with the presentation order — worse
+    than biased. And the 97.9% accuracy figure is exactly why single-order runs are trusted: in one
+    ordering the position bonus and the real quality point the same direction, so the bias is invisible
+    until you judge every pair in both orders.
+
+- id: q4
+  question: >-
+    Your graded judge returns a mean of 3.1 on the answers humans failed and 3.8 on the ones humans
+    passed, over 94 items. What is the strongest thing you can do with that result?
+  options:
+    - Report it as evidence the judge tracks human judgement closely, since the two means separate.
+    - >-
+      Convert it to an accuracy by scoring every answer 4 or above as a pass, which is the standard way
+      to compare a graded judge with binary labels.
+    - >-
+      Use it to sort the disagreement queue by how contested each item is, and put a written threshold
+      in the config so the pass/fail decision is reviewable.
+    - Discard it and rebuild the judge as binary, since a graded scale cannot be validated against
+      pass/fail labels.
+  correct: 2
+  explanation: >-
+    The separation between the two means is real and useful for triage: it tells you which items were
+    contested, which is the queue worth reading first. It is not a gate, and it is not accuracy —
+    scoring 4-or-above as a pass on a five-point scale is the construction that lets a judge that always
+    says 4 score 80% without agreeing with anyone.

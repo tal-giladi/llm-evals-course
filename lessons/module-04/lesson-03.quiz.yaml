@@ -1,0 +1,94 @@
+- id: q1
+  question: >-
+    Your 20-item sample contains 4 `out_of_scope` items, all of which the system passes. The slice table
+    shows `4 of 7` in the sampled column. What can you say about the check on that slice?
+  options:
+    - >-
+      Nothing about its true-negative rate, because the slice contains no human failures for the rate's
+      denominator — and the slice has quietly dropped out of the overall rate.
+    - That the check passes every `out_of_scope` item, since 4 of 4 passed and the sample is half the
+      slice.
+    - That the slice is at 100.0%, so it can be dropped from the release gate as a solved case.
+    - That the sample is too small to tell, so re-run it at n = 94 before drawing any conclusion.
+  correct: 0
+  explanation: >-
+    A true-negative rate is caught failures divided by real failures, and a slice with no real failures
+    has a denominator of zero. The row still shows a perfectly computable 100% pass rate, which is
+    exactly why the hole is invisible on a scoreboard — and because the slice contributes nothing to
+    the overall rate, a missing hard slice pushes the headline up rather than down.
+
+- id: q2
+  question: >-
+    Switching to **Keep the slice mix** at n = 20 guarantees every intent slice has at least one item in
+    the sample. Two of them still read `none seen` in the failing-items column. Why?
+  options:
+    - The mix is still only roughly the population mix, and 3 items out of 94 works out at 0.64 of an
+      item in a sample of 20 — so the slice is present and its failures are not.
+    - The panel only updates when the size changes, so the new rows are stale until you redraw.
+    - Stratified draws deliberately weight the hard slices, and `exception` failed the weighting test.
+    - Failing items are excluded from every draw by design, because a failing item has no verdict yet.
+  correct: 0
+  explanation: >-
+    Stratification decides which slices you draw from; allocation decides how many failing items end up
+    inside each one, and those are different questions. Preserving a 3% share gives you 3% of the
+    items, and `out_of_scope` failures are 2 items in 7, so a mix-preserving draw of 20 expects 0.43
+    of them — a rate cannot be measured on 0.43 of an item.
+
+- id: q3
+  question: >-
+    A check's overall true-negative rate is 48.9% on all 94 items, but it is 0.0% on the `exception`
+    slice. What is the most likely explanation for a 20-item run reading 88.9%?
+  options:
+    - The judge was re-run and got better, so the earlier 48.9% is stale and can be replaced.
+    - The check is fine on the population that matters and the `exception` slice is too small to count.
+    - >-
+      The draw happened to contain items from the slices the check handles well and none from the two
+      rare ones, so the overall rate is an average whose weights came from the seed.
+    - The seed knob changes the check's prompt as well as the items, so the 88.9% is a different
+      measurement entirely.
+  correct: 2
+  explanation: >-
+    Nothing about the check or the system changed; only the items did, and the same run ranges from
+    11.1% to 88.9% across the 200 seeds the knob offers. The headline is a weighted average over
+    whichever slices survived the draw, and the slices with the fewest items are the ones most likely
+    to go missing.
+
+- id: q4
+  question: >-
+    The price of covering the rare slices by sampling is high: at seed 11 you need 80 of the 94 items
+    before `out_of_scope` contains a single failing item. What is the cheaper move?
+  options:
+    - Accept it, because the rare slices are rare and a 94-item draw is as good as the population gets.
+    - Take the whole rare strata by hand — all 7 `out_of_scope` items and all 3 `exception` items — and
+      report per-slice rates with their failing counts beside them.
+    - Weight the per-slice rates back to production proportions, which recovers the population answer
+      without more items.
+    - Drop the rare slices and gate only on `policy_fact` and `boundary`, which between them cover 65
+      of the 94 items.
+  correct: 3
+  explanation: >-
+    The allocation argument from lesson 4.1 applies inside a slice: a stratum with two failing items
+    will not produce one by sampling, so hand-write the stratum and let the interval say how little it
+    proves. The cost is that the set no longer matches production traffic, which every rate on it then
+    has to declare.
+
+- id: q5
+  question: >-
+    Your held-out 37 items contain 2 `out_of_scope` items and the system passes both. How should that
+    go in the validation write-up?
+  options:
+    - >-
+      As a pass: the slice reads 100.0% on held-out data, so it is out of scope for the gate from now
+      on.
+    - >-
+      As an unmeasured slice: 100.0% on 2 items with an interval of 34.2%–100.0%, and no failures in
+      either, so it gates on something other than a rate.
+    - As a failure of the split, since a slice with 2 items should have been left out of the test half.
+    - As a warning against shipping, since a system that fails out-of-scope questions has clearly not
+      been validated.
+  correct: 1
+  explanation: >-
+    Two items, both passing, means both humans agreed the system was right — so the slice contains no
+    failures and the rate that matters is undefined. Publishing the 100.0% without the count beside it
+    is exactly the failure this lesson describes, and the interval from 34.2% upward is what says the
+    claim is unfalsifiable.

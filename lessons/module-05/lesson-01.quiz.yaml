@@ -1,0 +1,85 @@
+- id: q1
+  question: >-
+    A team's nightly judge is prompted "Is this answer good? Reply PASS or FAIL." On 94 items it reports
+    a 69.1% pass rate where the humans report 50.0%. What is the strongest reading of that gap?
+  options:
+    - >-
+      The judge model is too small, so the fix is to move to a larger judge from the same menu at the
+      same prompt.
+    - >-
+      The judge is answering a question the humans never agreed on, so its 23 missed failures are spread
+      across four categories and no single edit reaches most of them.
+    - The eval set is too small, so 94 items is why the judge and the humans disagree by this much.
+    - >-
+      The judge is optimistically biased, so correcting its pass rate for its own TPR will bring it in
+      line with the human number.
+  correct: 1
+  explanation: >-
+    A judge is one question, and "is this answer good?" is a question nobody wrote down. Broken out by
+    failure category it catches 55.6% of missing citations, 41.7% of wrong facts, 50.0% of over-refusals
+    and 50.0% of invented out-of-scope rules — none of which is a decision, and none of which one prompt
+    edit repairs. Size and sample size do not move that; writing one judge per category does.
+
+- id: q2
+  question: >-
+    You are replacing one vague judge with four per-category judges over the same 40-item dev set. What
+    does the change cost at this course's recorded price of $0.03794 a call, and what does it buy?
+  options:
+    - >-
+      Four times the spend, $6.0704 instead of $1.5176, and four per-category TNRs instead of one total
+      you cannot act on.
+    - The same spend, because a judge suite is priced once per run rather than once per judge.
+    - >-
+      Four times the spend, $6.0704, but no additional information, since all four judges see the same
+      items.
+    - Slightly less spend, because four smaller judges each process fewer tokens than one larger judge.
+  correct: 0
+  explanation: >-
+    Every judge call is a model call, so four judges over 40 items is 160 calls rather than 40. What you
+    buy is four confusion tables and four TNRs — including the categories a single total hides, such as a
+    judge that catches every over-refusal and half the missing citations.
+
+- id: q3
+  question: >-
+    Your judge catches 89.4% of the answers humans passed but only 51.1% of the answers humans failed. The
+    dashboard shows a respectable 70.2% accuracy. What decision should you refuse to make with it?
+  options:
+    - >-
+      Nothing — accuracy of 70.2% on 94 items is enough to let it gate a release, because the interval
+      on a rate this size is narrow.
+    - Reporting its pass rate on a dashboard, since a rate nobody gates on is a legitimate use of this
+      check.
+    - >-
+      Reporting its accuracy next to a human pass rate, because the two numbers measure the same thing
+      and should agree.
+    - >-
+      Using it as a release gate, because a true-negative rate of 0.511 means nearly half of real
+      failures would ship through it.
+  correct: 3
+  explanation: >-
+    The headline is accuracy on a set where 50% of answers are already good, which flatters a judge that
+    waves through failures. TNR is the rate that decides gating, and 0.511 means 23 of the 47 real
+    failures here would sail through. Report the rate with its interval on a dashboard if you like; never
+    block on it.
+
+- id: q4
+  question: >-
+    Your taxonomy has nine rows and a stakeholder wants one judge covering all nine, averaging the
+    per-category scores. What is the concrete cost of accepting that?
+  options:
+    - The averaged judge costs nine times as much, because each category needs its own model call.
+    - >-
+      Reporting the average on the dashboard, because only a single headline number can be compared
+      across systems.
+    - >-
+      You lose the per-category TNR, so you cannot tell which failure category the judge is missing and
+      cannot say which one to fix.
+    - >-
+      Nothing measurable, since the per-category counts are already known from the taxonomy and do not
+      need a judge to confirm them.
+  correct: 2
+  explanation: >-
+    Averaging three categories with different counts and different fix costs produces a number with no
+    referent, and it destroys exactly the statistic you need: the per-category true-negative rate. The
+    count from your taxonomy tells you which categories exist; only the per-category confusion table
+    tells you which of them this judge is blind to.

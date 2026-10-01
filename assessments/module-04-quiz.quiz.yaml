@@ -1,0 +1,189 @@
+- id: q1
+  question: >-
+    Your taxonomy's `out_of_scope` row has 2 items in the whole population and `no_citation` has 27.
+    You are allocating 40 eval items. Which allocation is defensible, and why?
+  options:
+    - Take 2 of the 40 for `out_of_scope` and 24 for `no_citation`, because that mirrors the ratio the
+      error analysis produced.
+    - >-
+      Take both `out_of_scope` items and 12 `no_citation` items, and print the interval beside each
+      row — because frequent rows are cheap to re-collect from traffic and rare rows are not.
+    - Drop `out_of_scope` entirely and spend the budget on rows you can actually measure, since two
+      items can never resolve anything.
+    - Take 40 `out_of_scope` items, because an unmeasured row is worse than an expensive one.
+  correct: 1
+  explanation: >-
+    A category with two items cannot support a claim, but it can still be present in the set with its
+    interval written next to it — 100% on 2 of 2 reads 34.2%–100.0%. Proportional allocation gives the
+    row less than one item and leaves the gate with nothing to fire on, and a row you cannot measure is
+    still a row you have to gate somehow.
+
+- id: q2
+  question: >-
+    Two items both carry a human verdict of fail: one answer is correct but cites nothing, the other
+    states a policy the handbook contradicts. What does a set that stores only the verdict let you
+    build?
+  options:
+    - One check, since both items exercise the same fail path and a single assertion covers them.
+    - >-
+      Nothing useful, because the two need different checks and only a written failure clause per item
+      tells the suite which one to apply.
+    - A judge, since a judge is the rung you go to whenever the categories are hard to tell apart.
+    - Two items, because keeping both is enough for a per-category pass rate to be computed on each.
+  correct: 1
+  explanation: >-
+    `no_citation` and `wrong_fact` both produce a fail, and a citation check would pass the
+    contradicting answer while a contradiction check would pass the uncited one. The category label and
+    the failure clause are what make the item usable, and neither can be recovered from a verdict after
+    the fact.
+
+- id: q3
+  question: >-
+    You tune a judge prompt against the 37-item test split over six rounds, keeping each version that
+    reads higher. The test number falls from 66.7% to 58.2% and the judge ships. What is the state of
+    your evaluation?
+  options:
+    - >-
+      The test set is now a dev set. The reported figure is the best of six noisy draws, so it measures
+      your search rather than the judge, and you have no held-out evidence left.
+    - Fine, because six rounds of tuning is ordinary practice and the number moved in the direction you
+      wanted.
+    - The number is optimistic but the direction is real, so keep it and re-split before the next
+      release.
+    - Unusable, because the test split is too small at 37 items for prompt-level tuning to be
+      meaningful.
+  correct: 0
+  explanation: >-
+    Each choice between two prompts is a selection step, and the size of the optimism it adds is set by
+    the width of the interval — 31 points here — not by your care. Reading test once and shipping on it
+    is fine; changing anything afterwards is what converts it into a second dev set.
+
+- id: q4
+  question: >-
+    Dev reads 52.6% (39.9%–65.0%) on 57 items; test reads 45.9% (31.0%–61.6%) on 37. A teammate
+    concludes the model is worse in production. What settles it?
+  options:
+    - That the split was unbalanced, so it has to be rebuilt with matched difficulty counts on both
+      sides.
+    - >-
+      The 6.7-point gap sits inside both intervals, which overlap from 39.9% to 61.6% — so on this
+      split the two halves are not distinguishable.
+    - That test is too small, since fewer than 50 items cannot support a release decision.
+    - That the comparison is fine, and 6.7 points is enough to call it a real drop.
+  correct: 1
+  explanation: >-
+    A 6.7-point difference against a 25-point and a 31-point interval, on ranges that share 21.7
+    points, is inside the noise on both halves. Inability to tell the halves apart is what a balanced
+    split is supposed to produce — a split whose halves differ by more than the interval is telling
+    you something went wrong before the measurement started.
+
+- id: q5
+  question: >-
+    Your sample holds 20 `out_of_scope` items and none of them fail. The slice table shows `4 of 7`
+    sampled and the pass rate for the slice is a clean 100.0%. What is the honest reading?
+  options:
+    - The slice is passing, so it can be removed from the release gate.
+    - >-
+      The slice is unmeasured: its true-negative rate has a denominator of zero, so it drops out of
+      the overall rate entirely and the headline number goes up rather than down.
+    - The sample needs re-drawing, since a 4-item slice cannot produce a reliable rate.
+    - The check is performing well, because passing every item in the slice is direct evidence.
+  correct: 1
+  explanation: >-
+    A slice with no human failures cannot contribute a true-negative rate, and it does not contribute a
+    zero either — it contributes nothing, so the overall rate is recomputed over the surviving slices.
+    That is why a missing hard slice makes a judge look better, and why the pass rate for the slice is
+    perfectly computable while the rate that mattered is undefined.
+
+- id: q6
+  question: >-
+    Switching to **Keep the slice mix** guarantees every intent slice is drawn from, yet two slices
+    still read `none seen`. What is the reason, stated in one sentence?
+  options:
+    - >-
+      Stratification decides which slices you draw from, but failures are rarer than slices, so a
+      mix-preserving draw of 20 still expects 0.64 `exception` items and about 0.43 `out_of_scope`
+      failures.
+    - The panel only refreshes when the sample size changes, so the rows are stale until you redraw.
+    - Stratified draws weight the hard slices and `exception` failed the weighting test, so it is
+      excluded by design.
+    - Failing items are deliberately left out of every draw, because a failing item has no verdict to
+      contribute yet.
+  correct: 0
+  explanation: >-
+    Keeping a 3-in-94 share proportional gives you shares of 3%, and a rate cannot be measured on 0.64
+    of an item. The fix is not a better sampler but a different allocation: take the whole rare
+    stratum by hand so the failing count is large enough to have an interval.
+
+- id: q7
+  question: >-
+    A check's true-negative rate is 48.9% on all 94 items and 0.0% on the three-item `exception`
+    slice. A 20-item run of the same check reads 88.9%. What is the most defensible explanation?
+  options:
+    - The judge improved between the two runs, so the 48.9% should be retired.
+    - >-
+      The draw contained items from the slices the check handles and none from the two rare ones, so
+      the headline is an average whose weights came from the seed.
+    - The `exception` slice is too small to matter, so 48.9% is the number that should be quoted.
+    - The seed knob also changes the check's prompt, so the two runs are not comparable.
+  correct: 1
+  explanation: >-
+    Nothing about the check or the system changed, and the same run ranges from 11.1% to 88.9% across
+    the 200 seeds the knob offers. The rare slices are the ones most likely to be missing from a draw,
+    and their absence pushes the headline upward rather than down, which is the direction nobody
+    checks.
+
+- id: q8
+  question: >-
+    The size table reads 39 points wide at n = 20 and 21 points wide at n = 80. Your team plans to
+    reach 10 points by raising the set to 160 items. What should you tell them?
+  options:
+    - That 160 will get there, since the width keeps falling roughly linearly with the sample size.
+    - >-
+      That the width goes as one over the square root of n, so 160 buys about 17 points and a 10-point
+      interval would need roughly 345 items.
+    - That 160 will get there, provided the draw is stratified rather than random.
+    - That the width cannot go below about 20 points on this population, whatever the size.
+  correct: 1
+  explanation: >-
+    Each doubling returns about a third of the width you had, so halving the width needs four times the
+    sample. On a pass rate near 50% a 10-point interval needs roughly 345 items, and this course's
+    whole population is 94 — which is the fact worth writing down before anyone sizes a gate.
+
+- id: q9
+  question: >-
+    Your write-up says "prompt B scores 53.3% against prompt A's 40.0% on 30 items, a 13-point
+    improvement". Both figures come from the lab's size table. What is the defect?
+  options:
+    - That 30 items was not a round number chosen in advance, so the comparison is not pre-registered.
+    - >-
+      That both intervals span both figures, so the run cannot tell a 13-point gain from the 34 points
+      of sampling noise sitting on top of it.
+    - That prompt A should have been re-run at the same size rather than reusing its earlier figure.
+    - That the improvement should be reported as a count of items rather than as a percentage.
+  correct: 1
+  explanation: >-
+    Two point estimates from one population are not a difference until the noise is priced, and the
+    price is the interval on each. The same table shows prompt A reading 40.0% at n = 20 and 52.5% at
+    n = 40 with nothing whatsoever changed.
+
+- id: q10
+  question: >-
+    Your decision needs a 15-point improvement to be visible and the entire eval set is 94 items
+    reading 50.0% (40.1%–59.9%). What do you do?
+  options:
+    - Re-run the suite three times and average the pass rates, which narrows the interval by the square
+      root of three.
+    - Switch to a stratified draw, since preserving the slice mix tightens the interval at a fixed
+      size.
+    - >-
+      Publish the resolution this set has — roughly a 20-point interval — reframe the gate around
+      catching a regression of that size, and say what resolving 15 points would cost.
+    - Lower the pass-rate threshold until the two intervals stop overlapping, which makes the change
+      detectable at this size.
+  correct: 2
+  explanation: >-
+    At a fixed size no sampling strategy changes the width, and repeating a run re-samples the judge
+    rather than the population. The useful deliverable is an honest sentence about what the eval can
+    and cannot resolve, plus a gate sized to that, rather than a number obtained by moving a
+    threshold until the answer looks clean.

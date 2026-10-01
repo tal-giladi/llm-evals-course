@@ -1,0 +1,89 @@
+- id: q1
+  question: >-
+    Your taxonomy's smallest failure category has 2 items in the whole population. A check written for
+    that category catches both of them. What is the most you can honestly claim?
+  options:
+    - The category is solved, because a true-negative rate of 100% on every item in the row is proof.
+    - >-
+      The check caught 2 of 2, which is 100.0% with an interval of 34.2%–100.0%, so the row is in the
+      set but too small to measure and should be labelled that way.
+    - The category needs no more items, because two independent examples already rule out chance.
+    - The check is 100% reliable, so it can be the only gate on the release that touches this row.
+  correct: 1
+  explanation: >-
+    The Wilson interval on a perfect two out of two runs from 34.2% upward, so a check that caught one
+    of the two and a check that caught both are not distinguishable here. The right move is to keep
+    both items and publish the row as unmeasurable, not to quote the 100% as a result.
+
+- id: q2
+  question: >-
+    You are allocating 40 eval items and one row of your taxonomy holds 4.3% of the failures.
+    Proportional allocation gives that row 0.85 of an item. What is the defensible choice, and why?
+  options:
+    - Take a proportional share, since a set that mirrors the failure counts is representative.
+    - Take a proportional share and then mark the row low-priority, since 4.3% of the failures cannot
+      justify a fifth of the labelling budget.
+    - >-
+      Take every item in the row, because a proportional draw cannot reliably contain the failures at
+      all — and write the resulting interval next to the row so nobody reads it as coverage.
+    - Drop the row, because a category with under 5% of failures is not worth a place in the set.
+  correct: 2
+  explanation: >-
+    At a 4.3% share a draw of 20 contains 0.43 items from that row on average, so the row is empty
+    most of the time and any check built for it has nothing to fire on. Taking the whole row costs two
+    items; the price is that the interval stays wide, and that is the sentence you publish with it.
+
+- id: q3
+  question: >-
+    Two eval items both get a human verdict of fail. Item 1's answer is true but names no source; item
+    2's answer states a policy the handbook contradicts. Both were labelled `label: 0`. What does that
+    tell you about the set?
+  options:
+    - Nothing, because a fail is a fail and the checks decide the verdict anyway, not the label.
+    - The set is fine, because two failing items already exercise the pass/fail path of the suite.
+    - The two items should be merged, since they fail in the same way as far as the suite is concerned.
+    - >-
+      The set cannot derive checks from verdicts alone: these two need different checks, and only a
+      written failure clause per item tells the suite which is which.
+  correct: 3
+  explanation: >-
+    `no_citation` and `wrong_fact` both produce a fail verdict, and a citation check would pass the
+    contradicting answer while a contradiction check would pass the uncited one. The category label and
+    the failure clause are what make the set usable, and neither can be recovered from a verdict.
+
+- id: q4
+  question: >-
+    You pull 500 items from the conversations that ended well, to save labelling time. The suite reads
+    91% on the first release. Six weeks later a customer is told the company matches their pension
+    contributions. What was wrong with the set?
+  options:
+    - The set was too small to detect the failure, since 500 items is below the usual sample minimum.
+    - >-
+      Every row of the taxonomy was empty, because the items were drawn from the one population where
+      the system already succeeds, so the scoreboard measured the happy path.
+    - The labels were wrong, because items from resolved conversations should have been marked fail.
+    - The split was the problem, since the 500 items never got divided into a dev half and a test half.
+  correct: 1
+  explanation: >-
+    A verdict-only set stores `correct` for every one of those items, so the categories you spent weeks
+    naming have nothing in them. The 91% is not a wrong number — it is a real computation about a
+    population where the failures do not appear, which is why it survives review and is still useless.
+
+- id: q5
+  question: >-
+    Your hand-built set has 12 `no_citation` items, 8 `wrong_fact`, all 6 `over_refusal` and both
+    `out_of_scope` items. A reviewer says the allocation does not match the failure counts. What is
+    the reply that holds up?
+  options:
+    - >-
+      Proportional allocation would give the `out_of_scope` row fewer than one item, so the set
+      spends its budget where measurement is hard and says so in writing beside each row.
+    - The counts came from a different population than the one the eval set serves, so they do not apply.
+    - Matching the counts matters less than making the set large enough, and 40 items is plenty large.
+    - The reviewer is right, so add 15 more `out_of_scope` items and rebalance the other rows down.
+  correct: 0
+  explanation: >-
+    A row that is a few percent of the failures cannot be given a few percent of the items and then be
+    treated as covered. The allocation is deliberate: frequent rows are cheap to re-collect from
+    traffic later, rare rows only exist because somebody hand-wrote them, and every row's interval is
+    written down next to it.

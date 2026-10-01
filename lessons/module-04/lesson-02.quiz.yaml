@@ -1,0 +1,92 @@
+- id: q1
+  question: >-
+    Dev reads 52.6% (39.9%–65.0%) on 57 items and test reads 45.9% (31.0%–61.6%) on 37. A teammate
+    says the 6.7-point drop means the model is worse in production. What is the right response?
+  options:
+    - They are right, because a drop between a tuned half and a fresh half is exactly what a real
+      regression looks like.
+    - >-
+      The gap is inside both intervals, which overlap from 39.9% to 61.6%, so on this split it is not
+      evidence that the two halves are different systems.
+    - The split is unusable, because a legitimate split should produce matching pass rates to one
+      decimal place.
+    - The test half is too small at 37 items, so the fix is to rebuild it from at least 100 items.
+  correct: 1
+  explanation: >-
+    A 6.7-point difference sits inside a 25-point interval and a 31-point interval, and the two share a
+    21.7-point range. The correct reading is that dev and test are indistinguishable here — which is
+    what you want from a balanced split, because a split where the halves differ by more than the
+    interval is a split where something went wrong earlier.
+
+- id: q2
+  question: >-
+    You try two judge prompts on the 37 test items. They read 47.9% and 53.8%, and you keep the second
+    because it read higher. What have you actually measured?
+  options:
+    - >-
+      That at least one of two prompts reads higher on these 37 items; because the test interval is 31
+      points wide, keeping the higher one is usually a coin rather than a measurement.
+    - The better prompt, because the 5.9-point gap is larger than the difference in item counts.
+    - The system, because the test items are held out and so cannot be biased by the choice.
+    - Nothing yet, but keeping the better prompt is harmless because test can be re-run as often as
+      dev can.
+  correct: 0
+  explanation: >-
+    On an unchanged system the seed knob alone swings a 20-item draw between 25.0% and 75.0%, so a
+    handful of points on 37 items is noise. The reported figure after a selection step is the maximum
+    of several noisy draws rather than an estimate of the system, which is why test is read once and
+    the choice is made on dev.
+
+- id: q3
+  question: >-
+    A teammate proposes that test should be a copy of dev: "it is faster to set up, and it stops the
+    half-size split from adding noise". What does this cost you?
+  options:
+    - Nothing, because a larger test set always beats a smaller one even if the items are not new.
+    - Twice the storage cost, since each item would have to be stored under both ids.
+    - >-
+      Any independence at all — both halves read 52.6% (39.9%–65.0%) on the same 57 items, so the
+      validation run measures the set you tuned on.
+    - A wider interval, since duplicate items make the effective sample smaller than the count suggests.
+  correct: 2
+  explanation: >-
+    A cloned half produces an identical pass count and an identical interval, so it cannot disagree
+    with dev and carries no information a tuned number does not already carry. This course's real
+    split shows the cost: dev's own first 37 items read 51.4% while a genuinely separate 37 read 45.9%.
+
+- id: q4
+  question: >-
+    Your test run comes back 6.6 points below dev. Which response keeps the test set usable?
+  options:
+    - Tune the judge prompt once more against test to close the gap, since a small correction is not
+      really tuning.
+    - Re-split dev and test so the halves agree, then re-run until the numbers match.
+    - Average the two numbers and report the average, since more data points reduces the interval.
+    - >-
+      Report the test number with its interval, ship or do not ship on that basis, and open a new row
+      in the failure taxonomy instead of re-running the tune.
+  correct: 3
+  explanation: >-
+    Reading test once is fine; changing anything afterwards is what converts it into a second dev set,
+    permanently, for that cycle. The honest response to a disappointing validation run is to record it
+    and go and get the items that explain it, not to adjust the check until the number agrees with
+    the workbench.
+
+- id: q5
+  question: >-
+    A split is balanced on difficulty — easy, medium and hard land at 61/61/60 in dev and 39/39/40 in
+    test — but the three `exception` items all sit in dev and test contains none. What follows?
+  options:
+    - The split should be rebuilt until every slice appears in both halves, however small it is.
+    - >-
+      Difficulty is the attribute that changes the work, so balancing it is right; the missing slice
+      is a declared gap you must state, not a defect in the cut.
+    - The missing slice proves the split is biased, because every intent should be represented in both
+      halves.
+    - Nothing, since a three-item slice is too small to matter on a set of this size either way.
+  correct: 1
+  explanation: >-
+    A split balanced on every attribute would have to be the same set twice, which is the failure
+    lesson 4.2 is about. Balancing difficulty while letting the rare slice fall on one side is the
+    honest version — provided the number of items of that slice in the held-out half is written down
+    somewhere, so nobody later reads the validation run as covering it.

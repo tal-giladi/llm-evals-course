@@ -1,0 +1,105 @@
+- id: q1
+  question: >-
+    A rubric clause reads "the answer is clear and helpful." What test tells you it is not doing any
+    work?
+  options:
+    - >-
+      No clause can be restated as a yes-or-no question, and this one cannot, so it decides nothing.
+    - >-
+      You cannot count how many real answers violate it. Without a count from your error analysis the
+      clause has no behaviour you could predict.
+    - The clause is too long, so short clauses are more reliable than long ones in a judge prompt.
+    - The clause has no verb, so it cannot be evaluated by a model that scores answers on a fixed schema.
+  correct: 1
+  explanation: >-
+    A working clause names a testable property of the answer. On this corpus "it cites the handbook
+    section" splits the tuned system's 94 items almost perfectly — all 47 answers the humans passed cite
+    one and only 2 of the 47 they failed do. "Clear and helpful" has no count behind it, so you cannot
+    tell whether ignoring it changed anything.
+
+- id: q2
+  question: >-
+    Your rubric has three clauses and catches 85.1% of failures overall. It catches 81.5% of missing
+    citations but 100% of over-refusals. What does the per-category view tell you that the total does
+    not?
+  options:
+    - >-
+      That the judge would fail a per-category target of 0.85 on two of its four categories, which the
+      single total hides completely.
+    - >-
+      That the weakest category is the one with the most items, so it needs the most judge budget per
+      category.
+    - That the over-refusal clause is redundant, since nothing else in the rubric can catch refusals.
+    - >-
+      That the rubric is over-fitted to the over-refusal category and should drop that clause before it
+      is used on a new system.
+  correct: 0
+  explanation: >-
+    A total is an average over categories with different counts and different fix costs. The rubric judge
+    reads 81.5% on missing citations and 83.3% on wrong facts against 100% on over-refusals and
+    out-of-scope rules, so it would miss a per-category target of 0.85 on two rows of its own mapping
+    table — which is exactly what a stakeholder should hear before it gates anything.
+
+- id: q3
+  question: >-
+    You edit one character of the rubric prompt to make it clearer. The eval page keeps showing the same
+    kappa. Why, and what should it do instead?
+  options:
+    - >-
+      The page caches the prompt so that small edits keep the old run; clearing the cache shows the new
+      judge's numbers once they exist.
+    - The page interpolates the prompt into the run, so any edit that leaves the rules intact is treated
+      as the same judge.
+    - The page only recomputes when the item sample changes, so the prompt text is deliberately excluded
+      from the key.
+    - >-
+      Nothing has been re-run, so those numbers belong to the old judge. The edited prompt has no
+      recorded verdicts and must be run from zero.
+  correct: 3
+  explanation: >-
+    A recorded verdict is tied to an exact key — item, system output, model build, full prompt text,
+    rubric, few-shot ids and order, answer order, decoding settings, sample index. One character makes a
+    different judge whose verdicts nobody has observed, so the honest behaviour is to display nothing
+    rather than to show another prompt's result as this prompt's.
+
+- id: q4
+  question: >-
+    Someone changes rubric clause 2 from "It cites the handbook section" to "It does not cite the
+    handbook section". The page reports "Differs from the closest recorded prompt at 1 place(s): line 3".
+    What does that diff report leave out?
+  options:
+    - >-
+      How many answers change verdict, since that cannot be known without re-running the judge on the
+      edited prompt.
+    - The word count of the change, which is why the report counts lines rather than characters.
+    - >-
+      That this is a polarity reversal — the new judge passes exactly the answers missing a citation —
+      and the same one-line report is produced by a trailing full stop.
+    - Which clause number moved, since the report identifies the position rather than the clause.
+  correct: 2
+  explanation: >-
+    A line count is not a change description. Inverting a clause gives a judge that rewards the failure
+    the rubric was written to catch, and the page reports it exactly as it reports `otherwise FAIL`
+    becoming `or else FAIL` — one line, one word. Only a human reading the diff can see that the clause
+    changed meaning rather than wording.
+
+- id: q5
+  question: >-
+    After three rounds of prompt tuning your rubric judge reads kappa 1.00 on 57 dev items with an
+    interval of 1.00–1.00. What does that pair of numbers indicate?
+  options:
+    - >-
+      The judge has been tuned to dev. With zero disagreements there is nothing to vary, so the interval
+      is the absence of evidence — press Validate on test before believing anything.
+    - >-
+      The judge is finished and can gate releases, because there are no disagreements left on the
+      tuning set.
+    - The interval collapsed because the bootstrap found no variance, which means the sample is too large
+      to resample usefully.
+    - >-
+      The kappa was computed with a rounding error, since a value of exactly 1.00 is not a legal result.
+  correct: 0
+  explanation: >-
+    A bootstrap over a set with no disagreements cannot produce a distribution, so the interval collapses
+    to a point. That shape is what overfitting on a small split always looks like. The held-out
+    validation exists to tell you whether the tuning transferred, and it is the only thing that can.

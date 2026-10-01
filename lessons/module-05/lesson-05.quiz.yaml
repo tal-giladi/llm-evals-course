@@ -1,0 +1,86 @@
+- id: q1
+  question: >-
+    A nightly judge log shows the pass rate falling from 57/57 to 42/57 between two runs, and the only
+    line that changed is the rubric version. What does the log let you conclude?
+  options:
+    - >-
+      Nothing is decided. System regression, natural marginality and a stricter rubric all produce this
+      log, and a judge that records only a word cannot tell them apart.
+    - >-
+      The system regressed, because a rubric revision is a cosmetic change that cannot move verdicts.
+    - >-
+      The rubric revision caused the drop, because judge prompts are the only input the log does not
+      record.
+    - >-
+      The drop is inside the interval on 57 items, so the two runs are the same judge and the change is
+      noise.
+  correct: 0
+  explanation: >-
+    This is the failure a reason column exists to prevent. A verdict-only judge gives you a number with
+    no provenance: three different causes fit the evidence equally well, and the investigation has to be
+    redone from scratch every time. Recording the reason attached to the verdict turns the log into
+    something a reader can triage.
+
+- id: q2
+  question: >-
+    A critique-first judge reads kappa 0.77 against 0.89 for a smaller critique-first judge on the same
+    94 items, and costs 1.4 times as much. What is the correct response?
+  options:
+    - >-
+      Switch to the smaller judge, because a lower kappa at a higher price is dominated on both axes.
+    - >-
+      Upgrade anyway, because a larger model is the standard answer to a kappa that is not high enough.
+    - >-
+      Check whether the two kappas' intervals overlap before deciding; on this data the gap spans the
+      range where a 94-item set cannot separate them.
+    - >-
+      Keep the larger one, because its disagreement count is lower and triage speed matters more than
+      cost.
+  correct: 2
+  explanation: >-
+    A point estimate difference with no interval attached is not a finding. The gap here sits inside the
+    uncertainty of a 94-item set, so the honest move is to read the intervals, add items, and treat the
+    model name as a hypothesis rather than a conclusion.
+
+- id: q3
+  question: >-
+    Your critique-first judge writes "The stated rule contradicts the handbook section" about six answers
+    the humans passed, while its verdicts are reliable enough to gate on. What is the honest position?
+  options:
+    - >-
+      The judge is unusable, because a judge that reasons wrongly cannot be trusted to decide anything.
+    - >-
+      The contradictions are rare enough to ignore, since six items is a small share of a 94-item set.
+    - >-
+      Replace the judge with a verdict-only prompt, since the critique is the part adding the error.
+    - >-
+      Gate on the verdict and audit the critique separately, because the two are different measured
+      quantities and only one of them has been validated.
+  correct: 3
+  explanation: >-
+    On this corpus that judge names the human category on 83 of 94 items and gets the remaining 11
+    wrong, six of them confidently. That is a reason worth having — you can disagree with it — but it is
+    a second quantity with its own audit, not a free upgrade on the verdict.
+
+- id: q4
+  question: >-
+    A colleague starts reading the critique column in the disagreement queue instead of the verdict. Why
+    is that a structural problem rather than a helpful habit?
+  options:
+    - >-
+      It is slower than reading the verdict, so it costs the team engineer-hours on every nightly run.
+    - >-
+      It puts a person back on the critical path, so the dashboard is measuring someone's afternoon and
+      calling it an automated judge.
+    - >-
+      It exposes the team to prompt-injection text from the answers being judged, which is a security
+      risk.
+    - >-
+      The critiques are written by the same model as the verdict, so reading them adds no information
+      beyond the verdict itself.
+  correct: 1
+  explanation: >-
+    The failure with the longest fuse, because it works well enough that nobody notices the system
+    changed. A person approving generated prose is a human-in-the-loop eval, not an LLM judge, and the
+    pass rate it reports is a measure of the reviewer. The defence is structural: put the verdict on its
+    own line and make it the only field the pipeline can read.

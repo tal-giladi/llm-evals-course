@@ -1,0 +1,92 @@
+- id: q1
+  question: >-
+    A 20-item draw passes 8 items. Working the Wilson interval by hand gives a centre of 0.4960, a
+    margin of 0.2352 and a denominator of 1.1921. What does that produce, and why is it on the scoreboard
+    rather than just the 40.0%?
+  options:
+    - A normal-approximation interval of 40.0% ± 21.9%, which is wider because Wilson is conservative.
+    - >-
+      21.9%–61.3%, and it belongs on the scoreboard because the 21.9 points below 40.0% are the sample,
+      not the system — the same system reads 75.0% on a different twenty items.
+    - 30.4%–49.6%, since the margin has to be subtracted from the centre before the denominator is
+      applied twice.
+    - 39.0%–61.3%, since the interval is centred on the point estimate rather than on the shifted
+      centre.
+  correct: 1
+  explanation: >-
+    Dividing both ends of `centre ± margin` by the denominator gives 0.2188 and 0.6134, which is what
+    the tile prints. The interval is what tells you how much of the 40.0% is the system and how much is
+    the draw, and it is the only part of the number that changes when you change the seed.
+
+- id: q2
+  question: >-
+    The size table reads: n = 20 is 39 points wide, n = 40 is 30 points wide, n = 80 is 21 points wide.
+    Your team doubles the set again, to 160. What should they expect?
+  options:
+    - About 10 points wide, because each doubling has been buying roughly a quarter of the width.
+    - About 30 points wide, because the width only improves once the sample passes 100 items.
+    - About 21 points wide, because the table flattens out after 80 items on this population.
+    - About 15 points wide, because the interval halves every time the sample doubles.
+  correct: 0
+  explanation: >-
+    The width goes as one over the square root of n, so each doubling buys back about a third of the
+    width you had — nine points, then nine points again. Halving the width requires quadrupling the
+    sample, which is why "just add a few more items" never feels like it works.
+
+- id: q3
+  question: >-
+    Your decision needs a 15-point improvement to be visible. This population is 94 items in total and
+    reads 50.0% (40.1%–59.9%). What is the right move?
+  options:
+    - Randomise the sampling strategy, since a stratified draw produces a tighter interval at the same
+      size.
+    - Re-run the whole suite three times and average the pass rates, which narrows the interval by the
+      square root of three.
+    - >-
+      Say the decision is not available: 94 items gives a 20-point interval and roughly 157 items would
+      be needed, so reframe the target as catching a 20-point regression.
+    - Lower the pass-rate threshold until the intervals stop overlapping, which makes the change
+      detectable.
+  correct: 2
+  explanation: >-
+    No sampling strategy changes the width at a fixed size — only the number of items does, and the
+    whole set is 94. Repeating a run on the same items re-samples the judge, not the population. The
+    useful move is to write down that this eval resolves large regressions and not small wins, and to
+    gate on that.
+
+- id: q4
+  question: >-
+    A write-up says: "Prompt B scores 53.3% against prompt A's 40.0% on 30 items, a 13-point
+    improvement." Both figures come from the size table at seed 11. What is wrong with the claim?
+  options:
+    - Nothing, since both pass rates are computed the same way and the difference is therefore real.
+    - The seed was not recorded, so the result cannot be reproduced by anyone else.
+    - The comparison should have used the test split, since dev items were already used for the
+      previous prompt.
+    - >-
+      Both intervals span both figures — 40.0% sits inside 36.1%–69.8%, and so does 53.3% — so the run
+      cannot distinguish a 13-point gain from the 34 points of noise on top of it.
+  correct: 3
+  explanation: >-
+    Two point estimates from the same population are not evidence of a difference on their own, and the
+    interval on each is the honest measure of how far apart two draws routinely land. The same table
+    shows prompt A at 40.0% for n = 20 and 52.5% for n = 40 without anything changing.
+
+- id: q5
+  question: >-
+    The seed knob at 20 items reads 25.0% on one seed, 40.0% on another and 75.0% on a third, while the
+    interval width stays between 36 and 40 points throughout. What does that tell you?
+  options:
+    - The seed changes which items are drawn, so any comparison across seeds has to be re-based.
+    - The width is unreliable at small n, since three different seeds gave three different widths.
+    - >-
+      The width is a property of the size, not of the particular draw, and the 50-point swing in the
+      point estimate is that same fact observed directly.
+    - The pass rate and the interval are measuring two different systems, so only one of them can be
+      published.
+  correct: 2
+  explanation: >-
+    The point estimate moves because the sample moved; the width moves because the size moved, which is
+    why it barely changes across seeds. Reading the swing directly is a more convincing demonstration of
+    the interval than quoting the formula, and it is why the seed is on the page rather than hidden in
+    the sample code.

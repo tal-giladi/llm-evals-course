@@ -1,0 +1,88 @@
+- id: q1
+  question: >-
+    You add three worked examples to your rubric judge prompt. On the same items, same seed, single
+    greedy verdict, kappa moves from 0.79 on dev to 0.72. What does that tell you about the examples?
+  options:
+    - The examples made the judge worse, and you should revert to the zero-shot prompt immediately.
+    - >-
+      Examples do not act on a single verdict, so the comparison is invalid and you must abandon the
+      greedy setting before drawing any conclusion.
+    - >-
+      Nothing you can measure yet — the two values sit inside each other's intervals, so the change is
+      not evidence of anything.
+    - >-
+      The kappa fell because examples add output tokens, which lengthens the verdict and dilutes the
+      rubric's effect on the answer.
+  correct: 2
+  explanation: >-
+    On a single sample the exemplars bought nothing measurable — and that is the expected result, because
+    what they change is how much the five samples of the same item disagree with each other, which a
+    single greedy verdict cannot show. Measure stability and the majority-of-five kappa before deciding.
+
+- id: q2
+  question: >-
+    Switching from 0 shots to 3 shots takes kappa from 0.94 to 1.00 on 94 items at five repeats. Why is
+    that comparison a misleading argument for few-shot?
+  options:
+    - >-
+      The zero-shot entry was not run on the same items, so the two kappas are not comparable.
+    - >-
+      The zero-shot judge also reaches 1.00 at five repeats on the 37 held-out items, so most of the jump
+      came from aggregating five samples rather than from the examples.
+    - A kappa of exactly 1.00 is outside the valid range, so the three-shot figure is a rounding
+      artefact.
+    - >-
+      Five repeats on 94 items is 470 judge calls, and at that volume the interval is narrow enough that
+      any prompt change looks significant.
+  correct: 1
+  explanation: >-
+    The popular reading of this table is wrong in an instructive way. The exemplars made individual
+    verdicts steadier — non-unanimous items fell from 50 of 94 to 35 of 94 — and the majority vote is
+    what turned that steadiness into kappa. Aggregating is the larger effect, and the held-out split
+    shows it on its own.
+
+- id: q3
+  question: >-
+    Your three exemplars are all correct, cited, unambiguous answers, and every one is labelled PASS.
+    What is the most likely effect on the judge's behaviour?
+  options:
+    - >-
+      None, because the rubric clauses still decide every verdict and the examples only set the output
+      format.
+    - >-
+      A prior towards FAIL, since showing only good answers signals that they are rare and worth
+      rejecting.
+    - >-
+      No effect on the verdict and a large effect on latency, since three extra turns of context cost
+      most of the 540 ms per call.
+    - >-
+      A prior towards PASS: an exemplar set is an unwritten rubric clause, so the judge passes a little
+      more of every system, including the ones it already fails most of.
+  correct: 3
+  explanation: >-
+    On this corpus the three-shot rubric judge passes 1.1 points more of the tuned system, 2.1 more of
+    the generic one and 1.1 more of the small-model one — the same direction everywhere. That is a
+    threshold change written as a formatting choice, and it is invisible because no clause in the prompt
+    was edited.
+
+- id: q4
+  question: >-
+    Your eval set grows and item `s42` is re-labelled. One of your judge prompts includes `s42` as a
+    worked example. What has happened to the judge?
+  options:
+    - >-
+      The example set is part of the key, so the exemplar now teaches a label the eval set no longer
+      holds — and nothing in the pass rate will tell you.
+    - >-
+      Nothing, because the example's text is unchanged and only the stored label behind it moved.
+    - >-
+      The judge must be rebuilt from scratch, since a re-labelled item invalidates every recorded
+      verdict for it.
+    - >-
+      The judge is fine but the eval set is now inconsistent, so the fix is a re-labelling pass before
+      the next nightly run.
+  correct: 0
+  explanation: >-
+    Few-shot ids and their order are part of what makes a verdict reproducible, exactly like the rubric
+    version. Pin exemplars to item ids so a re-label is a loud failure — the exemplar teaching a label
+    the set no longer holds is the failure mode that produces no symptom in any metric you are reporting.

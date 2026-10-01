@@ -1,0 +1,184 @@
+- id: q1
+  question: >-
+    Your support assistant has a nine-row failure taxonomy and one judge covering all nine, prompted "is
+    this answer good?". On last night's run it passed 69.1% of answers where the humans passed 50.0%. What
+    is the strongest objection to shipping it?
+  options:
+    - >-
+      It is answering a question nobody agreed on, so its misses spread across four categories at 42% to
+      56% apiece and no single prompt edit reaches most of them.
+    - >-
+      The judge model is smaller than the ones on the menu above it, so a larger judge would close most
+      of the gap.
+    - >-
+      94 items is too few to conclude anything, so the run should be repeated on a larger eval set before
+      the judge is judged at all.
+    - >-
+      The pass rate is 19 points above the human rate, so the judge should be corrected for its own
+      measured error before anything else is done.
+  correct: 0
+  explanation: >-
+    One vague judge means one question covering four failure categories, and a per-category catch rate
+    between 41.7% and 55.6% is a set of coins, not a decision. Neither size nor a bigger sample addresses
+    it; one judge per taxonomy row does, at four times the calls.
+
+- id: q2
+  question: >-
+    A judge reports TPR 0.92 and TNR 0.55 on your dev set, and a 91% accuracy on the nightly dashboard.
+    What does that combination license you to do?
+  options:
+    - Block a release, because 91% accuracy on the headline means the check is working as intended.
+    - >-
+      Report the check on a dashboard where nobody gates on it, but not gate a release: it would let
+      almost half of real failures through.
+    - Delete the human labels, since agreement has now been measured once and will not drift materially.
+    - Report the pass rate as a proxy for quality, because pass rate and accuracy track each other
+      closely on balanced sets.
+  correct: 1
+  explanation: >-
+    Accuracy on a set where half the answers are already good flatters a judge that waves through
+    failures. TNR is the rate that decides gating, and 0.55 means 21 of the 47 real failures here would
+    ship. A trending dashboard number is a legitimate use of a weak check; a gate is not.
+
+- id: q3
+  question: >-
+    You add three worked examples to a rubric judge prompt. On the same items and the same seed, kappa
+    moves from 0.79 to 0.72 on dev at one greedy verdict, and the judge's five samples of the same item
+    disagree on 35 of 94 items instead of 50. What is the right conclusion?
+  options:
+    - >-
+      The examples failed, because kappa is the metric that decides gating and it moved in the wrong
+      direction.
+    - The examples failed on the three hardest categories, which is why the pass rate on the generic
+      system rose by 2.1 points.
+    - >-
+      The examples did what examples do: they made each verdict steadier without moving the centre, so the
+      gain only appears once you aggregate.
+    - >-
+      The examples succeeded, because fewer disagreeing samples is the same as a higher kappa once the
+      verdict is taken by majority.
+  correct: 2
+  explanation: >-
+    A single greedy verdict cannot show a variance change, so the 0.79 to 0.72 move is two values inside
+    each other's intervals. The measurable effect is stability — 50 of 94 non-unanimous items down to 35
+    — which only turns into kappa when the repeats are aggregated and a majority is taken.
+
+- id: q4
+  question: >-
+    A pairwise judge on your two candidate prompts picks the known-better answer on 97.9% of comparisons
+    in one order, and gives the same winner in both orders on 52.1% of them. What do you do before
+    trusting the 97.9%?
+  options:
+    - Report the 97.9%, since swap consistency is a separate diagnostic that does not affect the ranking.
+    - Raise the number of comparisons, since swap consistency converges on its own as the sample grows.
+    - Switch to a single-order run on more items, which removes the position effect from the scoreboard
+      entirely.
+    - >-
+      Judge every pair in both orders and count a win only for an answer that wins in both, treating the
+      rest as ties, then re-measure.
+  correct: 3
+  explanation: >-
+    In a single ordering the position bonus and the real quality point the same way, so the bias is
+    invisible in an accuracy number. Both orders on every pair is the only measurement that separates them,
+    and counting a win only when it survives the swap removes the bias at the price of discarding
+    contested items.
+
+- id: q5
+  question: >-
+    You invert one clause of a rubric — "It cites the handbook section" becomes "It does not cite the
+    handbook section" — and the page keeps showing the previous kappa with a diff report naming one line.
+    What is the correct reading?
+  options:
+    - >-
+      A recorded verdict is tied to an exact key, so those numbers belong to a judge that no longer
+      exists and the edited prompt starts with no data at all.
+    - The change is too small to affect results, so the previous verdicts remain a valid estimate.
+    - The page is applying the edit lazily, so reloading the page will produce the new judge's verdicts.
+    - >-
+      The clause is now stricter, so the judge will pass fewer answers and the old pass rate is a safe
+      upper bound on the new one.
+  correct: 0
+  explanation: >-
+    One character makes a different judge whose verdicts nobody has observed, and the honest behaviour is
+    to display nothing rather than to show another prompt's result as this prompt's. This is also why a
+    judge-call cache must key on the full prompt hash — otherwise a CI job will serve you a verdict from a
+    judge you deleted.
+
+- id: q6
+  question: >-
+    Your rubric clause reads "the answer is accurate". The other two clauses each split the 94-item set
+    almost in half. What is the problem with the first clause specifically?
+  options:
+    - It is redundant, since accuracy is already implied by the handbook-citation clause.
+    - >-
+      No answer on your set can be shown to violate it, so it changes no verdict and costs tokens on every
+      call while making the rubric look more thorough.
+    - It is too broad to be applied consistently, so it will be judged differently by different readers.
+    - It cannot be applied before the citation check, so the judge has to evaluate the clauses out of
+      order and its verdicts become unstable.
+  correct: 1
+  explanation: >-
+    A clause earns its place by naming a testable property, and the test is a count: how many real answers
+    violate it. A clause nothing violates cannot change a verdict, and coverage you have not counted is
+    coverage you have not got.
+
+- id: q7
+  question: >-
+    Your critique-first judge reads kappa 0.77 against 0.89 for a smaller critique-first judge on the same
+    94 items, at 1.4 times the price. What is the correct response?
+  options:
+    - >-
+      Switch to the smaller judge, because a lower kappa at a higher price is dominated on both axes.
+    - Upgrade anyway, because a larger model is the standard answer to a kappa that is not high enough.
+    - >-
+      Check whether the two kappas' intervals overlap before deciding; the gap here sits inside what a
+      94-item set can resolve.
+    - >-
+      Keep the larger one, because its disagreement count is lower and triage speed matters more than
+      cost.
+  correct: 2
+  explanation: >-
+    A point estimate difference with no interval attached is not a finding. Read the intervals, add items,
+    and treat the model name as a hypothesis — the model names on that menu are the labels under which
+    recorded runs were filed, not measurements of those models anywhere.
+
+- id: q8
+  question: >-
+    A nightly run drops from 57 passes out of 57 to 42. Your judge stores one word per item and nothing
+    else. What is the cost of that storage decision, stated in one sentence?
+  options:
+    - >-
+      The pass rate is less precise than a graded score would have been, so a 15-item drop is hard to
+      read off the chart.
+    - The run costs more per item than storing a verdict with a reason would have cost.
+    - >-
+      The judge cannot be re-run on the same items, because nothing recorded lets anybody identify which
+      configuration produced the earlier run.
+    - >-
+      System regression, natural marginality and a stricter rubric all produce the same log, so the team
+      has to re-investigate from scratch every time.
+  correct: 3
+  explanation: >-
+    A verdict-only judge gives you a number with no provenance, and three different causes fit the
+    evidence equally well. Recording the reason next to the verdict under the same key turns that log
+    into something a reader can triage without re-running anything — which is the whole argument for the
+    critique-first format.
+
+- id: q9
+  question: >-
+    You are about to replace four per-category judges with one averaged judge, because the suite is slow
+    and the cost is annoying. Which finding most directly argues against it?
+  options:
+    - The averaged judge will be cheaper per item only if the four category judges share a model.
+    - Four judges on the same items produce correlated verdicts, so their cost is mostly wasted
+      duplication.
+    - >-
+      Averaging destroys the per-category TNR, so you would no longer know which failure category the
+      judge is blind to — and that is the number you would need to fix it.
+    - Averaged scores cannot be thresholded, so the nightly job would have to report a mean instead of a
+      pass count.
+  correct: 2
+  explanation: >-
+    The per-category true-negative rate is the statistic that maps a judge's blindness onto a taxonomy
+    row and therefore onto a fix. A single averaged score removes exactly that mapping, and the speed-up
+    does not buy back the ability to say which row to work on next.
