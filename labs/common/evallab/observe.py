@@ -43,7 +43,8 @@ def estimate_tokens(text: str) -> int:
 
 def instrumented_run(item, data: Dataset, variant: str = "v1",
                      model: str = "qwen3-1.7b", session: str = "s-demo",
-                     fail_on: str | None = None, user: str | None = None) -> dict:
+                     fail_on: str | None = None, user: str | None = None,
+                     keep_errors: bool = True) -> dict:
     """Answer one question, emitting a full OTel GenAI trace.
 
     ``fail_on`` is an item id: raise inside the model span instead of
@@ -60,47 +61,66 @@ def instrumented_run(item, data: Dataset, variant: str = "v1",
     tracer = Tracer(trace_id=f"tr_{item.id}")
     answer = item.output(variant)
     question = item.question
+    # v1padded is the tuned answer with two extra sentences: same content, so
+    # it carries v1's label. The dataset has no human.v1padded and this must
+    # not guess — an unknown variant is a missing measurement, not a zero.
+    label_variant = {"v1padded": "v1"}.get(variant, variant)
+    if label_variant not in item.human:
+        raise KeyError(
+            f"no human labels for variant {variant!r} on {item.id}. "
+            f"Labelled variants: {', '.join(sorted(item.human))}."
+        )
 
-    with tracer.span("support.answer", "agent",
-                     **{GEN_AI_CONVERSATION_ID: session}) as root:
-        # 1. Retrieval. A real app would call a vector store; the shape of
-        #    the span is what matters, and it is the span that tells you
-        #    whether the right text was in front of the model at all.
-        with tracer.tool("retrieve_handbook", "retrieve_handbook") as ret:
-            # `out_of_scope` lives in the item's slice descriptor. A question
-            # the handbook does not cover retrieves nothing, and that is a
-            # trace fact worth having: the model was asked to answer without
-            # evidence.
-            found = not (item.slice or {}).get("out_of_scope", False)
-            ret.attributes["retrieved"] = int(found)
-            if not found:
-                ret.attributes[ERROR_TYPE] = "no_matching_section"
+    try:
+        with tracer.span("support.answer", "agent",
+                         **{GEN_AI_CONVERSATION_ID: session}):
+            # 1. Retrieval. A real app would call a vector store; the shape
+            #    of the span is what matters, and it is the span that tells
+            #    you whether the right text was in front of the model at all.
+            with tracer.tool("retrieve_handbook", "retrieve_handbook") as ret:
+                # `out_of_scope` lives in the item's slice descriptor. A
+                # question the handbook does not cover retrieves nothing, and
+                # that is a trace fact worth having: the model was asked to
+                # answer without evidence.
+                found = not (item.slice or {}).get("out_of_scope", False)
+                ret.attributes["retrieved"] = int(found)
+                if not found:
+                    ret.attributes[ERROR_TYPE] = "no_matching_section"
 
-        # 2. The model call.
-        with tracer.chat("generate answer", model) as chat:
-            if fail_on == item.id:
-                chat.attributes[GEN_AI_OUTPUT_TOKENS] = 0
-                raise RuntimeError(f"upstream timeout on {item.id}")
-            prompt = f"{question}\n\n{answer}"
-            chat.attributes[GEN_AI_INPUT_TOKENS] = estimate_tokens(prompt)
-            chat.attributes[GEN_AI_OUTPUT_TOKENS] = estimate_tokens(answer)
-            chat.attributes[GEN_AI_RESPONSE_MODEL] = model
-            chat.attributes[GEN_AI_OUTPUT_MESSAGES] = answer
-            chat.attributes["question"] = question
-            if user:
-                # A support bot knows who is asking, and a dashboard that
-                # groups by user needs it on the span. Both facts are why
-                # the redaction in lesson 12.5 exists.
-                chat.attributes["user.id"] = user
-                chat.attributes["user.email"] = user
+            # 2. The model call.
+            with tracer.chat("generate answer", model) as chat:
+                if fail_on == item.id:
+                    chat.attributes[GEN_AI_OUTPUT_TOKENS] = 0
+                    raise RuntimeError(f"upstream timeout on {item.id}")
+                prompt = f"{question}\n\n{answer}"
+                chat.attributes[GEN_AI_INPUT_TOKENS] = estimate_tokens(prompt)
+                chat.attributes[GEN_AI_OUTPUT_TOKENS] = estimate_tokens(answer)
+                chat.attributes[GEN_AI_RESPONSE_MODEL] = model
+                chat.attributes[GEN_AI_OUTPUT_MESSAGES] = answer
+                chat.attributes["question"] = question
+                if user:
+                    # A support bot knows who is asking, and a dashboard that
+                    # groups by user needs it on the span. Both facts are why
+                    # the redaction in lesson 12.5 exists.
+                    chat.attributes["user.id"] = user
+                    chat.attributes["user.email"] = user
 
-        # 3. The post-check. This is the span that turns a user complaint
-        #    into a line in a dashboard.
-        with tracer.span("citation check", "chain") as check:
-            if item.human[variant]["category"] == "no_citation":
-                check.attributes[ERROR_TYPE] = "no_handbook_citation"
-            elif item.human[variant]["category"] == "extra":
-                check.attributes[ERROR_TYPE] = "unsupported_addition"
+            # 3. The post-check. This is the span that turns a user complaint
+            #    into a line in a dashboard.
+            with tracer.span("citation check", "chain") as check:
+                category = item.human[label_variant]["category"]
+                if category == "no_citation":
+                    check.attributes[ERROR_TYPE] = "no_handbook_citation"
+                elif category == "extra":
+                    check.attributes[ERROR_TYPE] = "unsupported_addition"
+    except Exception as exc:
+        # Ship what we have. A trace that stops at the exception is the one
+        # trace you needed, and a real SDK exports inside the context
+        # manager precisely so this does not happen. `keep_errors=False`
+        # reproduces the naive version for lesson 12.3 to break.
+        if keep_errors:
+            exc.trace = tracer.to_dict()
+        raise
 
     return tracer.to_dict()
 
@@ -109,7 +129,7 @@ def record(data: Dataset | None = None, n: int = 20, split: str = "dev",
            variant: str = "v1", model: str = "qwen3-1.7b",
            session: str = "s-demo", fail_rate: float = 0.0,
            sample_rate: float = 1.0, seed: int = 0,
-           pii_rate: float = 0.0) -> list[dict]:
+           pii_rate: float = 0.0, keep_errors: bool = True) -> list[dict]:
     """Run the bot over a slice and collect traces.
 
     ``fail_rate`` plants errors at a known rate so the error-rate query in
@@ -118,6 +138,11 @@ def record(data: Dataset | None = None, n: int = 20, split: str = "dev",
     and the result is still stable across runs. ``pii_rate`` attaches a
     customer identifier to that share of requests, which is what a real
     support bot does and what the redaction lab turns off.
+
+    ``keep_errors=False`` reproduces the naive exporter, which discards a
+    trace the moment the call raises — so the failed requests simply
+    vanish from the numbers. That is the default bug in every hand-rolled
+    tracer, and lesson 12.3 makes the learner hit it.
     """
     data = data or load("support")
     items = data.items_for(split)[:n]
@@ -136,12 +161,15 @@ def record(data: Dataset | None = None, n: int = 20, split: str = "dev",
         try:
             out.append(instrumented_run(item, data, variant=variant,
                                         model=model, session=session,
-                                        fail_on=fail_on, user=user))
-        except RuntimeError:
-            # The tracer already has the spans; a real app loses them here
-            # unless the exporter is inside the context manager, which is
-            # exactly the bug lesson 12.3 is about.
-            continue
+                                        fail_on=fail_on, user=user,
+                                        keep_errors=keep_errors))
+        except RuntimeError as exc:
+            # The spans are on the exception because the tracer exported
+            # inside its context manager. With keep_errors=False they are
+            # gone, and the trace you most wanted is the one that vanished.
+            salvaged = getattr(exc, "trace", None)
+            if salvaged is not None:
+                out.append(salvaged)
     return out
 
 

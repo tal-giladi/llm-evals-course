@@ -61,12 +61,49 @@ def test_the_four_span_kinds_are_present(store):
 
 
 def test_model_spans_carry_model_and_tokens(store):
+    """A chat span always names its model.
+
+    Token counts are required on spans that produced output. A call that
+    failed before the model answered has no output tokens, and inventing a
+    number for it would inflate the cost panel with the price of an error.
+    """
     chats = store.spans("chat")
     assert chats
     for s in chats:
         assert s.attributes[GEN_AI_REQUEST_MODEL]
-        assert s.attributes.get(GEN_AI_INPUT_TOKENS, 0) > 0
-        assert s.attributes.get(GEN_AI_OUTPUT_TOKENS, 0) > 0
+    for s in chats:
+        if s.error is None:
+            assert s.attributes[GEN_AI_INPUT_TOKENS] > 0
+            assert s.attributes[GEN_AI_OUTPUT_TOKENS] > 0
+        else:
+            assert s.attributes.get(GEN_AI_OUTPUT_TOKENS, 0) == 0, \
+                "a failed call must not report output tokens"
+
+
+def test_error_rate_is_reported_by_span_kind(store):
+    rates = store.error_rate()
+    assert "chat" in rates and "chain" in rates
+    assert rates["chain"]["rate"] > 0, "the planted citation errors must be visible"
+    for kind, v in rates.items():
+        assert v["errors"] <= v["spans"]
+
+
+def test_failed_traces_survive_the_exception(data):
+    """Lesson 12.3's shipped half: the spans are exported, not lost.
+
+    ``keep_errors=False`` reproduces the naive exporter, and the difference
+    between the two is the whole lesson: without it, the failed requests
+    simply do not appear in the error rate.
+    """
+    kept = record(data, n=20, split="dev", fail_rate=0.10, seed=1, keep_errors=True)
+    lost = record(data, n=20, split="dev", fail_rate=0.10, seed=1, keep_errors=False)
+    assert len(kept) == 20
+    assert len(lost) < 20, "the naive exporter must lose the failed traces"
+    kept_chat_errors = TraceStore.from_traces(kept).error_rate()["chat"]["errors"]
+    assert kept_chat_errors == 2
+    # And the lost ones are precisely the failures.
+    assert "chat" not in TraceStore.from_traces(lost).error_rate() or \
+        TraceStore.from_traces(lost).error_rate()["chat"]["errors"] == 0
 
 
 def test_tool_spans_name_their_tool(store):
