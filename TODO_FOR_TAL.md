@@ -31,10 +31,19 @@ All four build checks pass:
 | Question | Decision |
 |---|---|
 | Course name | **Eval Lab: LLM Evals & Observability by Experiment** |
-| Judge data | Seeded **educational model**; every statistic is computed for real, but the verdicts are generated, not recorded from a real LLM |
-| Scope of this build | Modules 1–10 only |
-| Production path (M11–M15) | Deferred |
-| Tier B playground with live judges (WebLLM / Ollama / bring-your-own key) | Deferred with M11–M15 |
+| Judge data | **Ship the seeded educational model as-is.** No real recordings. Every lab and lesson says so plainly; the statistics and workflow are real, only the judge's behaviour is modelled |
+| Scope of this build | Modules 1–10 built and import-ready |
+| Production path | **Plan M11–M15 before writing it.** Plans are in `curriculum/module-plans-11-15.md`; no lesson content written yet |
+| Tracing UI (plan §12.6) | **MLflow Tracing** — Apache-2.0, `pip install`, no Docker, so the production path stays on a CPU-only laptop. The lesson teaches the OTel GenAI spans; MLflow is the viewer, not the subject |
+| Eval framework (plan §12.7) | **Plain pytest, with a framework shown alongside.** Learners reimplement the lab's statistics in readable code; the mapping onto promptfoo/Inspect/DeepEval is shown as the payoff, not the starting point |
+| Python package (plan §12.8) | **A separate `evallab` package** in `labs/common/`, vendored into each module zip. `rag-course` has no `raglab` to share with yet, so there is nothing to coordinate |
+| Tier B playground | Deferred with M11–M15 |
+
+### Open but minor — adjust in `curriculum/course-details.md`, no build impact
+
+- **Free or paid:** suggested **free**; the whole fundamentals path needs no paid model.
+- **Repo listing (§12.12):** `tal-giladi/llm-evals-course`, public, hidden until launch — as written in `course-details.md`.
+- **Cross-links (§12.10):** `ai-engineer` M3/10.4, `ai-native-org` M7 and `rag-course` M10 are not yet linked here. Cheap to add whenever you want them.
 
 ## The most important thing to know
 

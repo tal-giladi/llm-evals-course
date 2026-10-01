@@ -81,3 +81,4 @@ import check reports `0 problems`. All four build commands pass.
 - Plan §12.2/§12.3 (shared lab kit with rag-course, Academy network access) — this pass vendors a standalone copy into `simulations/common/`; sharing is not decided.
 
 
+
