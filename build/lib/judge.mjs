@@ -118,9 +118,11 @@ export function verdictFor(truth, opts, rng) {
   }
 
   // 4. Self-preference: a judge from the same family as the system that
-  //    produced the answer is measurably more generous to it.
+  //    produced the answer is measurably more generous to it. Sized so the
+  //    effect clears the run-to-run noise floor on a 57-item set — a bias you
+  //    cannot distinguish from a rerun is not a bias you can act on.
   if (opts.self_preference && FAMILY[opts.model] === SYSTEM_FAMILY[opts.variant]) {
-    latent += 0.22;
+    latent += 0.60;
   }
 
   // 5. Run-to-run noise. Sample 0 is greedy (temperature 0); the rest are

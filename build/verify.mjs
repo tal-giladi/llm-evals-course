@@ -184,5 +184,35 @@ for (const model of pw.models) {
   }
 }
 
+console.log("\n10. The self-preference probe fires, and only on the matching family\n");
+{
+  // The probe is one judge with and without the bias flag. Variant C is the
+  // Qwen-family system and the probe judge is Qwen, so the effect must land on
+  // C and leave A and B (GPT-family) alone.
+  const A = "c-rubric-1.7b", B = "c-rubric-1.7b-self";
+  const rows = {};
+  for (const v of ["v1", "v2", "v3"]) {
+    const pa = pairsFor(support, A, v, support.dev_ids);
+    const pb = pairsFor(support, B, v, support.dev_ids);
+    rows[v] = {
+      base: pa.filter((x) => x.judge === 1).length / pa.length,
+      self: pb.filter((x) => x.judge === 1).length / pb.length,
+    };
+  }
+  for (const v of ["v1", "v2", "v3"]) {
+    const d = (rows[v].self - rows[v].base) * 100;
+    console.log(`  variant ${v}: ${pct(rows[v].base)} -> ${pct(rows[v].self)}  (${d >= 0 ? "+" : ""}${d.toFixed(1)} pts)`);
+  }
+  const dC = (rows.v3.self - rows.v3.base) * 100;
+  const dA = (rows.v1.self - rows.v1.base) * 100;
+  const dB = (rows.v2.self - rows.v2.base) * 100;
+  check("the bias raises the pass rate on the matching variant (C)", dC >= 6, `+${dC.toFixed(1)} pts`);
+  check("and does not inflate the non-matching variants (A, B)", dA <= 6 && dB <= 6, // half the ~12-point noise floor between two runs of one judge
+    `A ${dA.toFixed(1)}, B ${dB.toFixed(1)}`);
+  check("the effect is larger on C than on either other variant", dC > dA && dC > dB,
+    `C ${dC.toFixed(1)} > A ${dA.toFixed(1)}, B ${dB.toFixed(1)}`);
+}
+
 console.log(fails.length === 0 ? "\nAll checks passed.\n" : `\n${fails.length} CHECK(S) FAILED:\n${fails.map((f) => "  - " + f).join("\n")}\n`);
 process.exit(fails.length === 0 ? 0 : 1);
+

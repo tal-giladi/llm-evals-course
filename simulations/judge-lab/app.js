@@ -55,7 +55,7 @@ const PRESETS = {
   "prevalence":    { judge: "c-plain-3b",    variant: "v1", panel: "prevalence" },
   "position":      { judge: "c-rubric-7b",   variant: "v1", panel: "position" },
   "verbosity":     { judge: "c-rubric-3b-verb", variant: "v1", panel: "verbosity" },
-  "self":          { judge: "c-rubric-3b-self", variant: "v1", panel: "self" },
+  "self":          { judge: "c-rubric-1.7b", variant: "v1", panel: "self" },
   "size":          { judge: "c-rubric-0.6b", variant: "v1", panel: "size" },
   "repeats":       { judge: "c-rubric-3b",   variant: "v1", panel: "repeats" },
   "validate":      { judge: "c-rubric-3b",   variant: "v1", panel: "agreement", split: "test" },
@@ -520,16 +520,20 @@ function verbosityPanel() {
 }
 
 function selfPanel() {
-  const cfgA = "c-rubric-3b";
-  const cfgB = "c-rubric-3b-self";
+  // The probe is one judge with and without self-preference. It must be the
+  // SAME judge on both sides, and it must share a family with one of the
+  // systems (variant C is a Qwen-family model) or the bonus never fires and
+  // this panel silently becomes a second run of an identical judge.
+  const cfgA = "c-rubric-1.7b";
+  const cfgB = "c-rubric-1.7b-self";
   const rows = [];
   for (const v of ["v1", "v2", "v3"]) {
     const base = judgeMetrics(D.dev_ids.map((id) => ({
       human: itemById.get(id).human[v].label, judge: D.runs[cfgA][`${id}|${v}`][0],
-    })), { resamples: 300, seed: 13 });
+    })), { resamples: 600, seed: 13 });
     const self = judgeMetrics(D.dev_ids.map((id) => ({
       human: itemById.get(id).human[v].label, judge: D.runs[cfgB][`${id}|${v}`][0],
-    })), { resamples: 300, seed: 13 });
+    })), { resamples: 600, seed: 13 });
     const d = (self.judgePassRate - base.judgePassRate) * 100;
     rows.push(el("tr", { class: Math.abs(d) > 2 ? "diff-up" : "" }, [
       el("th", { scope: "row", text: D.variants.find((x) => x.id === v).label }),
@@ -541,13 +545,15 @@ function selfPanel() {
   return el("div", { class: "panel" }, [
     el("h2", { text: "Self-preference" }),
     el("p", { class: "muted" },
-      "Self-preference is a judge being kinder to answers written by the same model family it is. " +
-      "Variant C was produced by a Qwen-family model; the Llama judge is the one being tested here."),
+      "Same judge, same items, same prompt — the only difference is whether the judge favours answers from " +
+      "its own model family. Variant C was written by a Qwen-family model and the judge here is Qwen 1.7B, " +
+      "so the effect should land on C and leave A and B alone. If all three rows move together, the probe " +
+      "is measuring run-to-run noise, not a bias."),
     el("table", {}, [
       el("thead", {}, [el("tr", {}, [
         el("th", { scope: "col", text: "System" }),
-        el("th", { scope: "col", text: "Plain rubric judge" }),
-        el("th", { scope: "col", text: "Self-preference judge" }),
+        el("th", { scope: "col", text: "Judge, no self-preference" }),
+        el("th", { scope: "col", text: "Judge, self-preference" }),
         el("th", { scope: "col", text: "Change" }),
       ])]),
       el("tbody", {}, rows),
@@ -782,3 +788,4 @@ shell({
 });
 
 render();
+

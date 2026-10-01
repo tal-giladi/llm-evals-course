@@ -160,7 +160,11 @@ const CONFIGS = [
   { id: "c-crit-3b",     model: "llama-3.2-3b",   prompt_variant: "critique_first", fewshot: 2 },
   { id: "c-rubric-3b-fs3", model: "llama-3.2-3b", prompt_variant: "rubric",         fewshot: 3 },
   { id: "c-rubric-3b-verb", model: "llama-3.2-3b", prompt_variant: "rubric",       fewshot: 0, verbosity_bias: true },
-  { id: "c-rubric-3b-self", model: "llama-3.2-3b", prompt_variant: "rubric",       fewshot: 0, self_preference: true },
+  // The self-preference probe needs a judge whose family MATCHES one of the
+  // systems, or the bonus never fires and the panel silently becomes a second
+  // run of the same judge. SYSTEM_FAMILY says variant C is a Qwen-family
+  // model, so this probe uses a Qwen judge and fires on C.
+  { id: "c-rubric-1.7b-self", model: "qwen3-1.7b", prompt_variant: "rubric",       fewshot: 0, self_preference: true },
 ];
 
 /* ================================================================== *
