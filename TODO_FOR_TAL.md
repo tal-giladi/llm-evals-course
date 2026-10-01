@@ -4,13 +4,27 @@ Open decisions and handoff items. Working file — not imported.
 
 ## Status
 
-Modules 1–10 (43 lessons, browser-only fundamentals path) are built and ready for import.
-Modules 11–15 (the production path) are **deliberately not built** — see below.
+**Ready to import.** The Academy's own dry-run checker reports `0 problems`:
 
-**When this course is ready to import, set the GitHub repo name and the commit here:**
+```
+Eval Lab: LLM Evals & Observability by Experiment: 12 modules, 43 lessons,
+53 quiz files, 292 questions (A-D 67/79/77/69), 0 problems
+```
 
 - Repo: `tal-giladi/llm-evals-course` (suggested; public, hidden until launch)
-- Commit: _(filled in at final QA)_
+- Commit: see `git log --oneline -1` on `main` — the whole course is built in
+  linear commits, so the current head is the importable state.
+- Import with `course-creator` against this repo. Nothing needs editing after
+  the first import.
+
+All four build checks pass:
+
+| Command | What it proves |
+|---|---|
+| `node build/verify.mjs` | The shipped data supports every claim the lessons make, including that the self-preference probe lands on the family-matched variant |
+| `node build/fix-quiz-yaml.mjs` | No quiz file contains a scalar that will silently break the importer |
+| `node build/check-lessons.mjs` | 43 lessons, no problems: front matter, section template, links, simulation presets, prerequisites, and every quiz rule including the importer's option-length rule |
+| `node build/smoke.mjs` | All 9 simulations load in a real browser with no console errors and no network requests |
 
 ## Decisions taken with you (2026-10-01)
 
@@ -78,8 +92,28 @@ Recommended defaults, all easy to change:
 
 ## Things I would check personally before launch
 
-1. Read modules 5–7 end to end. They carry the "educational model" caveat most heavily.
-2. Decide whether the labelling pass on real data is worth doing, or whether the seeded model stays
-   for the public course.
+1. Read modules 5–7 end to end. They carry the "educational model" caveat most heavily, and
+   they are where the most popular claims had to be corrected against the shipped data.
+2. Decide whether a labelling pass on real data is worth doing, or whether the seeded model
+   stays for the public course.
 3. Check the licensing note in `COURSE-MAP.md` — all shipped datasets are original and generated.
 4. Decide whether to add the cross-links in plan §12.10.
+5. Modules 11–15 are not written. Either defer them and ship the fundamentals path as the
+   course, or decide plan §12.6/§12.7/§12.8 first — the recommended defaults are above.
+
+## Known simplifications, stated rather than hidden
+
+- **`doubled` is a dead field in the recipe lab.** `simulations/code-checks/app.js` computes a
+  doubled ingredient quantity that no metric reads, so the "Break the metric" button only changes
+  length, not correctness. Lesson 03.3 is written around what actually happens (ROUGE-L's recall
+  half is already saturated, so padding moves only the precision half) and does not claim
+  otherwise, but the doubling is inert and a future revision should either surface it in a
+  field-accuracy check or drop it.
+- **There is no judge picker in the release-gate lab.** `ab-gates` hardcodes one judge, and
+  lessons 10.1–10.3 say so. Adding a picker means re-measuring those lessons.
+- **The gate grid and the Items knob sample differently** — the grid takes a prefix of the item
+  order, the knob draws. Lesson 10.3 flags this for the learner; it is worth making consistent
+  if that lab is revisited.
+- **`ab-gates` flip-list naming is asymmetric** — `paired.fixed`/`broke` are named from A's side
+  while the panel's list is named from B's. Left in place deliberately: lesson 10.1 teaches it as
+  a real trap in reporting.

@@ -76,9 +76,6 @@
     you?
   options:
     - >-
-      Which system the difference is relative to — the tile never says A minus B, and the list is named
-      from the candidate's side, so the thirty-five broken rows are what the positive number is made of.
-    - >-
       Which item set the numbers were computed over, because the tile shows a rate and a rate without its
       `n` cannot be checked.
     - >-
@@ -87,7 +84,10 @@
     - >-
       Whether the interval was resampled or assumed, because a closed-form interval and a bootstrap give
       different widths on the same data.
-  correct: 0
+    - >-
+      Which system the difference is relative to — the tile never says A minus B, and the list is named
+      from the candidate's side, so the thirty-five broken rows are what the positive number is made of.
+  correct: 3
   explanation: >-
     A signed number needs an owner: swap the two dropdowns and both the sign of the tile and the meaning of
     the glyphs move, so a runbook that records "+26.6" without "A minus B" cannot be re-read by anybody,

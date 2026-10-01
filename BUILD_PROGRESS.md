@@ -34,18 +34,21 @@ Modules 11–15 (production path: Python, Docker, tracing UI, CI, online monitor
 - [x] Lesson/quiz validator (`build/check-lessons.mjs`)
 - [x] Shared docs: `README.md`, `_sidebar.md`, `glossary.md`, `templates/`, `references/`, `COURSE-MAP.md`, `TODO_FOR_TAL.md`
 - [x] Writing brief for agents (`curriculum/AGENT-BRIEF.md`)
-- [ ] Module 1 — Why evals (4 lessons)
-- [ ] Module 2 — Error analysis (4)
-- [ ] Module 3 — Code-based checks (4)
-- [ ] Module 4 — Building the eval set (4)
-- [ ] Module 5 — Designing an LLM judge (5)
-- [ ] Module 6 — Validating the judge (5)
-- [ ] Module 7 — Judge biases, models and cost (5)
-- [ ] Module 8 — Evaluating RAG answers (4)
-- [ ] Module 9 — Evaluating agents and conversations (4)
-- [ ] Module 10 — Comparing systems and release gates (4)
-- [ ] Module quizzes M1–M10 (`assessments/`)
-- [ ] Final QA — all four build checks green
+- [x] Module 1 — Why evals (4 lessons)
+- [x] Module 2 — Error analysis (4)
+- [x] Module 3 — Code-based checks (4)
+- [x] Module 4 — Building the eval set (4)
+- [x] Module 5 — Designing an LLM judge (5)
+- [x] Module 6 — Validating the judge (5)
+- [x] Module 7 — Judge biases, models and cost (5)
+- [x] Module 8 — Evaluating RAG answers (4)
+- [x] Module 9 — Evaluating agents and conversations (4)
+- [x] Module 10 — Comparing systems and release gates (4)
+- [x] Module quizzes M1–M10 (`assessments/`)
+- [x] Final QA — `npm run check-course` reports 0 problems
+
+**COMPLETE.** 43 lessons, 53 quiz files, 292 questions, 9 simulations. The Academy dry-run
+import check reports `0 problems`. All four build commands pass.
 
 ## Who is working on what right now
 
@@ -76,4 +79,5 @@ Modules 11–15 (production path: Python, Docker, tracing UI, CI, online monitor
 - Plan §12.5 (who labels our datasets) — our educational-model labels are synthetic; real labelling pass is Tal's call.
 - Plan §12.9 (Hebrew judging set) — not in this pass.
 - Plan §12.2/§12.3 (shared lab kit with rag-course, Academy network access) — this pass vendors a standalone copy into `simulations/common/`; sharing is not decided.
+
 

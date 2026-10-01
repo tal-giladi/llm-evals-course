@@ -198,7 +198,7 @@
       Drop the slice, since a metric whose intervals overlap cannot support a release decision.
     - >-
       Report the difference of four refusals as a 4.3-point regression, since counts and rates are the same
-      unit on this panel.
+      unit on this panel and the gate needs a number it can compare against the overall tolerance.
     - >-
       Keep the slice as a floor on a named denominator — `over-refusals ≤ 12 of 94` — and say in the
       specification that it is a floor rather than a detector, because the counts are one and seven events.

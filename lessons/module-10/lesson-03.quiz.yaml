@@ -25,8 +25,8 @@
 
 - id: q2
   question: >-
-    At a 5-point tolerance the gate grid reads false alarms `27% / 21% / 10%` as the item count goes 20, 40,
-    94, and missed regressions `51% / 62% / 53%`. The callout says more items and more repeats are the only
+    At a 5-point tolerance the gate grid reads false alarms `32% / 26% / 10%` as the item count goes 20, 40,
+    94, and missed regressions `44% / 50% / 53%`. The callout says more items and more repeats are the only
     knobs that move both rates the right way. What is right?
   options:
     - >-
@@ -77,25 +77,25 @@
 - id: q4
   question: >-
     On 94 items and 3 repeats the paired 95% interval on a real 27-point difference is `12.8 to 39.4`, so the
-    half-width is 13.3 points. The regression the gate must catch is 9 broken items out of 94, a 4.26-point
+    half-width is 13.3 points. The regression the gate must catch is 9 broken items out of 94, a 4.53-point
     drop. What follows?
   options:
     - >-
       The tolerance is irrelevant, because the paired interval measures the effect size and not the
       run-to-run variation a nightly gate actually sees.
     - >-
-      The gate is fine, because the false-alarm rate on the panel reads 10.0% at exactly this setting.
-    - >-
       The regression is a third of the measurement's own half-width, which is why the gate is close to a coin
       on it and why no threshold fixes a signal that far under its noise.
     - >-
-      The gate is strict, because a 4.26-point regression is more than a third of the tolerance and a gate
+      The gate is fine, because the false-alarm rate on the panel reads 10.0% at exactly this setting.
+    - >-
+      The gate is strict, because a 4.53-point regression is more than a third of the tolerance and a gate
       can resolve anything above a third of its tolerance.
-  correct: 2
+  correct: 1
   explanation: >-
     A threshold is only interpretable against the width of the quantity it is applied to, and here the signal
     is well under that width. More items shrink the width — 30.0, 18.8, 13.3 as the set grows — but a
-    4.26-point drop stays a 4.26-point drop at every size, so the only way to catch it reliably is a
+    4.53-point drop stays a 4.53-point drop at every size, so the only way to catch it reliably is a
     threshold tight enough to fire on it and an honest statement of the false alarms that buys.
 
 - id: q5
@@ -110,11 +110,11 @@
       That the candidate's pass rate has not dropped, because the threshold is what the gate enforces.
     - >-
       That the gate blocks regressions larger than five points, since anything smaller falls under the
-      measurement's own noise floor.
+      measurement's own noise floor and the paired interval measures effect size rather than nightly drift.
     - >-
       That on 94 items and 3 repeats the measurement carries a ±13.3-point half-width, the gate blocks about
-      one healthy build in ten and misses about half of the one-in-ten breaks, and both of those were
-      accepted in writing.
+      one healthy build in ten and misses about half of the one-in-ten breaks — a 4.53-point drop — and both
+      of those were accepted in writing.
   correct: 3
   explanation: >-
     A gate specification is four numbers — the tolerance, the width of the measurement, the accepted

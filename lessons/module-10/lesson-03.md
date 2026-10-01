@@ -81,22 +81,23 @@ balanced. Every other tolerance is a decision about which mistake you would rath
 
 ### The other two knobs buy down one side only
 
-Now read the grid, which holds the tolerance at 5 points and varies items and repeats:
+Now read the grid, which holds the tolerance at 5 points and varies items and repeats. Left number is false
+alarms, right number is missed regressions:
 
 | Items | 1 repeat | 3 repeats | 5 repeats |
 |---|---|---|---|
-| 20 | 0% / 0% | **27% / 51%** | 20% / 53% |
-| 40 | 0% / 100% | **21% / 62%** | 21% / 64% |
-| 94 | 0% / 0% | **10% / 53%** | 8% / 52% |
+| 20 | 0% / 0% | **32.3% / 43.5%** | 28.2% / 46.8% |
+| 40 | 0% / 0% | **25.5% / 49.5%** | 24.0% / 52.8% |
+| 94 | 0% / 0% | **10.0% / 52.8%** | 8.3% / 51.8% |
 
-Left number: false alarms. Right number: missed regressions.
+**Items move the false-alarm rate and nothing else.** Going from 20 items to 94 at three repeats takes false
+alarms from 32.3% to 10.0% — a 69% reduction for 4.7 times the budget. The miss rate over the same move
+reads 43.5%, then 49.5%, then 52.8%: it drifts *up*, not down.
 
-**Items move the false-alarm rate and almost nothing else.** Going from 20 items to 94 at three repeats
-takes false alarms from 27% to 10% — a two-thirds reduction for four times the budget. The miss rate over
-the same move reads 51%, then 62%, then 53%, which is scatter rather than a trend.
-
-**Repeats move the false-alarm rate and almost nothing else.** At 94 items, going from three repeats to five
-takes false alarms from 10.0% to 8.0% and the miss rate from 52.8% to 52.4%.
+**Repeats move the false-alarm rate and nothing else.** At 94 items, going from three repeats to five takes
+false alarms from 10.0% to 8.3% and the miss rate from 52.8% to 51.8%. At 20 items the same move takes
+false alarms 32.3% → 28.2% and the miss rate 43.5% → 46.8%. Across the whole grid the miss column spans
+43.5% to 52.8% and moves in no direction either knob controls.
 
 That is not a disappointing version of the story. It is the story, and the reason is worth being able to
 say out loud. **A regression is a proportion.** When a change breaks a tenth of the questions, it costs a
@@ -106,36 +107,42 @@ made twice: they make the measurement quieter, which buys down false alarms and 
 regression exactly as detectable as it was.
 
 > [!IMPORTANT]
-> > That contradicts the callout printed under the gate tiles, which says *the only knobs that move both in
-> > the right direction are more items and more repeats*. The grid above is the shipped simulator's own
-> > output, and its miss column does not fall: 51, 62, 53 down the item axis, and 53 against 52 as repeats
-> > go from three to five at 94 items. The callout's claim holds for the **false-alarm** side and not for the
-> > **miss** side. The cheapest way to find that out is the one you just did — read the two columns
-> > separately instead of hunting for a cell that improves on both.
+> That contradicts the callout printed under the gate tiles, which says *the only knobs that move both in
+> the right direction are more items and more repeats*. The grid above is the shipped simulator's own
+> output, and its miss column goes 43.5%, 49.5%, 52.8% **up** the item axis and 52.8% against 51.8% across
+> the repeat axis. The callout's claim holds for the **false-alarm** side and not for the **miss** side.
+> The cheapest way to find that out is the one you just did — read the two columns separately instead of
+> hunting for a cell that improves on both.
 
 ### What actually sets the miss rate
 
 If items and repeats do not set it, something else must. The simulator plants a **block** of regressions — a
-default tenth of the item set — because a real regression breaks a category of question rather than one
-unlucky item. On 94 items that block is the first nine, and A passes four of them at three repeats, so the
-planted drop is **4.26 points** against a **5-point** tolerance. The regression sits just under the
-threshold, which is exactly why the gate is close to a coin on it.
+default tenth of the item list — because a real regression breaks a category of question rather than one
+unlucky item. On 94 items that block is the first nine, `s01` through `s09`, and under the simulator's
+resampled majority those nine carry **4.53 points** of the healthy pass rate. That is the signal, and
+against a **5-point** tolerance it sits just under the line, which is why the gate is close to a coin on it.
 
-Re-run the shipped simulation with a different block size at the same tolerance and the answer falls out:
+Re-run the shipped simulation with a different block size at the same tolerance and the answer falls out.
+The false-alarm rate is **10.0% in every row**, to the decimal, because the block exists only in the broken
+build and cannot touch the healthy one:
 
-| Broken items | Approx. drop | False alarms | Missed |
+| Broken items | Drop they cost | False alarms | Missed |
 |---|---|---|---|
-| 1 | 1.1 pts | 10.0% | **89.8%** |
-| 3 | 3.2 pts | 10.0% | 76.5% |
-| 9 (the panel's default) | 4.3 pts | 10.0% | 52.8% |
-| 19 | 10.6 pts | 10.0% | **5.2%** |
-| 30 | 16.0 pts | 10.0% | 0.0% |
+| 1 | 0.27 pts | 10.0% | **89.8%** |
+| 3 | 2.12 pts | 10.0% | 76.5% |
+| 9 (the panel's default) | 4.53 pts | 10.0% | 52.8% |
+| 19 | 10.12 pts | 10.0% | **5.2%** |
+| 30 | 15.44 pts | 10.0% | 0.0% |
 
-The false-alarm column does not move at all, and it cannot: the block exists only in the broken build, so it
-has no effect on what the healthy build does. The miss rate falls from nine in ten to zero. **The miss rate
-is a function of how big the regression is relative to the tolerance, and of nothing else on this page.**
-One broken item out of 94 is a one-point drop, and a five-point gate misses that about nine times in ten —
-correctly, because a one-point drop is not the event anyone is trying to catch.
+**The miss rate is a function of how big the regression is relative to the tolerance, and of nothing else
+on this page.** One broken item out of 94 costs a quarter of a point, and a five-point gate misses that
+about nine times in ten — correctly, because a quarter-point drop is not the event anyone is trying to catch.
+
+One wrinkle worth naming, because it is the reason the grid's miss column drifts at all: **the block is a
+tenth of the list, but a tenth of the list is not a tenth of the pass rate.** The nine items it lands on at
+94 carry 4.53 points; the two it lands on at 20 carry 6.30, and the four at 40 carry 5.00. The block is the
+same *fraction* at every cell and a different *size* every time, and part of what the grid's miss column is
+reading is that.
 
 That is the sentence a gate specification has to contain. A false-alarm rate is a property of your
 measurement. A miss rate is always a property of *a regression you have named*, and until you name it you
@@ -153,10 +160,10 @@ takes you to every point on it. A against B, `c-rubric-3b`, 3 repeats, seed 23:
 | 40 | +22.5 pts | 5.0 to 42.5 | **18.8 pts** |
 | 94 | +26.6 pts | 12.8 to 39.4 | **13.3 pts** |
 
-Read the last column against the 4.26-point regression above. **The planted regression is a third of the
+Read the last column against the 4.53-point regression above. **The planted regression is a third of the
 measurement's half-width.** That is the arithmetic behind a 52.8% miss rate, and no threshold tuning fixes a
 gate whose signal is that far under its own noise: the half-width moves 30.0 → 18.8 → 13.3 as the item count
-rises, but a 4.26-point drop stays a 4.26-point drop at every size.
+rises, but a 4.53-point drop stays a 4.53-point drop at every size.
 
 Repeats are the smaller term again. At 94 items the half-width is **14.4** points at one repeat, **13.3** at
 three and **13.3** at five. That is why "just run it three times" is not the answer, and also why repeats
@@ -170,14 +177,14 @@ The deliverable from setting a gate is a paragraph, and it has four numbers in i
 
 > **Gate: pass rate on 94 frozen items, 3 repeats, judge `c-rubric-3b`, majority vote.** Fire when the
 > candidate's pass rate is more than **4 points** below the current build's on those items. **The regression we
-> must catch is a break of one question in ten**, which on this set the simulator plants as 9 of 94 items — a
-> 4.26-point drop. At a 4-point tolerance the panel prices that at **16.8% false alarms and 42.3% missed**; at
-> 5 points, 10.0% / 52.8%; at 3 points, 23.0% / 29.0%. **We take 4 points**, accepting one blocked healthy
-> build in six in exchange for catching four regressions in ten instead of two. **Measurement half-width on
-> this set: ±13.3 points**, so a 4-point tolerance is 30% of the noise and this gate is deliberately strict.
-> **To halve the false-alarm side, buy items** — 20 items at 3 repeats reads 27% / 51% against 10% / 53% at
-> 94. **To halve the miss side, name a bigger regression**: at 19 broken items the same gate reads 5.2%
-> missed, and no item budget will ever get it there.
+> must catch is a break of one question in ten**, which on this set the simulator plants as 9 of 94 items and
+> which costs a 4.53-point drop. At a 4-point tolerance the panel prices that at **16.8% false alarms and 42.3%
+> missed**; at 5 points, 10.0% / 52.8%; at 3 points, 23.0% / 29.0%. **We take 4 points**, accepting one blocked
+> healthy build in six in exchange for catching four regressions in ten instead of two. **Measurement
+> half-width on this set: ±13.3 points**, so a 4-point tolerance is 30% of the noise and the regression is 34%
+> of it — this gate is deliberately strict. **To halve the false-alarm side, buy items**: 20 items at 3 repeats
+> reads 32.3% / 43.5% against 10.0% / 52.8% at 94. **To halve the miss side, name a bigger regression** — at 19
+> broken items the same gate reads 5.2% missed, and no item budget will ever get it there.
 
 Every clause is checkable, both rates sit in the same sentence, and the last clause is the one teams leave
 out: **the miss rate is bought with a decision about what counts as a regression, not with a larger eval
@@ -206,12 +213,12 @@ Do this, in order:
    down to 0 and back up to 15. False alarms climb 10.0% → 23.0% → 45.3%; the miss rate falls 52.8% → 29.0%
    → 14.5%; and the two cross somewhere near 3 points. That crossing is the whole trade, and it is the only
    place the panel shows one.
-2. **Read the grid's two columns separately, not its cells.** At 5 points, false alarms run 27 → 21 → 10 down
-   the item axis and 27 → 20 across the repeat axis. The miss column runs 51 → 62 → 53, and 51 → 53. Write
+2. **Read the grid's two columns separately, not its cells.** At 5 points, false alarms run 32 → 26 → 10 down
+   the item axis and 32 → 28 across the repeat axis. The miss column runs 44 → 50 → 53, and 44 → 47. Write
    down the sentence that describes the difference between those two columns.
 3. **Read the callout against the grid.** The callout says more items and more repeats are the only knobs
-   that move both rates in the right direction. The grid's miss column does not move. Say which half of the
-   callout the panel supports and which half it does not, then write the replacement sentence.
+   that move both rates in the right direction. The grid's miss column goes the other way. Say which half of
+   the callout the panel supports and which half it does not, then write the replacement sentence.
 4. **Move the `Items` knob and watch the headline respond.** At tolerance 5 and 3 repeats: `Items 20` reads
    **26.5% / 50.5%**, `40` reads **20.5% / 62.0%**, `60` reads **16.0% / 34.0%**, `94` reads **10.0% /
    52.8%**. The false-alarm rate falls monotonically. The miss rate swings by nearly thirty points between
@@ -219,7 +226,8 @@ Do this, in order:
 5. **Work out what the regression actually is.** The planted block is the *first tenth of the item list*, so
    at 94 items it breaks `s01` through `s09` and at 20 items it breaks `s01` and `s02`. The 60-item draw does
    not contain the same first ninth of the corpus that the 94-item set does, so the block lands on different
-   items. That is the thirty-point swing, and it is not thirty items of extra evidence.
+   items — and a tenth of the list is not a tenth of the pass rate, because the items it lands on are not
+   average items. That is the thirty-point swing, and it is not thirty items of extra evidence.
 6. **Put an error bar on the rates.** There is no seed knob on this panel, so ask it another way: the
    simulator runs 400 trials of a seeded generator and this page is seed 23. Re-running the same setting at
    ten other seeds gives a false-alarm rate of **8.8% to 12.8%** and a miss rate of **46.0% to 55.5%**.
@@ -227,21 +235,21 @@ Do this, in order:
    formatting.
 
 > [!NOTE]
-> > One more reading note, and it is the same rule as Module 6: at `Repeats 2` this panel's majority rule
-> > requires **both** recorded samples to pass, because a tie resolves to fail. A's pass rate at `Repeats 2`
-> > is **42.6%** (40/94) against 53.2% at 1 and 55.3% at 3. That is not the system getting worse; it is the
-> > tie rule, and it is why an even repeat count is the worst setting on any majority-vote threshold.
-> > Every number on this page is computed from a seeded educational model of judge behaviour on generated
-> > support items, for real, in your browser — and none of it measures a named support bot in the wild. The
-> > block sizes in the fourth table are a hand calculation with the shipped simulator's own option rather
-> > than a panel readout, and the seed sweep in step 6 is the shipped simulator re-run at other seeds.
+> One more reading note, and it is the same rule as Module 6: at `Repeats 2` this panel's majority rule
+> requires **both** recorded samples to pass, because a tie resolves to fail. A's pass rate at `Repeats 2`
+> is **42.6%** (40/94) against 53.2% at 1 and 55.3% at 3. That is not the system getting worse; it is the
+> tie rule, and it is why an even repeat count is the worst setting on any majority-vote threshold.
+> Every number on this page is computed from a seeded educational model of judge behaviour on generated
+> support items, for real, in your browser — and none of it measures a named support bot in the wild. The
+> block sizes in the fourth table are a hand calculation with the shipped simulator's own option rather
+> than a panel readout, and the seed sweep in step 6 is the shipped simulator re-run at other seeds.
 
 ## Try it
 
 **Predict first**, on paper:
 
 1. A gate compares two builds on 94 items where the difference carries a half-width of 13.3 points, and the
-   regression you need to catch is 4.3 points. Is the tolerance the thing that decides whether you catch it,
+   regression you need to catch is 4.5 points. Is the tolerance the thing that decides whether you catch it,
    or is it something else?
 2. The grid's false-alarm column improves as you add items and its missed column does not. Explain why in
    one sentence, using the word *proportion*.
@@ -258,10 +266,11 @@ Do this, in order:
    and 3 repeats, writing both columns down. Then sweep the repeat count 1, 3, 5 and the item count 20, 40,
    94 and do the same. Make two lists — the knobs that move the left column, and the knobs that move the
    right one — and report what is on the second list.
-3. **Work out the planted regression by hand.** Take the first 9 items, count how many A passes at 3 repeats,
-   divide by 94 and multiply by 100. You should land on **4.26 points**. Compare it with the tolerance of 5
-   and explain why the gate is close to a coin on it. Then work out what tolerance the same regression would
-   need in order to be caught nine times in ten.
+3. **Work out the planted regression by hand.** Take the first 9 items — `s01` to `s09` — and work out how
+   much of the healthy pass rate each one carries under the simulator's resampled majority. Nine items
+   carrying 4.53 points of a 55.6% pass rate is the signal. Compare it with the tolerance of 5 and explain
+   why the gate is close to a coin on it, then work out what tolerance the same regression would need in
+   order to be caught nine times in ten.
 4. **Watch the block move.** Set `Items` to 60 and then to 94 and record both rates at each. Work out which
    items the simulator breaks in each case — it is always the first tenth of the list — and explain the
    thirty-point swing in the miss rate without using the words "more evidence".
@@ -278,40 +287,41 @@ without knowing they were choosing it. The lie: **a single green tick reads as "
 was tested is one of the two ways of being wrong.**
 
 **Set a tolerance without a half-width.** Five points against a ±13.3 measurement is a 38% noise threshold,
-and the regression you need to catch is a 4.26-point drop. The gate is being asked to resolve a signal a
+and the regression you need to catch is a 4.53-point drop. The gate is being asked to resolve a signal a
 third of the size of its own noise. The lie: **a threshold smaller than the noise is not strict, it is
 random with a CI badge on it.**
 
 **Believe the callout.** *The only knobs that move both in the right direction are more items and more
-repeats.* The grid's miss column reads 51, 62, 53. The lie: **a caption describing one column of a table is
-read as a description of the table, and the half that is wrong is the half you were about to budget
-against.**
+repeats.* The grid's miss column reads 44, 50, 53 going down the item axis. The lie: **a caption describing
+one column of a table is read as a description of the table, and the half that is wrong is the half you were
+about to budget against.**
 
-**Treat "more items and more repeats" as the answer to a miss rate.** They cut false alarms — 27% to 10% on
-items, 10.0% to 8.0% on repeats — and leave the miss rate where it was, because a proportional regression is
-exactly as detectable at 20 items as at 94. The lie: **a knob that reduces the noise and leaves the signal
-alone cannot rescue a gate whose signal was never large enough.**
+**Treat "more items and more repeats" as the answer to a miss rate.** They cut false alarms — 32.3% to
+10.0% on items, 10.0% to 8.3% on repeats — and move the miss rate the wrong way or not at all, because a
+proportional regression is exactly as detectable at 20 items as at 94. The lie: **a knob that reduces the
+noise and leaves the signal alone cannot rescue a gate whose signal was never large enough.**
 
 **Read a 52.8% miss rate as a verdict on your gate.** The simulator plants a fixed tenth of the item set
-every time. One broken item is missed 89.8% of the time at this tolerance; nineteen are missed 5.2%. The
-number is a property of *that* regression, and a team that reads it as a property of its gate will either
-give up or loosen a threshold that was doing its job. The lie: **a miss rate is always a miss rate for a
-named regression, and nobody named one.**
+every time. One broken item is missed 89.8% of the time at this tolerance; nineteen are missed 5.2%, and the
+false-alarm rate is 10.0% in both. The number is a property of *that* regression, and a team that reads it as
+a property of its gate will either give up or loosen a threshold that was doing its job. The lie: **a miss
+rate is always a miss rate for a named regression, and nobody named one.**
 
 **Treat "more items and more repeats" as free.** 282 verdicts a night at 94 × 3, every night, is a line item
-somebody has to approve — and the measurement says repeats buy 14.4 → 13.3 while items buy 30.0 → 13.3. The
-lie: **the knob that buys down false alarms is the one you price last, which is how it becomes unaffordable.**
+somebody has to approve — and the measurement says repeats buy 14.4 → 13.3 of half-width while items buy
+30.0 → 13.3. The lie: **the knob that buys down false alarms is the one you price last, which is how it
+becomes unaffordable.**
 
 ## Fix it
 
 1. **Publish two rates, never one.** `False alarms: 1 in 6 runs. Missed: a one-question-in-ten break is
    caught 4 times in 10. Both accepted deliberately, see ADR-114.` A gate with one rate has one failure mode
    and it is the one nobody chose.
-2. **Name the regression inside the gate's own text.** `Must catch: a break of one question in ten.` Every
-   miss rate in the runbook is then a miss rate *for that thing*, and a change to what counts as a regression
-   shows up as a change to the gate rather than as a silent retune.
+2. **Name the regression inside the gate's own text.** `Must catch: a break of one question in ten, which on
+   this set costs 4.53 points.` Every miss rate in the runbook is then a miss rate *for that thing*, and a
+   change to what counts as a regression shows up as a change to the gate rather than as a silent retune.
 3. **Print the measurement's half-width next to the tolerance.** `Tolerance 4 pts; paired 95% interval on
-   this set ±13.3 pts (94 items, 3 repeats); planted regression 4.26 pts.` Three numbers on one line, and the
+   this set ±13.3 pts (94 items, 3 repeats); planted regression 4.53 pts.` Three numbers on one line, and the
    ratio between them is the actual design decision.
 4. **Buy items, not repeats, for the false-alarm side.** On this data items move the half-width by a factor
    of 2.3 and repeats by 1.08. Repeats are per-item per-run cost forever, so they are the expensive way to
@@ -333,8 +343,9 @@ two thirds of the evidence, so require all four of these before it goes near CI:
   against a ±15.8 measurement: we accept ~1 false alarm in 6 because a missed parental-leave regression costs
   more than a morning of re-running.`
 - **The regression size the gate is meant to catch is named, and its drop in points is computed.** A break of
-  one question in ten on 57 items is **5.7 points**, not 4.3 — the plant is a *proportion* of the set, so it
-  does not shrink when you shrink the eval, and the gate has to be re-checked against it at every size.
+  one question in ten is nominally **5.7 points** on 57 items, not 4.53 — and the realised drop is whatever
+  those particular items contribute, which is why the number has to be computed on your own set rather than
+  assumed from the fraction.
 - **The gate's own error rates have been counted, not estimated.** At least ten consecutive runs with the
   threshold, and the actual false-alarm and miss counts in the ADR next to the predicted ones.
 
@@ -346,14 +357,14 @@ two thirds of the evidence, so require all four of these before it goes near CI:
 | 95% interval | 3.5 to 35.1 | 16.2 to 59.5 |
 | **Half-width** | **15.8 pts** | **21.7 pts** |
 | Sign test p (split) | 0.043 (18 vs 7) | 0.003 (17 vs 3) |
-| Planted regression, one in ten | **5.7 pts** | **9.5 pts** |
+| Nominal size of a one-in-ten break | **5.7 pts** | **9.5 pts** |
 
 The half-width got **worse** on the held-out half, from 15.8 to 21.7 points, while the measured effect got
-larger — and the regression the gate exists to catch got *bigger* too, from 5.7 points to 9.5, because it is
-a tenth of whatever set you measured. That last row is the finding. **The signal and the noise move in
-opposite directions when you shrink the eval, and they meet.** On 37 items a one-in-ten break is a 9.5-point
-drop against a ±21.7 measurement — well inside the noise — so this set cannot gate for that class of
-regression at any tolerance, and the honest output is *collect items*, not *move the threshold*.
+larger — and the regression the gate exists to catch nominally got *bigger* too, from 5.7 points to 9.5,
+because it is a tenth of whatever set you measured. That last row is the finding. **The signal and the noise
+move in opposite directions when you shrink the eval, and they meet.** On 37 items a one-in-ten break is
+nominally a 9.5-point drop against a ±21.7 measurement — inside the noise — so this set cannot gate for that
+class of regression at any tolerance, and the honest output is *collect items*, not *move the threshold*.
 
 ## Use / don't use
 
@@ -389,7 +400,7 @@ it.
    to a team why the second number is a statement about a *particular size of regression* rather than about
    the gate.
 2. The callout says more items and more repeats move both rates in the right direction, and the grid's miss
-   column reads 51, 62, 53. Write the one sentence you would add to the callout, and say which knob you
+   column reads 44, 50, 53. Write the one sentence you would add to the callout, and say which knob you
    would still spend budget on.
 3. You can afford 282 judged verdicts a night. Write the paragraph you would put in a budget review asking
    for 4× the items instead of 3× the repeats, and say what that buys — and what it visibly does not buy.
