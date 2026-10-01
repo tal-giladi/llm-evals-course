@@ -1,0 +1,74 @@
+- id: q1
+  question: >-
+    Your extraction feature returns malformed JSON on 4 of 20 items. A colleague suggests adding an
+    LLM judge that answers "is this valid JSON?" so the failure shows up on the dashboard. What is
+    the strongest objection?
+  options:
+    - >-
+      A judge cannot tell valid JSON from a trailing comma reliably, so it would under-report the
+      very failures it was added to find.
+    - The judge would be correct, but a model call per item is too slow to sit inside the importer.
+    - >-
+      Validity is fully decidable, so `JSON.parse` answers the same question for free, instantly and
+      with a reason.
+    - The dashboard would need human labels anyway, since only a person can confirm a JSON object is
+    right.
+  correct: 2
+  explanation: >-
+    The rule is to reach for the cheapest thing that can decide, and here something can decide. The
+    lesson's variant C is the case in miniature: 4 of 20 outputs are not JSON, and a parser names the
+    defect while a model opinion on the same 20 items costs money, varies between runs, and is never
+    validated against the parser it is meant to stand in for.
+
+- id: q2
+  question: >-
+    A check reads 100.0% on a system that is exactly right 20 times out of 20, and 100.0% on a
+    system that is exactly right 6 times out of 20. What does that pair of numbers tell you?
+  options: >-
+    - Nothing about either system: the check gives them the same number, so it cannot separate them.
+    - The first system is better, because a perfect score is stronger evidence than a partial one.
+    - The check is correct and conservative, since it rejected nothing and so admitted no false alarm.
+    - The second system needs a different prompt, because no single check can score both systems.
+  correct: 0
+  explanation: >-
+    A check earns its place by giving different systems different numbers. Here it does not, so the
+    100% is a measurement of the check rather than of the system — and the lab's "Contains substring"
+    check is exactly this, passing all 20 items on a variant that is wrong on 14 of them while
+    catching zero real failures.
+
+- id: q3
+  question: >-
+    On 20 items, a check passes 16. You know that 6 items are truly correct. Reading the check against
+    that truth, what can you conclude?
+  options: >-
+    - 16 of 20 pass, and the interval on that rate is the only thing still worth arguing about.
+    - >-
+      The check passes at least 10 items that are wrong, so it catches no more than 4 of the 14 real
+      failures.
+    - The check is half right, since it passes the 6 correct items and fails 4 others on the way.
+    - The pass rate cannot be read until the check's agreement with the humans is computed.
+  correct: 1
+  explanation: >-
+    Only 6 of the 16 passes can be correct, so at least 10 are false alarms and at most 4 of the 14
+    failures were caught. That pair — a pass rate and a catch rate — is the difference between a
+    number that ranks systems and a number that describes the check.
+
+- id: q4
+  question: >-
+    A code check in your suite is failing on every item, including items you know are correct. What
+    should you do before treating that as a system regression?
+  options: >-
+    Read what the check actually compares, because a check that never ran and a check that caught a
+    real regression look identical on the scoreboard.
+    - >-
+      Compare the failing output with a reference by hand, to confirm the check is wrong before
+      trusting its verdict.
+    - Raise the threshold or loosen the pattern until the pass rate looks like its previous value.
+    - Re-run on a larger sample, since a check failing on everything usually means the sample is
+      unrepresentative.
+  correct: 0
+  explanation: >-
+    The lab's numeric metric reads 0.0% on all three variants including the one that is exactly right
+    every time, because it calls `Number()` on a whole JSON object and gets `NaN`. That 0% carries no
+    information about the system, and no larger sample or looser threshold will change it — only
+    reading the check will.

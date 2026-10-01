@@ -19,11 +19,15 @@ one.
 
 | # | Failure mode | How you would recognise it | How often (count / sample) | Severity for the user | Cost to fix | Which check |
 |---|---|---|---|---|---|---|
-| 1 | Right answer, no citation | Answer is correct but names no section | _57 / 282_ | Medium — unverifiable | Low — prompt change | Code: regex for a citation |
-| 2 | Contradicts the handbook | States a rule the handbook does not contain | _56 / 282_ | High — user acts on it wrongly | Medium | Judge + human review |
-| 3 | Refuses an answerable question | Says it cannot help on a covered policy | _20 / 282_ | High — user gets nothing | Low — prompt change | Code: regex for a refusal |
-| 4 | Invents policy where none exists | Answers a salary or share-scheme question as fact | _14 / 282_ | Critical — company policy invented | Medium | Judge, plus a refusal test set |
+| 1 | Right answer, no citation | Answer is correct but names no section | _78 / 282_ | Medium — unverifiable | Low — prompt change | Code: regex for a citation |
+| 2 | Contradicts the handbook | States a rule the handbook does not contain | _60 / 282_ | High — user acts on it wrongly | Medium | Judge + human review |
+| 3 | Invents policy where none exists | Answers a salary or share-scheme question as fact | _14 / 282_ | Critical — company policy invented | Medium | Judge, plus a refusal test set |
+| 4 | Refuses an answerable question | Says it cannot help on a covered policy | _22 / 282_ | High — user gets nothing | Low — prompt change | Code: regex for a refusal |
 | 5 | Adds an unsupported claim | Correct answer plus an extra "in practice" claim | _27 / 282_ | Low | Low | Judge |
+
+Counts are from the shipped course dataset: 94 questions × 3 system variants = 282 answers, of which
+81 are correct. Recount them yourself with `node build/count-taxonomy.mjs` — if the numbers have moved
+since this was written, the table is stale and the data is right.
 
 ## Where the effort goes
 
@@ -33,11 +37,14 @@ prompt beats one that is frequent and needs a model migration.
 
 | Category | Frequency × severity | Fix cost | Do it now? |
 |---|---|---|---|
-| 2 — contradicts the handbook | _high_ | medium | yes |
-| 3 — over-refusal | _high_ | low | yes, cheapest win in the table |
-| 1 — no citation | medium | low | yes |
-| 4 — invented policy | low | medium | yes, but keep a dedicated gate on it |
-| 5 — extra claim | low | low | later |
+| 2 — contradicts the handbook | _highest_ | medium | yes |
+| 1 — no citation | _highest_ | low | yes, cheapest win in the table |
+| 3 — over-refusal | low | low | later — one prompt line, low blast radius |
+| 4 — invented policy | _lowest frequency, highest severity_ | medium | yes, but keep a dedicated gate on it |
+| 5 — extra claim | medium | low | later |
+
+Note what the table does *not* say: the most frequent failure is not the most dangerous one. Invented
+policy is 5% of answers and would be the first thing to make a lawyer's day.
 
 ## The question each row must answer
 
