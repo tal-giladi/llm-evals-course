@@ -164,7 +164,9 @@ for (const rel of lessonFiles) {
     if (used && known && !known.includes(used[1])) {
       fail(rel, `preset "${used[1]}" is not a preset in ${sim} (has: ${known.join(", ")})`);
     }
-    if (!used) notes.push(`${rel}: ${sim} link has no ?preset= — check the lesson says which view it wants`);
+    if (!used && known && known.length > 0) {
+      notes.push(`${rel}: ${sim} link has no ?preset= but ${sim} has presets to choose from`);
+    }
   }
 
   // Relative links must resolve. Strip any query string or fragment first —
