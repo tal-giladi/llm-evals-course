@@ -19,3 +19,6 @@ synced folder: git cannot read them, so never try to track them.
 **/pytest-cache-files-*/
 **/.tmppip/
 **/lab-scratch/
+
+# Traces the labs write while you are experimenting with them.
+*.jsonl

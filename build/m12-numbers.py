@@ -56,6 +56,10 @@ for fr in (0.0, 0.10, 0.25, 0.50):
     print(f"  planted {fr:>4.0%}  kept {len(k):2d} traces  chat {kc['errors']:2d}/{kc['spans']:2d}"
           f" = {kc['rate']:5.1%}   lost {len(l):2d} traces  chat {lc['errors']:2d}/{lc['spans']:2d}"
           f" = {lc['rate']:5.1%}")
+    print(f"                  tokens {k.total_tokens()['total']:4d} vs {l.total_tokens()['total']:4d}"
+          f"   cost ${k.total_cost():.8f} vs ${l.total_cost():.8f}"
+          f"   p50 {k.latency()['p50_end_to_end']:.1f} vs {l.latency()['p50_end_to_end']:.1f}"
+          f"   p95 {k.latency()['p95_end_to_end']:.1f} vs {l.latency()['p95_end_to_end']:.1f}")
 
 print("\n=== lesson 12.2: rename one attribute and read the panel again ===")
 
