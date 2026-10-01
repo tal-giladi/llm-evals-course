@@ -8,3 +8,7 @@ venv/
 build/node_modules/
 spike/node_modules/
 *.log.tmp
+build/pytest-tmp/
+report.json
+.judge-cache.json
+
