@@ -18,8 +18,10 @@ from .stats import (
     cohens_kappa,
     confusion,
     corrected_pass_rate,
+    hash_seed,
     judge_metrics,
     majority_vote,
+    mulberry32,
     paired_comparison,
     pct,
     sample_items,
@@ -48,6 +50,7 @@ __all__ = [
     "confusion", "tpr", "tnr", "accuracy", "cohens_kappa", "wilson", "pct",
     "judge_metrics", "corrected_pass_rate", "paired_comparison", "sample_items",
     "majority_vote", "threshold_verdict", "simulate_gate",
+    "hash_seed", "mulberry32",
     "Judge", "RecordedJudge", "MajorityJudge", "cache_key",
     "SuiteResult", "SliceScore", "run_suite", "compare",
     # tracing, module 12

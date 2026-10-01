@@ -30,6 +30,16 @@ base = show("20 dev traces, no planted errors",
 planted = show("20 dev traces, 10% model-call errors planted",
                record(data, n=20, split="dev", fail_rate=0.10, seed=1))
 
+print("\n=== lesson 12.3: the same 10% planted errors, naive exporter ===")
+lost = record(data, n=20, split="dev", fail_rate=0.10, seed=1, keep_errors=False)
+lost_store = show("10% planted errors, keep_errors=False", lost)
+kept_ids = {t["trace_id"] for t in record(data, n=20, split="dev", fail_rate=0.10, seed=1)}
+print(f"  traces missing entirely: {sorted(kept_ids - {t['trace_id'] for t in lost})}")
+print(f"  chat error rate: {planted.error_rate()['chat']['rate']:.1%} -> "
+      f"{lost_store.error_rate().get('chat', {'rate': 0.0})['rate']:.1%}")
+print(f"  chat spans seen: {planted.error_rate()['chat']['spans']} -> "
+      f"{lost_store.error_rate().get('chat', {'spans': 0})['spans']}")
+
 print("\n=== per-model cost (20 traces, qwen3-1.7b) ===")
 for m, c in base.cost_by_model().items():
     print(f"  {m:16s} ${c:.8f}")
