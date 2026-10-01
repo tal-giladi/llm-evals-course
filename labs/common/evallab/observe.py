@@ -148,8 +148,6 @@ def record(data: Dataset | None = None, n: int = 20, split: str = "dev",
     items = data.items_for(split)[:n]
     out: list[dict] = []
     for i, item in enumerate(items):
-        if not should_sample(sample_rate, f"tr_{item.id}"):
-            continue
         # Hash rather than multiply-and-modulo: a linear sequence of `i`
         # walks straight past a threshold and plants nothing at all, which
         # looks exactly like a redaction that works.
@@ -158,6 +156,15 @@ def record(data: Dataset | None = None, n: int = 20, split: str = "dev",
         user = None
         if pii_rate and hash_seed(f"pii:{seed}:{item.id}") % 1000 < pii_rate * 1000:
             user = f"customer{i:03d}@example.com"
+
+        # Sampling is for volume, never for failures. Decide what will fail
+        # *before* sampling, or a 25% sample silently deletes the errors and
+        # the error rate is computed over the requests that worked — the same
+        # mistake as dropping spans on an exception, one level up.
+        keep = fail_on is not None or should_sample(sample_rate, f"tr_{item.id}")
+        if not keep:
+            continue
+
         try:
             out.append(instrumented_run(item, data, variant=variant,
                                         model=model, session=session,
@@ -227,10 +234,20 @@ class TraceStore:
             "total": sum(s.input_tokens + s.output_tokens for s in chats),
         }
 
+    def _roots(self) -> list[Span]:
+        """The spans with no parent — the trace entries, by definition.
+
+        Not "the longest span". The longest span is a heuristic that happens
+        to work when a root encloses its children, and it reports a chat
+        span's duration under an end-to-end heading with no error at all
+        when it fails. The parent pointer is not a guess.
+        """
+        return [Span.from_dict(s) for t in self.traces
+                for s in t["spans"] if s.get("parent_id") is None]
+
     def latency(self) -> dict:
         """End-to-end (the root span) and per-model-call, in ms."""
-        roots = [max((Span.from_dict(s) for s in t["spans"]), key=lambda x: x.duration_ms)
-                 for t in self.traces]
+        roots = self._roots()
         chats = self.spans("chat")
         return {
             "p50_end_to_end": _pct([r.duration_ms for r in roots], 0.50),

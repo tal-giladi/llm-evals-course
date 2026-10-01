@@ -1,0 +1,91 @@
+- id: q1
+  question: >-
+    A chat span whose model call raised carries `gen_ai.usage.output_tokens: 0` and no
+    `gen_ai.usage.input_tokens` at all. Why is the difference the right way round?
+  options:
+    - >-
+      A call that raised before sending a prompt consumed none, so a count would be invented, and
+      a made-up figure would put the price of an error in the cost panel.
+    - >-
+      The exporter drops every attribute from a span that carries an `error.type`, so the tokens
+      went missing during export rather than at capture.
+    - >-
+      Token counts are attached by the model SDK only once it has finished streaming, so a span
+      that raised never receives either attribute.
+    - >-
+      The post-check reads `input_tokens` to decide whether to reject an answer, and an absent key
+      would raise a KeyError before the check could record its verdict.
+  correct: 0
+  explanation: >-
+    Absence and zero are different claims: `input_tokens` says "this never left the process", and
+    `output_tokens: 0` says "the call was made and produced nothing". A backend counting spans
+    reporting tokens and one counting non-zero tokens answer two different questions.
+
+- id: q2
+  question: >-
+    You rename `gen_ai.request.model` to `model` on every span. The token totals do not move, and
+    the cost of the run rises from $0.00005289 to $0.00015665. Why?
+  options:
+    - >-
+      The cost panel prefers the shorter `model` key and treats it as a separate pricing dimension
+      from the one it already reads.
+    - >-
+      A shorter attribute name hashes differently, so the model falls onto a different row of the
+      price sheet and is charged at that row's rate.
+    - >-
+      `cost_by_model` sums once per attribute name, so the same spend is now counted three times
+      under three different keys and once per model.
+    - >-
+      A span with no recognised model name falls through to the price sheet's default row, and the
+      default is dearer than the entry it replaced.
+  correct: 3
+  explanation: >-
+    `Span.cost_usd` looks the model up in `PRICE_PER_MTOK` and falls back to `DEFAULT_PRICE` when it
+    misses. This is the only rename on the page that makes the number go up, and teams have a story
+    ready for a price increase.
+
+- id: q3
+  question: >-
+    The GenAI semantic conventions are marked **Development** upstream, and `gen_ai.operation.name`
+    was itself introduced as a rename. What does that oblige you to do before an upgrade?
+  options:
+    - >-
+      Vendor the names into your own namespace first, so that upstream changes can never reach
+      the traces your dashboard already queries.
+    - >-
+      Pin the version you wrote against and read the changelog, because a rename breaks the
+      queries and dashboards that read the attribute, not the code that writes it.
+    - >-
+      Keep a second legacy copy of every attribute on every span until the status becomes Stable,
+      so old traces stay readable on new backends.
+    - >-
+      Nothing, since Development covers the prose rather than the attribute names, and names may
+      only be added and never changed.
+  correct: 1
+  explanation: >-
+    A rename leaves every writer correct and every reader broken, so it shows up on a dashboard
+    nobody was reviewing. The whole Development-status workflow is: pin, read the registry, diff the
+    names, then upgrade.
+
+- id: q4
+  question: >-
+    Renaming `error.type` to `error` leaves cost, tokens and latency untouched and makes every
+    error rate on the page read 0.0%. Why is this the worst of the four renames?
+  options:
+    - >-
+      It is the only one that changes a count rather than a total, so it corrupts every aggregate
+      the dashboard derives rather than a single panel.
+    - >-
+      The exporter rejects an unknown key and silently drops the whole span, so the traces
+      themselves stop being valid rather than merely unreadable.
+    - >-
+      A dashboard reading zero errors looks like good news, so nobody re-runs the query after the
+      next deployment to check that it still reads zero.
+    - >-
+      It is the only rename that raises an exception at export, which means the pipeline goes red
+      long before anybody reads a wrong number.
+  correct: 2
+  explanation: >-
+    The other three renames make a number visibly odd. This one makes the health tile look perfect
+    while the failure it would have reported goes unmentioned, so the error is discovered by a user
+    rather than by a dashboard.

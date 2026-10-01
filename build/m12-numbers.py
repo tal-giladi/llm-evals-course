@@ -148,10 +148,11 @@ for tr in record(data, n=20, split="dev", fail_rate=0.10, seed=1):
 
 print("\n=== held-out read: the test split, 37 items, same 10% plant ===")
 for split in ("dev", "test"):
-    st = TraceStore.from_traces(
-        record(data, n=37, split=split, fail_rate=0.10, seed=1))
+    tr = record(data, n=37, split=split, fail_rate=0.10, seed=1)
+    st = TraceStore.from_traces(tr)
     er = st.error_rate()
     lat = st.latency()
+    chats = st.spans("chat")
     print(f"  {split:5s} {len(st):2d} traces {len(st.spans()):3d} spans"
           f"  ${st.total_cost():.8f}  {st.total_tokens()['input']} in /"
           f" {st.total_tokens()['output']} out"
@@ -159,6 +160,23 @@ for split in ("dev", "test"):
           f"  chat {er['chat']['errors']}/{er['chat']['spans']}"
           f"  chain {er['chain']['errors']}/{er['chain']['spans']}"
           f"  agent {er['agent']['errors']}/{er['agent']['spans']}")
+    print(f"        chat spans carrying gen_ai.usage.input_tokens:  "
+          f"{sum(1 for s in chats if 'gen_ai.usage.input_tokens' in s.attributes)} of {len(chats)}")
+    print(f"        chat spans carrying gen_ai.usage.output_tokens: "
+          f"{sum(1 for s in chats if 'gen_ai.usage.output_tokens' in s.attributes)} of {len(chats)}")
+
+print("\n=== the attribute census at two planted failure rates ===")
+for fr in (0.0, 0.10, 0.50):
+    cc: Counter = Counter()
+    spans_n = 0
+    for t in record(data, n=20, split="dev", fail_rate=fr, seed=1):
+        for s in t["spans"]:
+            spans_n += 1
+            for k in s["attributes"]:
+                cc[k] += 1
+    print(f"  fail_rate {fr:>4.0%}: {spans_n} spans")
+    for k, v in sorted(cc.items(), key=lambda kv: (-kv[1], kv[0])):
+        print(f"    {v:3d}  {k}")
 
 print("\n=== redaction ===")
 pii = record(data, n=20, split="dev", pii_rate=1.0, seed=1)

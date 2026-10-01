@@ -1,0 +1,103 @@
+- id: q1
+  question: >-
+    Twenty requests run with 10% of the model calls made to fail, and the exporter returns nothing
+    when a call raises. What reaches the store?
+  options:
+    - >-
+      20 traces, and a `chat` error rate of 0.0% because no span recorded a failure.
+    - >-
+      18 traces, and a `chat` error rate of 10.0% because the root spans still carry the error.
+    - >-
+      18 traces, and a `chat` error rate of 0.0% because the failures were never in the store.
+    - >-
+      20 traces, and a `chat` error rate of 10.0% because the cost panel counts every request.
+  correct: 2
+  explanation: >-
+    The rate is computed over the traces that arrived, and the traces that arrived are precisely the
+    ones that worked. It is not an under-report — it is an exact number about the wrong population.
+
+- id: q2
+  question: >-
+    Dropping the failed traces changes the token total and the cost total by nothing at all. Why?
+  options:
+    - >-
+      Both totals are stored on the root span, which is never dropped because it wraps the whole
+      request including its exception.
+    - >-
+      The exporter recomputes both totals from the request log after the spans are written, so the
+      spans it dropped are still counted in the bill.
+    - >-
+      Both totals are printed to four decimal places, which is too coarse to show a difference of
+      two calls out of twenty.
+    - >-
+      A failed call records zero output tokens and never sets input tokens, so a dropped trace
+      contributes exactly the same nothing as a kept one.
+  correct: 3
+  explanation: >-
+    This is why the bug hides. The tokens and the cost are identical, the p50 is identical, and the
+    only figure that moves is the error count — so a dashboard built on cost and latency is
+    completely blind to it.
+
+- id: q3
+  question: >-
+    At a 50% planted failure rate, dropping the failed traces moves p95 end-to-end from 2378.1 ms
+    down to 1879.1 ms. What is the right reading of that 21% improvement?
+  options:
+    - >-
+      The error path is cheaper than the success path, so the naive exporter is genuinely faster
+      on the requests it keeps.
+    - >-
+      A failed request is a short request, so the failures were the slow tail and removing them
+      removed the slowest traces from the percentile.
+    - >-
+      Nothing: latency percentiles are computed over request starts and are unaffected by which
+      spans are kept or dropped from the store.
+    - >-
+      The p95 is over a smaller sample now, so a lower value is the expected consequence of fewer
+      traces rather than a fact about the app.
+  correct: 1
+  explanation: >-
+    The failures never reached the slow end of the distribution, so deleting them moves the tail
+    down. This is the artefact in the module most likely to be celebrated: a latency win that is
+    really a failure count in disguise.
+
+- id: q4
+  question: >-
+    Which of these spans can auto-instrumentation on a model client never produce for this app?
+  options:
+    - >-
+      The `chain` span that runs after generation and records why an answer was rejected as
+      uncited or unsupported.
+    - >-
+      The `chat` span, carrying the model name and the input and output token counts.
+    - >-
+      The `agent` root span, provided you wrap the request handler in it yourself.
+    - >-
+      The `error.type` attribute on a span whose call raised before the model answered.
+  correct: 0
+  explanation: >-
+    Retrieval and the post-check are your code, not a library call, so nothing instrumented on the
+    client sees them. A model-only tracer emits no `chain` span at all, which means the rejection
+    rate is not reported as zero — it is absent from the table.
+
+- id: q5
+  question: >-
+    You want a CI check that catches this class of bug. Which one actually works?
+  options:
+    - >-
+      Assert that every span's duration is non-negative and that each `parent_id` resolves to a
+      real span in the same trace.
+    - >-
+      Assert that a chat span that recorded an error carries zero output tokens and no invented
+      input count, so a failed call cannot inflate the bill.
+    - >-
+      Assert that the number of traces received equals the number sent, and that any shortfall is
+      exactly the number of failures planted on the run.
+    - >-
+      Assert that the cost total matches a hand calculation from the token counts, so a panel that
+      drifts cannot be published.
+  correct: 2
+  explanation: >-
+    The first two checks pass under the bug, because the spans that were kept are perfectly
+    well-formed. Only a count of what arrived against what was sent can see a trace that never
+    turned up — and the shortfall here is always the failures, never a neutral sample.

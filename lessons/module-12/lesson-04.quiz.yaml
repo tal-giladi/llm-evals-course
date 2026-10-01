@@ -1,0 +1,112 @@
+- id: q1
+  question: >-
+    An auto-instrumented dashboard reports a 0.0% model error rate across 20 requests. The eval suite says 5
+    of those same 20 answers shipped with no handbook citation. What has the dashboard established?
+  options:
+    - >-
+      That the bot is healthy, since a quarter of its answers were a prompt problem and prompts are fixed by
+      editing text.
+    - >-
+      That the citation failures came from the model provider, so the provider is the team to escalate this
+      to.
+    - >-
+      That answer quality cannot be read from traces at all, and only a judge-based suite can measure it in
+      any form.
+    - >-
+      That the model client raised on none of the 20 requests, which is a fact about the transport and not a
+      fact about the answers.
+  correct: 3
+  explanation: >-
+    The `chat` row of `error_rate()` is 0 of 20 while the `chain` row is 5 of 20. Every one of those five
+    answers came back from the model successfully and was then recorded as uncited by the post-check span, so
+    the defect lives in a span the instrumenter never creates.
+
+- id: q2
+  question: >-
+    A trace contains only `chat` spans, and `latency()` still returns two columns that both report a p95 of
+    2318 ms. What is the end-to-end column actually measuring?
+  options:
+    - >-
+      The offset from process start to the first span, which is the only end-to-end figure available without
+      a root span.
+    - >-
+      The longest span in each trace, which here is the model call, because there is no root span to be the
+      longest one.
+    - >-
+      The sum of the durations of every span, so with exactly one span per trace the sum and the maximum are
+      the same number.
+    - >-
+      Nothing at all; the function should refuse to return an end-to-end figure when it cannot find a span of
+      kind `agent`.
+  correct: 1
+  explanation: >-
+    `latency()` takes `max(spans, key=duration)` as the root. With only model spans the model call is the
+    longest, so the end-to-end column silently becomes the model column and nothing raises. The heading is
+    what makes it wrong.
+
+- id: q3
+  question: >-
+    The `retrieve_handbook` span records `retrieved: 0` and `error.type: no_matching_section`, and on the full
+    dev split it fires on 5 of 57 items. Why can a patched model client never record that?
+  options:
+    - >-
+      The fact lives in what your own retrieval returned, and the instrumenter only sees the prompt it sent
+      and the response it got back.
+    - >-
+      The GenAI conventions reserve `error.type` for transport failures on `chat` spans, so a tool span may
+      not carry it.
+    - >-
+      The span is opened before the search runs, so it is closed before anybody knows whether the search found
+      a matching section.
+    - >-
+      Instrumenters only emit spans for calls that leave the process, and a vector store in the same process
+      is invisible to them.
+  correct: 0
+  explanation: >-
+    A patched client wraps the model request. What your retriever returned, whether it returned anything, and
+    whether the post-check later failed are all facts your code holds. They are not in the prompt, so no
+    amount of configuration puts them on the span.
+
+- id: q4
+  question: >-
+    Your team hand-wrote every span, and a vendor SDK arrives that can also emit agent spans of its own. What
+    decides whether the hand-written ones can be deleted?
+  options:
+    - >-
+      Nothing, as long as the SDK emits the same `gen_ai.*` attribute names, since identical names make the
+      two sets of spans interchangeable.
+    - >-
+      Whether the SDK produces the same number of spans per request, because a count that matches is proof
+      that the coverage matches.
+    - >-
+      Whether each hand-written span answers a question about your own logic that the SDK has no way of
+      knowing about.
+    - >-
+      Delete them, because duplicate spans inflate the span count and every trace dashboard aggregates on
+      that count.
+  correct: 2
+  explanation: >-
+    The SDK will record a span the moment you ask for one, and it has no way to know that your `chain` is a
+    failed citation check rather than a format step or a retry. The event is the same; only your code knows
+    which one it was, and that is what makes the span queryable.
+
+- id: q5
+  question: >-
+    Over the first 20 dev traces the retrieval span reports 0 errors. Over all 57 dev items it reports 5 of
+    57, every one of them `no_matching_section`. What does that difference tell you?
+  options:
+    - >-
+      The first twenty requests hit a warmer cache, which is why retrieval could not fail on any of them.
+    - >-
+      The span is working and the sample was thin: none of the first twenty items is an out-of-scope question.
+    - >-
+      The error rate is unstable enough that the retrieval span should be removed until it settles into a
+      steadier value.
+    - >-
+      Spans are counted per request on one split and per item on the other, which is what makes the two
+      figures non-comparable.
+  correct: 1
+  explanation: >-
+    The `out_of_scope` items sit near the end of the dev list, so `--n 20` never reaches one. A span that does
+    not fire is either broken or unexercised, and only running the split that contains the case tells you
+    which one you have.

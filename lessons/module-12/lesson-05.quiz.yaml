@@ -1,0 +1,112 @@
+- id: q1
+  question: >-
+    `v1padded` ships two extra sentences of context. It uses 3.73 times the tokens of `v1` and costs 4.04
+    times as much. Where does the extra come from?
+  options:
+    - >-
+      Output tokens are priced at three times input, and the padding is added to the answer rather than to
+      the prompt.
+    - >-
+      The padded variant makes a second model call to write the summary, so its cost is roughly twice the
+      first call's.
+    - >-
+      The price sheet charges per span as well as per token, and the padded run emits more spans per
+      request.
+    - >-
+      The padded variant is served by a larger model, so every one of its tokens is priced at the larger
+      model's rate.
+  correct: 0
+  explanation: >-
+    `2147 × 0.03 + 1929 × 0.09 = 238.02` against `656 × 0.03 + 436 × 0.09 = 58.92`. Output rose from 436 to
+    1929 while input rose from 656 to 2147, and output costs three times as much per token, which is what
+    pushes the cost ratio above the token ratio.
+
+- id: q2
+  question: >-
+    A trace store reports p50 end-to-end of 1297 ms and p95 end-to-end of 2404 ms, and every span carries
+    `evallab.simulated_latency: true`. What can you honestly report from this run?
+  options:
+    - >-
+      That a typical request is fast and the tail is acceptable, since both figures clear a three-second
+      budget.
+    - >-
+      That the tail is your infrastructure, because the gap between the end-to-end and model columns is
+      queueing and network time.
+    - >-
+      That the percentile arithmetic over the shipped durations is real, and that the milliseconds themselves
+      are not measurements.
+    - >-
+      That the p95 runs 85% above the p50, so the tail is the number the product actually has to answer
+      to.
+  correct: 2
+  explanation: >-
+    The app answers from recorded outputs, so the durations are modelled and stamped as such on every span.
+    Sorting them and taking a percentile is real arithmetic over real lists; the milliseconds are a shape, not
+    an observation of a named system.
+
+- id: q3
+  question: >-
+    `--redact` is on. One span carries `gen_ai.conversation.id: cus_8f21a` and `user.email:
+    a.customer@example.com`. What survives the export?
+  options:
+    - >-
+      Both values, because the redactor only touches `chat` spans and this root span is of kind `agent`.
+    - >-
+      The session id survives unchanged and the email becomes `[redacted:email]`, because only keys on the
+      drop list are removed whole.
+    - >-
+      Both are removed whole, since anything a support bot knows about its requester is personal data by
+      definition.
+    - >-
+      The session id becomes `[dropped: 9 chars]` and the email becomes `[redacted:email]`, because both are
+      identifiers.
+  correct: 1
+  explanation: >-
+    `Redactor.KEYS` lists the keys known to carry a prompt, and a conversation id is not one of them, so it is
+    pattern-matched like any other string. `cus_8f21a` matches none of the four patterns and passes through,
+    which is why the session key has to be decided at capture.
+
+- id: q4
+  question: >-
+    The team wants no customer addresses in the trace store, and engineers also want to be able to debug a bad
+    trace at 2 a.m. Why does `Redactor` run inside `export()` rather than inside `Tracer`?
+  options:
+    - >-
+      Because `export()` is the only place that can still read the value of a span attribute after it has
+      been set.
+    - >-
+      Because redaction applied after the export cannot be undone, so it has to happen before the file is
+      opened.
+    - >-
+      Because redacting at capture time is cheaper, and the cost of a trace is the reason most teams get this
+      wrong.
+    - >-
+      Because the local copy keeps the text for debugging, while the exported copy is what a third-party
+      backend can see.
+  correct: 3
+  explanation: >-
+    `test_local_copy_still_has_the_text_for_debugging` asserts that the in-memory span still reads
+    `reach me at tal@example.com` after an export with redaction on. Redacting at capture gets the sharing
+    question right and leaves you nothing to look at at 2 a.m.
+
+- id: q5
+  question: >-
+    `should_sample` hashes the trace id, so a 25% sample is byte-identical on every run. Yet the shipped
+    sampler does drop errored traces. Why?
+  options:
+    - >-
+      The sampling decision is taken before the outcome is known, so a request that is about to fail is
+      sampled out like any other.
+    - >-
+      The hash only covers successful traces, because a trace id is not generated until the call returns a
+      response.
+    - >-
+      Hashing makes the sample stable, and stability is only meaningful for the traces that did not fail.
+    - >-
+      Errors are never dropped, so the two failures missing at 25% were lost by the exporter rather than by
+      the sampler.
+  correct: 0
+  explanation: >-
+    In `record()` the `should_sample` call comes before the failure is planted, so a trace that will fail is
+    judged on its id alone. At 25% the run drops from 9 error spans to 2 and the `chat` row goes to 0 of 5,
+    which is the evidence disappearing rather than the bot improving.

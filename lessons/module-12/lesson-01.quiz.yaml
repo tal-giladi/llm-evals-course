@@ -1,0 +1,104 @@
+- id: q1
+  question: >-
+    A root span reports 2441.371 ms and its three children report 57.446, 2364.48 and 10.876 ms.
+    Why must the root be at least as long as the sum of its children?
+  options:
+    - >-
+      A reader subtracts the children's durations from the root to find the app's own work, and a
+      root shorter than that sum would make the remainder negative.
+    - >-
+      The collector rejects a trace at export time whose root duration is shorter than the total of
+      the spans nested inside it.
+    - >-
+      Span durations are stored as millisecond integers, so a parent cannot be rounded down below
+      the child it contains without an overflow.
+    - >-
+      The end-to-end percentile is computed from the root span only, so a short root would move
+      p50 and p95 in opposite directions.
+  correct: 0
+  explanation: >-
+    The root's own work is what is left after you subtract the children, and that difference is a
+    real number a reader will compute. The shipped tracer sets a root's duration to its children's
+    total plus its own so the waterfall cannot lie about which step was slow.
+
+- id: q2
+  question: >-
+    What does a span's `kind` give you that its `name` does not?
+  options:
+    - >-
+      The wall-clock start time, which is needed to order sibling spans in the rendered tree.
+    - >-
+      A low-cardinality label a query can filter and group on, which is what gives an error rate a
+      denominator you can name.
+    - >-
+      The provider's own identifier for the call, which the model SDK fills in without being asked.
+    - >-
+      A stable id that survives an export, so two spans with the same name stay distinguishable.
+  correct: 1
+  explanation: >-
+    `name` is free text for a human reading a waterfall and may be high-cardinality;
+    `gen_ai.operation.name` is drawn from a small closed set. Grouping an error rate by kind turns
+    `9 errors in 78 spans` into `chat 2/20`, which names a ticket.
+
+- id: q3
+  question: >-
+    Twenty dev requests carry 656 input tokens and 436 output tokens on their chat spans, and
+    qwen3-1.7b is priced at $0.03 per million input tokens and $0.09 per million output tokens.
+    What did the run cost?
+  options:
+    - >-
+      $0.00003312, which is (656 x 0.09 + 436 x 0.03) divided by a million.
+    - >-
+      $0.00008968, which is the two rates added before dividing by a million.
+    - >-
+      $0.00005892, which is (656 x 0.03 + 436 x 0.09) divided by a million.
+    - >-
+      $0.00001977, which counts only the output tokens at the output rate.
+  correct: 2
+  explanation: >-
+    Each half of the bill uses its own rate: 19.68 for the prompt and 39.24 for the answer, so
+    58.92 micro-dollars, or $0.00005892. Swapping the two rates is the commonest way a hand-check
+    of a cost panel goes wrong.
+
+- id: q4
+  question: >-
+    `py -m evallab.cli trace --n 20 --tree tr_NOPE` prints a span tree and no warning, because the
+    command falls back to the first trace when the id is not found. What is wrong with that?
+  options:
+    - >-
+      Each invocation re-runs the instrumented app, so it is far slower than a lookup in an
+      existing file should be.
+    - >-
+      The trace ids are six characters long, so an unrelated id can collide with a real request
+      and overwrite it on export.
+    - >-
+      The output is indistinguishable from the trace you asked for, so a missing measurement reads
+      as a successful lookup.
+    - >-
+      It rewrites traces.jsonl as a side effect, so running it destroys the previous run's
+      evidence.
+  correct: 2
+  explanation: >-
+    This is lesson 11.1's rule in a new place: a missing measurement is not a failure. A tool
+    that answers a question you did not ask is worse than one that refuses, because the output
+    looks exactly like success.
+
+- id: q5
+  question: >-
+    A twenty-request run reports p50 1228.9 ms for the model call against p50 1296.8 ms
+    end-to-end. What does that pair license you to say?
+  options:
+    - >-
+      The two percentiles must be equal on any correctly nested trace, so one of them is wrong.
+    - >-
+      The remaining 68 ms is retrieval time, since the post-check is too short to account for it.
+    - >-
+      The two percentiles are not comparable, because end-to-end is measured from the first span
+      while the model call is measured from its own start.
+    - >-
+      About 95% of a median request is the model call, so a latency investigation starts there
+      rather than in your own code.
+  correct: 3
+  explanation: >-
+    1228.9 divided by 1296.8 is 0.948. A latency percentile without that breakdown says only
+    "slower", and a waterfall is the only thing on the page that turns it into a ticket.

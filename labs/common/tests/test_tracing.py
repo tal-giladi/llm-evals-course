@@ -299,7 +299,38 @@ def test_sampling_extremes():
     assert not should_sample(0.0, "anything")
 
 
-def test_errors_are_kept_at_a_low_sample_rate(data):
-    """The rule worth having: drop the volume, never the errors."""
-    out = record(data, n=40, split="dev", sample_rate=0.25, fail_rate=0.10, seed=3)
-    assert 0 < len(out) < 40, "sampling must actually drop some"
+def test_errors_survive_a_low_sample_rate(data):
+    """The rule worth having: drop the volume, never the errors.
+
+    Sampling is for cost. If the sampler runs before the failure is decided,
+    a 25% sample silently deletes the failing requests and the error rate is
+    then computed over the requests that worked — the same mistake as
+    dropping spans on an exception, one level up.
+    """
+    full = TraceStore.from_traces(
+        record(data, n=20, split="dev", fail_rate=0.10, sample_rate=1.0, seed=1))
+    sampled = TraceStore.from_traces(
+        record(data, n=20, split="dev", fail_rate=0.10, sample_rate=0.25, seed=1))
+    assert len(sampled) < len(full), "sampling must actually drop some"
+    assert sampled.error_rate()["chat"]["errors"] == full.error_rate()["chat"]["errors"], \
+        "the failures must survive the sampler"
+    # The rate gets noisier as the denominator shrinks, and that is honest:
+    # two errors in seven traces is not the information two in twenty is.
+    assert sampled.error_rate()["chat"]["rate"] > full.error_rate()["chat"]["rate"]
+
+
+def test_latency_uses_the_root_not_the_longest_span():
+    """A chat-only trace has no enclosing span, so end-to-end is undefined.
+
+    Picking the longest span instead reports the model call's duration under
+    an end-to-end heading, with no error. The parent pointer is not a guess.
+    """
+    t = Tracer("tr_chat_only")
+    with t.chat("generate", "qwen3-1.7b"):
+        pass
+    store = TraceStore.from_traces([t.to_dict()])
+    assert len(store._roots()) == 1, "a chat span with no parent is the root"
+    lat = store.latency()
+    assert lat["p50_end_to_end"] == pytest.approx(lat["p50_model_call"]), \
+        "with one span, end-to-end and the model call are the same span"
+    assert lat["p95_end_to_end"] >= lat["p50_end_to_end"]
