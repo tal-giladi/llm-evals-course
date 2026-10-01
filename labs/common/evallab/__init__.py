@@ -31,8 +31,16 @@ from .stats import (
 )
 from .judge import Judge, MajorityJudge, RecordedJudge, cache_key
 from .suite import SuiteResult, SliceScore, compare, run_suite
+from .tracing import (
+    ERROR_TYPE, GEN_AI_CONVERSATION_ID, GEN_AI_INPUT_TOKENS, GEN_AI_OPERATION,
+    GEN_AI_OUTPUT_MESSAGES, GEN_AI_OUTPUT_TOKENS, GEN_AI_REQUEST_MODEL,
+    GEN_AI_RESPONSE_MODEL, GEN_AI_SYSTEM, GEN_AI_TOOL_NAME,
+    GEN_AI_TOOL_CALL_ID, Redactor, Span, Tracer, backend_status, export,
+    model_price, should_sample, token_cost,
+)
+from .observe import TraceStore, instrumented_run, record, summary
 
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 
 __all__ = [
     "Dataset", "Item", "load",
@@ -42,4 +50,14 @@ __all__ = [
     "majority_vote", "threshold_verdict", "simulate_gate",
     "Judge", "RecordedJudge", "MajorityJudge", "cache_key",
     "SuiteResult", "SliceScore", "run_suite", "compare",
+    # tracing, module 12
+    "Span", "Tracer", "Redactor", "export", "backend_status",
+    "token_cost", "model_price", "should_sample",
+    "GEN_AI_SYSTEM", "GEN_AI_OPERATION", "GEN_AI_REQUEST_MODEL",
+    "GEN_AI_CONVERSATION_ID", "GEN_AI_INPUT_TOKENS", "GEN_AI_OUTPUT_MESSAGES",
+    "GEN_AI_OUTPUT_TOKENS", "GEN_AI_TOOL_NAME",
+    "GEN_AI_RESPONSE_MODEL", "GEN_AI_TOOL_CALL_ID",
+    "ERROR_TYPE",
+    "TraceStore", "instrumented_run", "record", "summary",
 ]
+

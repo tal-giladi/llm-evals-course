@@ -172,10 +172,62 @@ def main(argv=None) -> int:
     run.add_argument("--threshold", type=float, default=None,
                      help="probability-weighted threshold, 0 to 1")
 
+    trace = sub.add_parser("trace", help="instrument the support bot and read its traces")
+    trace.add_argument("--n", type=int, default=20, help="how many requests to run")
+    trace.add_argument("--split", default="dev", choices=["dev", "test"])
+    trace.add_argument("--variant", default="v1")
+    trace.add_argument("--model", default="qwen3-1.7b")
+    trace.add_argument("--session", default="s-demo")
+    trace.add_argument("--fail-rate", type=float, default=0.0,
+                       help="plant model-call errors at this rate")
+    trace.add_argument("--sample-rate", type=float, default=1.0)
+    trace.add_argument("--out", default="traces.jsonl")
+    trace.add_argument("--redact", action="store_true",
+                       help="strip personal data before writing the file")
+    trace.add_argument("--pii-rate", type=float, default=0.0,
+                       help="attach a customer identifier to this share of requests")
+    trace.add_argument("--tree", default=None, metavar="TRACE_ID",
+                       help="print one trace as a span tree and stop")
+
     args = ap.parse_args(argv)
     if args.cmd == "doctor":
         return _doctor()
+    if args.cmd == "trace":
+        return _trace(args)
     return _run(args)
+
+
+def _trace(args) -> int:
+    from .observe import TraceStore, record, summary
+    from .tracing import Redactor, backend_status, export
+
+    data = load("support")
+    traces = record(data, n=args.n, split=args.split, variant=args.variant,
+                    model=args.model, session=args.session,
+                    fail_rate=args.fail_rate, sample_rate=args.sample_rate,
+                    pii_rate=args.pii_rate, seed=1)
+
+    if args.tree:
+        store = TraceStore.from_traces(traces)
+        pick = args.tree if any(t["trace_id"] == args.tree for t in traces) else traces[0]["trace_id"]
+        say(store.tree(pick))
+        return 0
+
+    redactor = Redactor() if args.redact else None
+    result = export(traces, args.out, redactor=redactor)
+    say(summary(TraceStore.from_traces(traces)))
+    say("")
+    say(f"wrote {result['traces']} trace(s) to {result['written']['jsonl']}")
+    for skipped in result["skipped"]:
+        say(f"  skipped {skipped}")
+    if redactor is not None:
+        say(f"  {result['redactions']} personal-data value(s) redacted")
+    st = backend_status()
+    say("")
+    say("backends: jsonl yes, otlp "
+        f"{'yes' if st['otlp'] and st['otlp_endpoint'] else 'no'}, mlflow "
+        f"{'yes' if st['mlflow'] else 'no'} - install one and re-run to ship these spans.")
+    return 0
 
 
 if __name__ == "__main__":
