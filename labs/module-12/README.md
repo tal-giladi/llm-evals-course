@@ -14,17 +14,22 @@ cd labs/common
 $env:PYTHONPATH="."        # PowerShell; macOS/Linux: export PYTHONPATH=.
 py -m evallab.cli doctor
 py -m evallab.cli trace --n 20 --fail-rate 0.1 --out traces.jsonl
-py -m evallab.cli trace --n 6 --tree tr_s26
+py -m evallab.cli trace --n 6 --tree tr_s01
 ```
 
 Then read one trace by hand:
 
 ```bash
-py -m evallab.cli trace --n 3 --tree tr_s26
+py -m evallab.cli trace --n 3 --tree tr_s01
 ```
 
 That tree is the whole model: one root, a retrieval tool call, a model call with tokens and a price,
 and a post-check. If you can read that, you can read any trace.
+
+> **A sharp edge, on purpose.** `--tree` takes a trace id, and if the id is not in the run it prints
+> the first trace instead, without saying so. Try `--tree tr_nope` and notice. It is left that way
+> because "a tool that answers a question you did not ask" is worth meeting once, and lab 1 asks you to
+> break exactly this kind of thing. Everything else in these labs tells you when it did nothing.
 
 ---
 
@@ -99,3 +104,11 @@ uses illustrative per-million-token prices for small open models.
 
 That is deliberate, and it is the standard the course holds itself to: **the arithmetic is real, the
 model behind it is named as an educational model, and nothing here claims to be a benchmark.**
+
+Three known sharp edges are left in deliberately, and each is a lesson:
+
+| What it does | Why it stays |
+|---|---|
+| `--tree` with an unknown id prints the first trace, silently | A tool that answers a question you did not ask. Lab 1 is about exactly this. |
+| `summary()` rounds cost to 4 decimal places, so a healthy 20-trace run reads `$0.0001` and a 50%-failure run reads `$0.0000` | A cost panel that reads "free" while the product is broken is a real dashboard failure, and seeing it is faster than being told |
+| Simulated durations are hashed from the item id, so the held-out p50 comes out about 25% *better* than dev with no code change | A latency number that moves when nothing changed must not be gated on. Lesson 12.1 says so |
