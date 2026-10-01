@@ -1,0 +1,237 @@
+- id: q1
+  question: >-
+    A vendor's model card claims its new build leads a well-known public benchmark, and somebody
+    forwards the link into your channel. You have to decide whether to adopt that build. What is the
+    benchmark number admissible evidence for?
+  options:
+    - >-
+      It settles the adoption, because a benchmark is a controlled comparison: same questions, same
+      protocol, one variable, and the items were not chosen by the seller.
+    - >-
+      It settles which of two builds to adopt, because the set, the protocol and the scorer are held
+      fixed and only the model moves. It cannot settle whether your own feature works.
+    - >-
+      It settles the adoption, because a public score is the only number computed by someone other
+      than the seller, and a figure you did not produce is a figure you can rely on.
+    - >-
+      It settles nothing, because the answers ship next to the questions, so every model trained since
+      then has seen them and the whole comparison is contaminated by construction.
+  correct: 1
+  explanation: >-
+    What a benchmark buys is comparability across submissions on one fixed set, and that is exactly
+    what choosing between two builds needs. What it cannot buy is a statement about your traffic:
+    your set has five slices and the published one has one, and a leaderboard row is an aggregate
+    over per-item records that were thrown away. Answering the feature question needs your
+    questions, your format and an overlap check, none of which is in the model card.
+
+- id: q2
+  question: >-
+    Your CI overlap check prints zero shared ids and zero shared questions between dev and test. You
+    also sorted sixteen judge configurations by agreement on dev, and the top five all print exactly
+    1.000 on the split they were not chosen on. Which sentence belongs in the PR?
+  options:
+    - >-
+      Best-of-sixteen agreement 1.000 on dev and 1.000 held-out, selected from a menu of sixteen, and
+      the overlap check returns zero shared ids and zero shared questions.
+    - >-
+      Best-of-sixteen agreement 1.000 on the held-out split, so the selection generalises and the
+      figure is a property of the judge rather than of the set it was measured on.
+    - >-
+      Best-of-sixteen agreement 1.000 on both splits, and because the overlap check comes back clean
+      the held-out figure is uncontaminated and safe to quote as the team's headline.
+    - >-
+      Best-of-sixteen agreement 1.000 on dev and 1.000 on the held-out split, from this course's
+      recorded judge runs; the identical figures are close to an artefact of the recording.
+  correct: 3
+  explanation: >-
+    The clean overlap check answers a different question. It says the two splits are disjoint, not
+    that the judge is good. Five different configurations landing on an identical held-out figure,
+    on a recording where almost no judge-variant-split cell produces a false negative, is the
+    signature of a near one-sided instrument rather than of five models converging. The number at
+    the top of a selection table is the one most in need of the held-out run, and the held-out run
+    is what says it is close to an artefact.
+
+- id: q3
+  question: >-
+    The support bot's rubric has three rules, and rule 2 is that the answer cites a handbook section.
+    You already run a judge in CI at $0.03794 a call. What settles the argument about adding a
+    verifier for that rule?
+  options:
+    - >-
+      The decidability test. The answer either carries a citation marker or it does not, so three
+      lines decide it exactly, with no labels, no interval and no per-call price to amortise.
+    - >-
+      A head-to-head score. Run both scorers over the same items and keep whichever agrees more with
+      the humans, since the two of them are answering the same question about the same answers.
+    - >-
+      The rubric. The rule is already written into the judge's instructions, so a second scorer would
+      only be recomputing a piece of the work the existing judge has to do anyway.
+    - >-
+      The failure cost. A wrong verifier only returns the wrong boolean, while a wrong judge also
+      burns a paid call, so the deterministic check is always the cheaper of the two to own.
+  correct: 0
+  explanation: >-
+    Decidable means fixed code returns the same verdict every time with no model in the loop, and
+    "does it cite" is exactly that. A model call's cost is not the token price; it is the token
+    price plus the confusion matrix, the interval, the disagreement review and the hold-out you now
+    owe, forever. And the rubric being the description of the label is not an argument for using a
+    model to compute it.
+
+- id: q4
+  question: >-
+    On 52 human-labelled failures for one build, the coverage table reads both 41, verifier only 0,
+    judge only 11, missed by both 0. The verifier is a three-line citation check and the judge
+    scores the full three-rule rubric. What are those eleven?
+  options:
+    - >-
+      Reason to drop the verifier, because it caught nothing on this build that the judge did not
+      already catch, so the two numbers together already show the cheaper scorer is dead weight.
+    - >-
+      Nothing at all, because a zero in the missed-by-both column means the two scorers are
+      interchangeable, and eleven items cannot overturn a conclusion that strong.
+    - >-
+      Mostly `extra` failures, where the answer cites correctly and then adds something the handbook
+      does not say, which a citation check cannot see, so the verifier stays and the zero is real.
+    - >-
+      Evidence the judge is drifting, because eleven unique catches is too many for a rubric with
+      three rules, so the response is to re-validate the judge before believing the zero at all.
+  correct: 2
+  explanation: >-
+    A verifier decides one property exactly, and on this build the property it decided was not the
+    one that failed. An answer that cites the right section and then says something unsupported
+    passes a citation check by construction, and that is most of the judge's unique work. Coverage
+    is the artefact worth reporting rather than a scoreboard, and a zero in the last column says
+    the two scorers are indistinguishable from the labels on this data, not that the system is right.
+
+- id: q5
+  question: >-
+    A labelling round reports agreement 0.894 on a 57-item overlap sample, and the plan is to scale
+    the suite to 600 items with the same people and the same instructions. What may the planning
+    document claim about the figure at 600 items?
+  options:
+    - >-
+      That the figure is unchanged, because agreement is a property of the annotators and the
+      annotators are the same people who produced 0.894 on the first fifty-seven items.
+    - >-
+      Only that a larger set estimates the same agreement more precisely. The care taken per label
+      is untouched, so nothing about the labelling itself has got any better.
+    - >-
+      That the figure will rise, because spreading the queue over more annotators dilutes the share
+      of any one reviewer's idiosyncratic calls in the round's final labels.
+    - >-
+      That 0.894 is now a floor, because a larger sample can only narrow the error around a true
+      value that the smaller sample already measured without bias.
+  correct: 1
+  explanation: >-
+    Agreement is a property of the instruction set and the item set, and both of those change, so a
+    figure from one round cannot be carried into another as a fact. What scale actually buys is
+    precision on the same care: the sensitivity of the figure to a single label falls from 0.036 to
+    roughly 0.003, which is a better estimate of the round rather than a better round. Re-measure
+    after every instruction change, and treat the change as a new round.
+
+- id: q6
+  question: >-
+    A round reports kappa 0.894 on 57 items with a 95% interval of [0.787, 1.000], and one flipped
+    label out of 57 moves the figure by 0.036. A stakeholder reads the point estimate and asks
+    whether the annotators are reliable enough to gate merges on. What is the largest claim the
+    number supports?
+  options:
+    - >-
+      That the annotators agree at 0.894, which clears the floor, so the labels are fit to gate on
+      and the interval can be left off the dashboard where it only adds noise to the tile.
+    - >-
+      That the annotators agree well on these 57 items under these instructions. 0.89 and 0.78 are
+      not distinguishable here, and one flipped label is a third of the interval's half-width.
+    - >-
+      That the annotators agree at 0.894 with an uncertainty of 0.213, so a single disagreement out
+      of 57 is enough to make the round unreliable and to keep its labels out of the suite.
+    - >-
+      That they agree better than 0.894, because the top of the interval touches 1.000 and a
+      percentile bootstrap that piles resamples against the ceiling is a bound you can widen from.
+  correct: 1
+  explanation: >-
+    The half-width here is about 0.11, so the interval supports "agreement is high" and does not
+    support "agreement is 0.89". Granularity is the rest of the story: one label out of 57 moves the
+    figure by 0.036, which is a third of that half-width, so a round that reports three decimals has
+    reported something it cannot support. The ceiling at 1.000 is a property of the bootstrap
+    arithmetic rather than of the data, and neither artefact makes a stale figure quotable.
+
+- id: q7
+  question: >-
+    A migration script calls `paired_comparison(baseline_pairs, candidate_pairs)` and the report
+    reads "delta +0.2105, fixed 7, broke 19, gate passes", while the candidate's raw pass rate is 21
+    points below the baseline's on those same 57 items. What is the defensible response?
+  options:
+    - >-
+      Publish both argument orders, because the function has no preferred order and any reader who
+      disagrees with your choice can rerun it the other way round and get the other story instead.
+    - >-
+      Trust the gate, because it is the artefact the team already agreed to gate on, and the raw
+      pass rates are two separate evaluations rather than the paired comparison the gate performed.
+    - >-
+      Re-run with the candidate first and discard the first run as a bug, because a gate that
+      contradicts the raw pass rates is a gate with an inverted branch somewhere inside it.
+    - >-
+      Recompute the delta from the two verdict lists, where the sign of each item is visible, since
+      delta, `fixed` and `broke` are all counted relative to argument A and not to either build.
+  correct: 3
+  explanation: >-
+    `paired_comparison` returns `A - B`, so the sign of the delta is a property of the argument
+    list rather than of the data. Pass the baseline first and the nineteen items the migration broke
+    get reported as seven items it fixed, on the worst run in the whole dataset, with a positive
+    delta that reads as an improvement. That is why the gate's own docstring records passing
+    baseline first as a scar, so recompute from the verdict lists and assert that the sign matches
+    the raw pass-rate difference.
+
+- id: q8
+  question: >-
+    A change that adds two sentences to every answer blocks on the 57-item dev split at 5.3 points
+    against a 5-point tolerance, with an interval whose upper end is exactly zero, and passes on the
+    37 held-out items at 2.7 points better. Nothing was re-tuned between the two runs. What does the
+    pair license the team to conclude?
+  options:
+    - >-
+      That the change is fine, because the held-out split is the one nobody tuned on and a gate that
+      blocks on a 57-item set is reading noise rather than a real regression in the system.
+    - >-
+      That the change is a regression, because the dev interval's upper end lands on zero, and an
+      interval that stops at zero has already shown there is no real difference left to defend.
+    - >-
+      No verdict yet, because a 5-point tolerance on 57 items is tighter than the suite can resolve,
+      so the gate is reading noise whichever way the estimate happens to land this week.
+    - >-
+      Either verdict, because the two runs bracket the true effect between -5.3 and +2.7 points, and
+      any change whose size falls inside a band that narrow is within a reasonable tolerance.
+  correct: 2
+  explanation: >-
+    Neither number is a bug. What they say together is that the tolerance is set below the
+    resolution the suite has, and a gate set tighter than its own resolution becomes a coin that
+    lands the wrong way twice. At 75% pass, 57 items give a half-width of 10.9 points and 300 give
+    4.9, so the fix is to write the tolerance next to the resolution and raise the item count, not
+    to pick the split whose number you prefer.
+
+- id: q9
+  question: >-
+    The migration dashboard reports `p50_end_to_end` of 1584.724 ms for both the 1.7B build and the
+    0.6B build, to three decimal places, while the cost column on the same page does change. What
+    goes in the migration report?
+  options:
+    - >-
+      A note that the simulated durations are seeded from the trace id, so the same items always get
+      the same number and the panel cannot answer this migration's latency question at all.
+    - >-
+      Nothing about latency, because the figure is dominated by the shared retrieval path, and two
+      different models will land on the same median whenever the surrounding work is unchanged.
+    - >-
+      A note that the two builds are latency-equivalent, since a median identical across two builds
+      is strong evidence that neither is slower than the other at the median of the distribution.
+    - >-
+      A note that the cost column moving is enough to keep the latency column, because both are
+      produced by the same trace store and one credible column on the page vouches for the other.
+  correct: 0
+  explanation: >-
+    A number that cannot change is not a measurement. The simulated durations are seeded from the
+    trace id, so the same items get the same latency on both builds to the last decimal place, and
+    the cost column does move because token counts are not seeded that way. The only way to know
+    the panel cannot answer the question is to run both sides and notice that a figure which must
+    move did not, so the report has to say which columns are real.
