@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Eval Lab — judge design and validation</title>
+<link rel="stylesheet" href="../common/sim.css">
+</head>
+<body>
+<!-- Data ships as script files, not fetch(): a sandboxed iframe with
+     allow-scripts only cannot read sibling files with fetch, but a classic
+     <script src> load is not restricted the same way. -->
+<script src="data.js"></script>
+<script src="data-pairwise.js"></script>
+<script type="module" src="app.js"></script>
+<noscript>
+  <p style="padding:1rem">This simulation needs JavaScript. Everything it shows is computed in your
+  browser; nothing is sent anywhere.</p>
+</noscript>
+</body>
+</html>

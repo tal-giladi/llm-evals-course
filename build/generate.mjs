@@ -387,7 +387,181 @@ function buildAgentRuns() {
 }
 
 /* ================================================================== *
- * 7. Emit
+ * 7. Traces for the support bot (module 2 reads these)
+ *
+ * One trace per support item, in OpenTelemetry GenAI span shape. The
+ * error-analysis lesson reads these to find failure modes before any metric
+ * exists — which is the whole argument of module 2.
+ * ================================================================== */
+
+function buildSupportTraces(items) {
+  return items.map((it) => {
+    const rng = mulberry32(hashSeed(it.id + "trace") ^ SEED);
+    const spans = [];
+    let clock = 20 + Math.round(rng() * 200);
+    const root = `${it.id}-root`;
+    spans.push({ id: root, parent: null, kind: "agent", name: `support.answer: ${it.section}`, start_ms: clock, duration_ms: 0 });
+
+    // Retrieval. Its presence or absence is one of the first things an error
+    // analyst notices, and it is the difference between variants A and B.
+    let parent = root;
+    const dur1 = 30 + Math.round(rng() * 60);
+    spans.push({
+      id: `${it.id}-ret`, parent, kind: "execute_tool", name: "retrieve_handbook",
+      tool: "retrieve_handbook", start_ms: clock, duration_ms: dur1,
+    });
+    clock += dur1 + 10;
+    parent = `${it.id}-ret`;
+
+    const inTok = 400 + Math.round(rng() * 600);
+    const outTok = 40 + Math.round(rng() * 120);
+    const dur2 = 200 + Math.round(rng() * 800);
+    spans.push({
+      id: `${it.id}-llm`, parent, kind: "chat", name: "generate answer",
+      model: it.human.v3.label === 1 ? "qwen3-1.7b" : "qwen3-0.6b",
+      start_ms: clock, duration_ms: dur2,
+      input_tokens: inTok, output_tokens: outTok,
+      cost_usd: Math.round((inTok * 0.00003 + outTok * 0.00009) * 1e6) / 1e6,
+    });
+    clock += dur2 + 10;
+    parent = `${it.id}-llm`;
+
+    const dur3 = 120 + Math.round(rng() * 300);
+    spans.push({
+      id: `${it.id}-check`, parent, kind: "chain", name: "citation check",
+      start_ms: clock, duration_ms: dur3,
+      error: it.human.v1.category === "no_citation"
+        ? "answer contained no handbook citation"
+        : it.human.v1.category === "extra"
+          ? "answer added a claim with no source"
+          : undefined,
+    });
+    clock += dur3;
+
+    spans[0].duration_ms = clock + 50 - spans[0].start_ms;
+    return {
+      id: it.id,
+      question: it.question,
+      section: it.section,
+      trace_id: `tr_${it.id}`,
+      user_feedback: rng() < 0.2 ? (rng() < 0.5 ? "thumbs down" : "thumbs up") : null,
+      spans,
+    };
+  });
+}
+
+/* ================================================================== *
+ * 8. RAG variants and grounding judge runs (module 8)
+ * ================================================================== */
+
+const CONFABULATIONS = [
+  "The company pays 40 a month towards a gym membership, claimable in the expenses tool.",
+  "Yes, there is an on-site crèche subsidised to 200 a month for the first child.",
+  "Yes, you can buy up to 20,000 of shares each year at a 25% discount.",
+  "Yes, a 12-week paid internship runs every summer, applications open in January.",
+  "The Data Engineer band starts at 85,000 and tops out at 110,000.",
+];
+
+function buildRagItems() {
+  return RAG.map((it) => {
+    const rng = mulberry32(hashSeed(it.id) ^ SEED);
+    const confab = CONFABULATIONS[(rng() * CONFABULATIONS.length) | 0];
+
+    // A: grounded, and knows when it has nothing.
+    const v1 = it.answer;
+    // B: never told to abstain, so it answers even from empty passages.
+    const v2 = it.passages.length === 0 ? confab : it.answer;
+    // C: small model — confabulates often, refuses sometimes.
+    const roll = rng();
+    const v3 = roll < 0.55 ? (it.passages.length === 0 ? confab : it.answer)
+      : roll < 0.80 ? confab
+      : "I cannot help with that question.";
+
+    const label = (passed) => ({
+      label: passed ? 1 : 0,
+      category: passed
+        ? "grounded"
+        : it.should_abstain
+          ? "should_have_abstained"
+          : it.over_refusal
+            ? "over_refusal"
+            : "ungrounded",
+      critique: passed
+        ? (it.should_abstain
+            ? "Correctly declined to answer from passages that do not cover it."
+            : "Every claim traces to a supplied passage.")
+        : it.should_abstain
+          ? "The passages do not answer this, but the answer states a policy as fact."
+          : it.over_refusal
+            ? "Refuses a question the passages answer directly."
+            : "States a claim that appears in no supplied passage.",
+    });
+
+    return {
+      id: it.id,
+      question: it.question,
+      passages: it.passages,
+      should_abstain: !!it.should_abstain,
+      outputs: { v1, v2, v3 },
+      human: {
+        v1: label(!!it.grounded),
+        v2: label(it.passages.length > 0 && !!it.grounded),
+        v3: label(roll < 0.55 && it.passages.length > 0 && !!it.grounded),
+      },
+    };
+  });
+}
+
+/** Grounding judges: the same behaviour model, scoped to the RAG set. */
+function buildRagRuns(items) {
+  const configs = [
+    { id: "g-plain",  model: "qwen3-1.7b",    prompt_variant: "plain",    fewshot: 0 },
+    { id: "g-claim",  model: "llama-3.2-3b",  prompt_variant: "stepwise", fewshot: 0 },
+    { id: "g-strict", model: "prometheus-7b", prompt_variant: "stepwise", fewshot: 3 },
+  ];
+  const runs = {};
+  const cost = {};
+  const meanLen = items.reduce((a, it) => a + it.outputs.v1.length, 0) / items.length;
+  for (const cfg of configs) {
+    runs[cfg.id] = {};
+    const m = MODELS[cfg.model];
+    cost[cfg.id] = {
+      input_tokens: m.inTok + 220, // the retrieved passages go in with the question
+      output_tokens: m.outTok,
+      latency_ms: m.ms,
+      cost_usd: Math.round((m.inTok * m.costIn + m.outTok * m.costOut) * 1e6) / 1e6,
+      model: m.label,
+    };
+    for (const it of items) {
+      for (const variant of ["v1", "v2", "v3"]) {
+        const truth = it.human[variant].label;
+        const cat = it.human[variant].category;
+        const z = (it.outputs[variant].length - meanLen) / 60;
+        const rng = mulberry32(hashSeed(`${cfg.id}|${it.id}|${variant}`));
+        const run = buildRun({
+          itemId: cat, variant, truth, config: cfg, repeats: 5, lengthZ: z, rng,
+        });
+        runs[cfg.id][`${it.id}|${variant}`] = run.samples;
+      }
+    }
+  }
+  return {
+    runs,
+    cost,
+    menu: configs.map((c) => ({
+      id: c.id,
+      label: `${MODELS[c.model].label} · ${PROMPTS[c.prompt_variant].short}`,
+      model: c.model,
+      model_label: MODELS[c.model].label,
+      prompt_variant: c.prompt_variant,
+      prompt_label: PROMPTS[c.prompt_variant].label,
+      fewshot: c.fewshot,
+    })),
+  };
+}
+
+/* ================================================================== *
+ * 9. Emit
  * ================================================================== */
 
 function emit(path, name, payload, headerNote) {
@@ -416,6 +590,7 @@ function main() {
     model_label: MODELS[c.model].label,
     prompt_variant: c.prompt_variant,
     prompt_label: PROMPTS[c.prompt_variant].label,
+    prompt_text: PROMPTS[c.prompt_variant].text,
     fewshot: c.fewshot,
     verbosity_bias: !!c.verbosity_bias,
     self_preference: !!c.self_preference,
@@ -487,16 +662,30 @@ function main() {
     runs: buildAgentRuns(),
   }, "Multi-step agent runs with OpenTelemetry-style spans and known end states.");
 
+  const ragItems = buildRagItems();
+  const ragRuns = buildRagRuns(ragItems);
   emit("simulations/rag-evals/data.js", "rag", {
     dataset: "rag",
     title: "RAG answers over the handbook",
-    items: RAG,
+    items: ragItems,
     variants: [
-      { id: "v1", label: "A — grounded, abstains" },
-      { id: "v2", label: "B — no abstention instruction" },
+      { id: "v1", label: "A — grounded, abstains when nothing is retrieved" },
+      { id: "v2", label: "B — never told to abstain" },
       { id: "v3", label: "C — small model" },
     ],
-  }, "RAG items with the retrieved passages, so grounding is decidable.");
+    judge_menu: ragRuns.menu,
+    runs: ragRuns.runs,
+    cost: ragRuns.cost,
+    repeats: 5,
+  }, "RAG items with the retrieved passages, so grounding is decidable, plus grounding judge runs.");
+
+  // Traces ship in their own file so the error-analysis simulation does not
+  // pay for the judge runs it never touches.
+  emit("simulations/error-analysis/data-traces.js", "support-traces", {
+    dataset: "support-traces",
+    title: "Support bot traces",
+    traces: buildSupportTraces(support),
+  }, "One OpenTelemetry-shaped trace per support item, for the error-analysis lab.");
 
   const devN = dev.length;
   console.log(`\n  support items: ${support.length} (dev ${devN} / test ${support.length - devN})`);
