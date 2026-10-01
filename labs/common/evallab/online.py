@@ -59,18 +59,32 @@ def mix(items, key) -> dict:
 
 
 def read(baseline, window) -> dict:
-    """One dictionary of headline numbers for two windows of traces."""
+    """One dictionary of headline numbers for two windows of traces.
+
+    ``error.type`` lives in a span's **attributes**. Reading ``span["error"]``
+    finds nothing and reports zero errors on a window where every request
+    failed — which is the exact failure lesson 14.4 is about, in a helper
+    shipped inside the same module.
+    """
+    def err(s):
+        return s.get("attributes", {}).get("error.type")
+
     def one(items):
         chats = [s for t in items for s in t["spans"] if s["kind"] == "chat"]
-        cost = sum(s.cost_usd for s in chats)
-        lat = [s["duration_ms"] for s in chats]
-        lat_sorted = sorted(lat)
-        p95 = lat_sorted[min(len(lat_sorted) - 1, int(0.95 * len(lat_sorted)))] if lat_sorted else 0.0
-        return {"cost": cost, "p95_ms": p95, "errors": sum(1 for t in items for s in t["spans"] if s.get("error"))}
+        lat = sorted(s["duration_ms"] for s in chats)
+        p95 = lat[min(len(lat) - 1, int(0.95 * len(lat)))] if lat else 0.0
+        return {
+            "cost": sum(s.cost_usd for s in chats),
+            "p95_ms": p95,
+            "traces": len(items),
+            "errors": sum(1 for t in items for s in t["spans"] if err(s)),
+        }
 
     b, a = one(baseline), one(window)
     out = {k: (b[k], a[k]) for k in b}
-    out["psi_cost"] = None
+    # The two windows are directly comparable, so a ratio is worth reporting
+    # where the baseline is non-zero.
+    out["cost_ratio"] = (a["cost"] / b["cost"]) if b["cost"] else None
     return out
 
 
@@ -171,6 +185,10 @@ class Regression:
     category: str
     why: str = ""
     in_suite: bool = False
+    # The judge that produced the online verdict. It defaults to nothing
+    # rather than to a name, because guessing which judge graded a trace is
+    # how a test case ends up scored by something it was never written for.
+    judge_id: str | None = None
 
     def as_test_case(self, human_label: int, judge_verdict: int,
                      category: str | None = None) -> dict:
@@ -179,6 +197,13 @@ class Regression:
         The human label is the point. A production failure that nobody
         labelled is a trace, not a test, and it will be argued about again
         next quarter instead of being fixed once.
+
+        ``judge_verdict`` is the online judge's own answer, and it is
+        carried on the item so the suite can score the new case the moment
+        it lands rather than waiting for the next batch. It is a *recorded
+        verdict*, not a human label, and the two must not be confused:
+        ``human.v1.label`` is the ground truth, ``runs`` is what the judge
+        said.
         """
         return {
             "id": self.item_id,
@@ -191,11 +216,14 @@ class Regression:
                     "critique": self.why or "found in production",
                 }
             },
+            "runs": {self.judge_id: {f"{self.item_id}|v1": [int(judge_verdict)]}}
+            if self.judge_id else {},
             "slice": {"intent": "production", "difficulty": "unrated"},
         }
 
 
-def regressions_from(traces, human_labels: dict | None = None) -> list:
+def regressions_from(traces, human_labels: dict | None = None,
+                      judge_id: str | None = None) -> list:
     """Find the failures in a window of production traces.
 
     A trace is a failure when a span carries ``error.type`` — the post-check
@@ -225,5 +253,6 @@ def regressions_from(traces, human_labels: dict | None = None) -> list:
             category=err(broken[0]),
             why=f"span error: {err(broken[0])}",
             in_suite=t["trace_id"] in human_labels,
+            judge_id=judge_id,
         ))
     return out

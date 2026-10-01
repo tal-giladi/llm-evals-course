@@ -99,9 +99,10 @@ is what lets you tell the two failures apart:
 | prices moved | false | **true** | the provider changed, or you moved to a bigger judge |
 | both | true | true | read the commit, it is probably a good one |
 
-Set them to the same number with slack and you get a budget that cannot fail, which is the same thing as
-no budget with more typing. The shipped configuration sets **282 calls and $10.70** — the exact size of the
-run, with no headroom — and the day somebody adds a fourth repeat, the suite goes red and says so:
+Set them with slack and you get a budget that cannot fail, which is the same thing as no budget with more
+typing. The shipped configuration sets **282 calls and $10.70** — the exact size of the run, with no
+headroom — and any ceiling you set that way fires on an edit somebody did not agree to. Here is one firing,
+with the ceiling lowered to 40 so you can watch the boundary:
 
 ```
 94 items x 3 repeats: 40 judge call(s), 0 cache hit(s), $1.5176  STOPPED: budget ceiling reached: 40 call(s) and $1.5176 so far, limit is 40 call(s) and $10.70. The suite did not finish, so it has no result to report.
@@ -342,9 +343,10 @@ that crosses only `max_usd`, and that is the one nobody investigates.
 
 **Predict first**, on paper:
 
-1. Your suite is 57 items at 3 repeats at $0.03794 a verdict. Somebody adds a fourth repeat and does not
-   touch the budget. Predict which of `over_calls` and `over_usd` goes true first, and say why the answer
-   is a property of the price sheet rather than of the code.
+1. Your suite is 57 items at 3 repeats at $0.03794 a verdict, and the ceiling was set to exactly that:
+   `max_calls=171`, `max_usd=6.48774`. Somebody adds a fourth repeat and does not touch the budget. Predict
+   whether one of the two ceilings fires or both, and say what would have to change for the other to fire
+   alone.
 2. The budget check runs once, after the suite finishes, instead of before each call. Predict the
    difference in the reported numbers, and say what the run is able to report in each case.
 3. The budget charges for cache hits as well as misses. The suite runs entirely warm, 282 hits and 0
@@ -366,9 +368,10 @@ that crosses only `max_usd`, and that is the one nobody investigates.
    run with a ceiling of 40, and compare the reported spend with the run above. Then move the cache lookup
    below the budget check, warm the cache, and run with `--max-calls 0`. Write the one sentence that says
    which of the two orderings costs you more if you get it wrong.
-4. **Render the comment for all three statuses.** Run `gate_lab.py` three times: with a plant, healthy, and
-   with `--tolerance 0.5` on a healthy build. Write the three comment bodies by hand from the `gate.json`
-   each run leaves behind, and check that a reader could tell the three apart without opening a log.
+4. **Render the comment for the two statuses the lab gives you.** Run `gate_lab.py` with a plant and
+   healthy, and write both comment bodies by hand from the `gate.json` each run leaves behind. Then write
+   the third body — a clean pass, candidate level or better — and say which field on it is the one you would
+   most want to be wrong about. A status your format cannot express is a status you have not designed.
 5. **Find the line that is not from this run.** Take the comment above and mark every number that came out
    of this run and every number that was quoted from the specification. Then delete one of the quoted ones
    and write the sentence you would expect somebody to ask for it — that is the test of whether the block
@@ -404,11 +407,11 @@ human cannot read is an instruction to re-run, and re-running is how a gate stop
 traceback. The lie: **a log is optimised for the person who wrote it, and a pull-request comment is read
 by somebody with ten seconds and a merge button.**
 
-**Print the tolerance and drop, and leave out the spec.** `-12.3 points, tolerance 5` reads as a pass of a
-test. Without the regression the gate was built to catch, the accepted false-alarm rate, and the width of
-the measurement, nobody can tell whether the gate worked. The lie: **a threshold without the decision it
-was a threshold inside is a number, not a gate** — the same omission as lesson 10.3's spec with no width
-beside it.
+**Print the tolerance and drop, and leave out the spec.** `drop -12.3 points, tolerance 5` reads as a fact
+about two numbers. Without the regression the gate was built to catch, the accepted false-alarm rate, and
+the width of the measurement, nobody can tell whether the gate worked. The lie: **a threshold without the
+decision it was a threshold inside is a number, not a gate** — the same omission as lesson 10.3's spec with
+no width beside it.
 
 **Quote this repository's dollars in a business case.** $10.70 a run is the recorded price of a recorded
 judge, chosen so the line is not zero. The lie: **a price sheet for a teaching model measures the teaching

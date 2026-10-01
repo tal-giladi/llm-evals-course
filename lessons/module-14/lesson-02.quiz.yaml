@@ -1,0 +1,111 @@
+- id: q1
+  question: >-
+    The post-check fires on 20 of 57 production requests and 3 of those were answers a human marked
+    correct. How should that number be reported, and why?
+  options:
+    - >-
+      As the failure rate, because 20 of 57 is 35.1% and that is the share of requests the system got
+      wrong.
+    - >-
+      As a block rate, with a separate false-block rate of 3 of 20, because the check counts one property
+      rather than judging the answer.
+    - >-
+      As a pass rate, inverted to 65.0%, because the check ran on every request and a full-coverage check
+      cannot be biased.
+    - >-
+      Not at all, because a guardrail that misfires should be removed rather than reported with a
+      qualification attached to it.
+  correct: 1
+  explanation: >-
+    `20/57 = 35.1%` is a block rate and the humans' `27/57 = 47.4%` is a failure rate; they are different
+    quantities with similar shapes, and that similarity is what hides the substitution. The `3 of 20` is
+    the number that matters, because it is the price users paid for the check.
+
+- id: q2
+  question: >-
+    The guardrail missed ten of the 27 real failures on dev. The misses break down as seven `wrong_fact`
+    and three `over_refusal`. What does that breakdown tell you about how to fix it?
+  options:
+    - >-
+      The check needs a tighter threshold, because the misses are concentrated in two categories rather
+      than spread evenly across the failures.
+    - >-
+      The check should run on every request instead of a sample, because more coverage would have caught
+      the seven wrong facts.
+    - >-
+      Nothing tunable fixes it: the misses are properties the check has no expression for, so the fix is to
+      measure them separately rather than to retune this one.
+    - >-
+      The judge should be promoted into the request path, because a model call is the only way to see a
+      false statement in an answer.
+  correct: 2
+  explanation: >-
+    Every missed failure is a category nobody wrote a check for, and a blind spot is a property of the
+    check rather than of the sample, so it will not close on its own. Retuning a check that has no
+    expression for `wrong_fact` cannot see `wrong_fact`; measuring it properly is a separate job.
+
+- id: q3
+  question: >-
+    A team wants to add a guardrail that asks the model to verify its own answer before the user sees it.
+    What is that, and what is the honest objection?
+  options:
+    - >-
+      A guardrail, and the objection is only that it may be slightly slower than a string check.
+    - >-
+      A guardrail, and the objection is that a second model call has to be re-tuned whenever the model
+      behind it changes.
+    - >-
+      Neither, because a check that needs a model call cannot run inside the request path without breaking
+      the latency budget.
+    - >-
+      An eval in the request path, and the objection is the model call per request plus a false-block rate
+      that nobody has measured.
+  correct: 3
+  explanation: >-
+    A check that costs a model call is not cheap, and its error rate in both directions is unknown until
+    somebody measures it against labels. That makes it an eval, and putting an eval in the request path
+    moves an unmeasured mistake from a dashboard onto a user.
+
+- id: q4
+  question: >-
+    Blocked requests are dropped from the sample before the online judge scores it, so the pass rate
+    reflects only the requests that were allowed through. What is that number a rate of?
+  options:
+    - >-
+      The requests the guardrail cleared, which is a selected set and does not estimate the served
+      population.
+    - >-
+      Production, because a block is not an answer and answers are the only thing the rate is about.
+    - >-
+      The requests the system served, which is the population the pass rate is supposed to describe.
+    - >-
+      Nothing, because a pass rate needs a denominator the sample rate chooses and this one is not
+      recorded.
+  correct: 0
+  explanation: >-
+    Excluding the blocked population is the sampling mistake from 14.1 one level up: the kept set was
+    chosen partly for the property the guardrail checks, so a rate over it is not an estimate of the rate
+    over traffic. The two populations differ by exactly the requests a user was refused.
+
+- id: q5
+  question: >-
+    Before putting a new check in the request path, you are asked which failure you would rather have. What
+    makes that the right question to have to answer in writing?
+  options:
+    - >-
+      It sets the sensitivity the check needs, since each failure direction has a different false-alarm
+      cost to trade against.
+    - >-
+      It is the only question that connects a boolean on a span to what a blocked user actually loses,
+      which is a product judgement and not a property of the code.
+    - >-
+      It decides whether the check belongs on the sample or in the path, because only request-path checks
+      can have a user-visible failure.
+    - >-
+      It is what the design review template asks for, so recording it keeps the pull request consistent
+      with the rest of the eval design review.
+  correct: 1
+  explanation: >-
+    A guardrail's error is felt by a person immediately and an eval's error is felt by a dashboard later,
+    so the direction of the error is a judgement about the product, not about statistics. A check whose
+    direction nobody has written down is a wall, because nobody can say what it was measuring.

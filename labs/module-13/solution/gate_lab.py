@@ -177,15 +177,6 @@ def price_per_call(data, judge_id: str) -> float:
     return float((data.cost or {}).get(judge_id, {}).get("cost_usd", 0.0))
 
 
-def plant_block(items, fraction: float = 0.1) -> tuple:
-    """The regression a real change leaves behind.
-
-    A tenth of the list, at the front, exactly as lesson 10.3's simulator
-    plants it. A real regression breaks a category of question rather than one
-    unlucky item — and a tenth of the list is not a tenth of the pass rate,
-    which is why this block costs different numbers of points at different
-    suite sizes. That is the lesson, not a bug in the plant.
-    """
 def plant_block(items, baseline_pairs=None, fraction: float = 0.1) -> tuple:
     """The regression a real change leaves behind.
 

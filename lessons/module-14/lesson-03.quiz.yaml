@@ -1,0 +1,117 @@
+- id: q1
+  question: >-
+    You build the monitor's baseline on the dev mix and then point it at the held-out test split. The PSI
+    comes back 0.762 and three quarters of it is the `exception` bucket, which is 0.053 in dev and absent
+    from test. What is that number a fact about?
+  options:
+    - >-
+      A regression, because a third of the baseline category stopped arriving and that is a change in the
+      system's behaviour.
+    - >-
+      A drift alarm that should page, because 0.762 is far above the 0.25 threshold and the monitor was
+      built to fire above it.
+    - >-
+      Which population you measured, not whether the system changed: the split is a different population
+      rather than a second sample of the dev one.
+    - >-
+      The judge, because a missing category usually means the judge stopped emitting that label and the
+      mix is measuring the judge rather than the traffic.
+  correct: 2
+  explanation: >-
+    The test split holds zero `exception` items where dev holds three, so the 0.762 is mostly a bucket
+    that vanished rather than a bucket that grew. That is why the one-validation rule and the drift check
+    are the same defence from two sides: one protects the number from your own search, the other from the
+    calendar.
+
+- id: q2
+  question: >-
+    `Band("pass rate", 0.90, 20).explain(0.87)` reports a half-width of 0.137 against a 5-point band, and
+    appends a sentence saying the band will fire on noise. What should you do about it?
+  options:
+    - >-
+      Ship it, because the sentence is advisory and a 5-point band is the number the product team already
+      agreed to in the design review.
+    - >-
+      Widen the window or the band so the band is at least as wide as the measurement, since the half-width
+      is what the sample size permits.
+    - >-
+      Tighten the band to 2 points, so the monitor only fires on changes large enough to be worth
+      somebody's attention.
+    - >-
+      Leave the band and raise the sample rate, since sampling more requests is the only thing that
+      changes the half-width.
+  correct: 1
+  explanation: >-
+    The half-width is a consequence of the sample size, and the only two honest moves are a bigger window
+    or a wider band. Tightening the band makes the false-alarm rate worse, and it is a number you can
+    compute: at `n=20` a 5-point band fires on about one healthy day in four and still misses four days in
+    ten of a real ten-point drop.
+
+- id: q3
+  question: >-
+    Your monitor samples 20 requests a day and alerts when the pass rate leaves 0.85 to 0.95 around a
+    0.90 baseline. Assuming the system really is at 0.90, how often should you expect the alert to fire?
+  options:
+    - >-
+      About 25% of days, because twenty requests put a half-width of 0.137 around the rate and a 5-point
+      band is narrower than that.
+    - >-
+      About 5% of days, because the band was chosen with a 95% interval in mind and matches its coverage.
+    - >-
+      Almost never, because 0.85 and 0.95 are the band edges and `fires` uses a strict comparison on both
+      of them.
+    - >-
+      About once a year, because twenty requests is enough to measure a rate to within five points of
+      accuracy.
+  correct: 0
+  explanation: >-
+    This is a binomial, and it comes to 25.45% — only 74.5% of healthy windows land inside a 5-point band
+    at `n=20`. The same row also says a real drop to 0.80 is caught only 60% of the time, so the monitor
+    is bad in both directions at once and the cause is the same: twenty requests is not enough to measure
+    a rate.
+
+- id: q4
+  question: >-
+    The pass rate is comfortably inside its band and the drift check reads PSI 0.48. What is the correct
+    reading, and what is the correct action?
+  options:
+    - >-
+      The system is healthy, because the pass rate is the number that matters and it has not moved.
+    - >-
+      There is a regression, because a large drift in the mix always shows up as a pass-rate drop within
+      the same window.
+    - >-
+      Nothing has changed and the drift number is noise, because 0.48 is only just under the 0.5 mark
+      where you would usually re-baseline.
+    - >-
+      The pass rate is not comparable, because it was measured on a population the baseline does not
+      describe; re-measure and re-baseline rather than page.
+  correct: 3
+  explanation: >-
+    Drift first, then the rate: if the mix has moved, the pass rate is answering a question nobody asked
+    and paging on it is paging about the wrong number. A monitor that re-baselines loudly on the drift row
+    is doing the right thing, which is why the two alerts are ordered rather than merged.
+
+- id: q5
+  question: >-
+    A new intent arrives at 10% of traffic and no existing category changes at all. Compared with halving
+    an existing category, what does PSI do, and why?
+  options:
+    - >-
+      About the same, because PSI is a symmetric measure of the distance between two distributions and
+      both changes are the same size.
+    - >-
+      Much less, because a new category adds a bucket with no baseline to compare against and so
+      contributes almost nothing to the sum.
+    - >-
+      Much more, because a category at 10% that was absent from the baseline is a change nobody could
+      have predicted and the floored bucket contributes a large finite term.
+    - >-
+      The same, because the new category's 10% is renormalised away when the other buckets are left
+      unchanged.
+  correct: 2
+  explanation: >-
+    On the shipped mix, a new category at 10% scores 1.162 while halving an existing one scores 0.163, and
+    that asymmetry is deliberate. Flooring a vanished bucket at `eps` rather than dividing by zero is not
+    free, and the direction it points — a loud number for a category that appeared or disappeared — is the
+    direction you want.

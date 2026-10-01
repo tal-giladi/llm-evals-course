@@ -1,0 +1,113 @@
+- id: q1
+  question: >-
+    You drop the sample rate from 25% to 5% on the same window and keep the "never drop a failure" rule.
+    The failing-request count is 5 at both rates. What does the reported rate do, and why?
+  options:
+    - >-
+      It falls, because a smaller sample of the same traffic estimates the same population and therefore
+      lands closer to the true rate.
+    - >-
+      It rises, because the kept set is now a random draw plus every failure, so the denominator shrinks
+      while the numerator holds.
+    - >-
+      It is unchanged, because the count is unchanged and a rate is only ever a count divided by the window
+      size the sampling was planned against.
+    - >-
+      It falls, because the five failures were kept at both rates and the extra traces removed at 5% were
+      all requests that succeeded.
+  correct: 1
+  explanation: >-
+    `5/57 = 8.8%` estimates the rate of the traffic; `5/9 = 55.6%` is a count over a set selected because
+    it contains the failures. The selection is the reason the denominator shrinks, not noise, and no
+    interval closes that gap.
+
+- id: q2
+  question: >-
+    The keep rule is deleted so that every request is hashed and sampled like any other. At a 25% sample on
+    57 requests with five planted failures, what does the dashboard report, and what has been lost?
+  options:
+    - >-
+      0.0% from twelve traces, so the panel is obviously broken and the sampler gets fixed the same hour.
+    - >-
+      8.3% from twelve traces, so the number looks right and four of the five real failures are gone for
+      good, permanently and reproducibly.
+    - >-
+      31.2% from sixteen traces, so the panel is obviously broken and the sampler gets fixed the same hour.
+    - >-
+      11.1% from twenty-seven traces, so the panel reads about twice the truth and the on-call can judge by
+      hand whether the extra alerts are worth it.
+  correct: 1
+  explanation: >-
+    The naive sampler keeps one of the five failures, so the rate lands near the truth by accident while
+    the evidence is mostly deleted. That is worse than a broken-looking zero: a monitor biased toward
+    stability teaches the team production is fine on the day it is not.
+
+- id: q3
+  question: >-
+    Why does the shipped sampler hash the request id rather than draw a coin per request? What does the
+    hash buy that the coin does not?
+  options:
+    - >-
+      The realised share is closer to the requested rate on small windows, because hashing balances better
+      than an independent draw.
+    - >-
+      The decision costs nothing per request, so a 10% sample on high traffic is cheaper than a coin flip
+      would be.
+    - >-
+      Membership is computable, so you can name which requests were dropped and reproduce the same kept set
+      on every run.
+    - >-
+      Hashing avoids the correlation a coin flip creates between two requests arriving in the same second,
+      which biased the sample by time of day.
+  correct: 2
+  explanation: >-
+    A coin flip gives you a set with the right expected composition and no membership rule, so nobody can
+    tell a dropped request from one that never happened. Hashing the request id makes the kept set a pure
+    function of the ids, which is what makes a rate over it computable and an audit possible.
+
+- id: q4
+  question: >-
+    `sample_for_review` is called at a sample rate of `0.0` on 200 requests, one in ten of which carry an
+    error. What should it return, and what is that behaviour testing?
+  options:
+    - >-
+      An empty list, because a zero sample rate means keep nothing, and the failures are found by the
+      unsampled run instead.
+    - >-
+      The twenty failing requests plus a few of the rest, because the hash on a zero rate still admits a
+      handful of requests by chance.
+    - >-
+      About two requests, because the errors are one in ten and a zero rate keeps only the rarest slice of
+      a distribution.
+    - >-
+      The twenty failing requests, which tests the rule at the limit where the "never drop a failure" half
+      is carrying the whole result.
+  correct: 3
+  explanation: >-
+    `should_sample` returns false for every request at a rate of 0.0, so anything kept came from the
+    failures branch. Testing at the limit is the only way to tell a rule from an intention, because the
+    case where the rule matters is the case where the sample is small and the failures are rare.
+
+- id: q5
+  question: >-
+    A single sample rate is applied to every intent, and a new intent arrives at 0.5% of traffic. What
+    happens to that intent under the rule in this lesson?
+  options:
+    - >-
+      It is not monitored at all, because a rare slice has too few requests to survive sampling and the
+      panel reports it as stable.
+    - >-
+      It is sampled like everything else, so its failure rate is estimated from whatever survives the hash
+      and widens as the rate falls.
+    - >-
+      It is measured, because the hash does not know about slices and a 5% sample of 0.5% of traffic still
+      contains some of it.
+    - >-
+      It is monitored more accurately, because a rare slice is a smaller population and therefore needs a
+      smaller sample to characterise.
+  correct: 0
+  explanation: >-
+    The kept-set is drawn from the whole traffic, so a category that is half a percent of it is thinned
+    twice over: once by its own share and once by the sample rate. The panel then reads stable, which is
+    the most dangerous state a monitor can be in. Either keep that category whole or write down that you
+    have no monitor on it.

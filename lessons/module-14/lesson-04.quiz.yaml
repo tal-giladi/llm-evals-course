@@ -1,0 +1,114 @@
+- id: q1
+  question: >-
+    A window of production traces contains 24 real failures. You find them with
+    `s.get("error")` instead of `s.get("attributes", {}).get("error.type")`. What does the loop return, and
+    what does the team conclude?
+  options:
+    - >-
+      All 24, because `error.type` is promoted to a top-level field when the span is serialised to JSON.
+    - >-
+      An empty list, which reads as a healthy window, so nothing gets investigated and the failures are
+      never seen again.
+    - >-
+      An empty list with a KeyError, so the run fails loudly and the mistake is caught before anybody acts
+      on the number.
+    - >-
+      6 of the 24, because only the raised calls put their error on the span rather than in its attributes.
+  correct: 1
+  explanation: >-
+    `error.type` is a span attribute following the GenAI convention, not a field on the span, so the naive
+    read finds nothing. An empty list is indistinguishable from a quiet night, which is why the shipped test
+    asserts `regs` is non-empty before it asserts anything about the contents.
+
+- id: q2
+  question: >-
+    `as_test_case` is called with `human_label=0` and `judge_verdict=1`, and the function's body never reads
+    the judge argument. Why is the signature shaped that way?
+  options:
+    - >-
+      Because the judge argument is there so callers can record both opinions, and the suite will use the
+      judge's once the human label has been reviewed twice.
+    - >-
+      Because the judge's verdict is already in the trace's `error.type` attribute and storing it twice
+      would let the two copies drift apart.
+    - >-
+      Because the judge is the course's recorded educational model, so its verdict is not a real opinion and
+      has no place in a dataset.
+    - >-
+      Because a test case's label is what the suite is scored against, and writing the judge's verdict
+      there would make the suite grade its own homework.
+  correct: 3
+  explanation: >-
+    The human label is the one field in the course that nothing computes for you, and it is the field the
+    whole loop exists to fill. Put a judge in that field and a judge that drifts quietly relabels the
+    ground truth rather than disagreeing with it, which is the one failure a test set cannot detect.
+
+- id: q3
+  question: >-
+    Six of the 24 failures in a window are calls that raised, so the chat span never recorded the question.
+    What does converting one of them into a test case produce, and what is the right response?
+  options:
+    - >-
+      A test case with an empty question and `difficulty: unrated`, so it scores but is invisible to slice
+      queries and can never break a slice gate.
+    - >-
+      A test case with an empty question that the suite scores forever, which is harmless because it can
+      never be the thing that fails.
+    - >-
+      A usable test case, because the trace id and the category are enough for the suite to know what it is
+      measuring.
+    - >-
+      An error, because `as_test_case` refuses a Regression with no question rather than emitting an item
+      nobody can run.
+  correct: 0
+  explanation: >-
+    The code does not refuse; it emits a five-key item that runs and scores and tells you nothing. The
+    right response is to keep those six out of the suite, put them in the incident view where they are
+    visible, and move the request onto the root span so a raised call is still readable.
+
+- id: q4
+  question: >-
+    `regressions_from` fills `Regression.category` with the span's own error type, so a window of
+    failures reads `no_handbook_citation: 14, RuntimeError: 6, no_matching_section: 4`. What are those?
+  options:
+    - >-
+      Failure categories in the taxonomy, because a span that carries an error type is by definition a
+      failure mode the team has already named.
+    - >-
+      Exception class names, so the fix is to map each class to a category once and store the mapping
+      with the pipeline.
+    - >-
+      Trigger names rather than failure names, so each one needs a human to decide which taxonomy bucket
+      the item belongs in before it is filed.
+    - >-
+      The categories the judge uses, which means the loop is already measuring the same taxonomy the
+      dataset is labelled with.
+  correct: 2
+  explanation: >-
+    `no_handbook_citation` says which check fired, not what was wrong, and `RuntimeError` says how the
+    call died rather than what the answer should have been. Deciding which taxonomy bucket an item is in
+    requires a person who has read the answer, which is why `as_test_case` takes a `category` argument
+    that overrides the span's own name.
+
+- id: q5
+  question: >-
+    The loop is handed the suite's `dev_ids` as `human_labels`, so every regression reports
+    `in_suite: False`. What happens over a year, and what is the fix?
+  options:
+    - >-
+      Nothing changes, because `in_suite` only decides whether an item is filtered out of the list and the
+      list is read by a person either way.
+    - >-
+      The suite starts double-counting items already in the suite, because `in_suite: False` is what the
+      function uses to decide a failure is new.
+    - >-
+      The suite fills with duplicates within a month, because the wrong key means existing items are added
+      again on every run.
+    - >-
+      The suite stops growing and the queue keeps growing, because deduplication that never matches makes
+      every old failure look new.
+  correct: 3
+  explanation: >-
+    The join key is the trace id (`tr_s01`) and the suite's key is the item id (`s01`), so nothing matches
+    and every regression looks brand new. The report is wrong in the direction that looks most like
+    progress, which is the worst direction for a report to be wrong in.
