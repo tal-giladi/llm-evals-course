@@ -1,7 +1,8 @@
 - id: q1
   question: >-
-    Your nightly gate failed overnight and passed on a re-run of the same commit. On 57 items, two runs of the
-    identical judge differ by 12.3 points of pass rate. What is the correct explanation?
+    Your nightly gate failed overnight and passed on a re-run of the same commit. On 57 items, two independent
+    single-sample runs of this judge differ by 10 or more points of pass rate about one time in twenty. What
+    is the correct explanation?
   options:
     - >-
       The gate threshold is too tight for the judge in use, so widen the tolerance until the flakiness stops

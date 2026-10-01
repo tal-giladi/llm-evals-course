@@ -115,26 +115,28 @@
 
 - id: q6
   question: >-
-    A panel labelled "self-preference" reports the judge passing one system 12.3 points more than another and
-    a third 10.5 points less. You have measured that two runs of this identical judge on 57 items differ by
-    12.3 points. What is the panel actually showing you?
+    A family-matched probe moves one system by +10.5 points of pass rate and leaves the other two within 3.5
+    points either way. The moved system's true-negative rate falls from 80.8% to 69.2%. Two runs of the
+    identical judge on these 57 items differ by 12 to 14 points of pass rate 95% of the time. What do you
+    conclude?
   options:
     - >-
-      A family prior of roughly 11 points, because both differences exceed the floor once you average them.
+      The effect is confirmed, because the true-negative rate fell, and that is the signature of a family
+      prior rather than of sampling noise.
     - >-
-      Nothing usable, because a panel whose label and data disagree should be discarded rather than
-      interpreted.
+      Nothing at all, because a bias whose size sits inside the noise floor cannot be distinguished from a
+      coincidence on this eval set.
     - >-
-      A self-preference effect that is present but too small for 57 items, so the study should be repeated on
-      the full set before any conclusion is drawn.
+      The probe failed, because a bias that flatters one system should show up on the other two as well.
     - >-
-      A null result and a useful control: the changed items run 12 one way on one system and 10 the other way
-      on another, which is the noise floor of one judge measured against itself.
+      The shape is confirmed and the size is not: the effect landed where the probe predicted, and the
+      fall in true-negative rate is the finding worth reporting, while +10.5 remains a hypothesis.
   correct: 3
   explanation: >-
-    A bias has a direction on every system it touches; a re-roll scatters. The value here is the floor itself,
-    because every other bias reading in this module — padding at 17.5 points, size at 0.11 of kappa — has to
-    be measured against it before it means anything.
+    The TNR falling on the family-matched system while the other two improve is exactly the signature a
+    correct probe predicts, and it is the sentence to report. The pass-rate change still sits at the 90th
+    percentile of what two runs of this judge produce, so the magnitude is not established — which is a
+    reason to change the judge family, not a reason to quote the number.
 
 - id: q7
   question: >-
@@ -184,8 +186,9 @@
 
 - id: q9
   question: >-
-    Your release gate failed overnight and passed on a re-run of the same commit, on 57 items where two runs
-    of the identical judge differ by 12.3 points of pass rate. What now?
+    Your release gate failed overnight and passed on a re-run of the same commit, on 57 items where two
+    independent single-sample runs of this judge differ by 10 or more points of pass rate about one time in
+    twenty. What now?
   options:
     - >-
       Raise the gate tolerance until the flakiness stops, since the judge itself is stable on average.

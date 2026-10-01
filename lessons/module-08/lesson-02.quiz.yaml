@@ -1,0 +1,123 @@
+- id: q1
+  question: >-
+    On variant B, `Qwen3 1.7B · Plain` reports 80.0% grounded with a true-negative rate of 44.4%, and
+    `Prometheus 2 7B · Stepwise` reports 60.0% grounded with a TNR of 88.9%. Which number should a release
+    gate be built on?
+  options:
+    - >-
+      Neither, because the two grounded rates overlap once you carry their intervals, so no gate can be
+      justified from twenty items.
+    - >-
+      The 88.9% TNR, because a pass rate rises whenever a judge gets more generous and TNR is the half that
+      turns into shipped faults — the 20-point drop in reported quality is the judge getting better.
+    - >-
+      The 80.0% grounded rate, because it is the number users are quoted and the TNR is an internal diagnostic
+      that moves whenever the eval set changes.
+    - >-
+      The mean of the two, 70.0%, so that the gate sits between the most and the least generous judge and is
+      therefore hard to move in either direction.
+  correct: 1
+  explanation: >-
+    A pass rate has no direction: the judge that waves everything through tops it, so a rising grounded rate
+    is evidence of a more generous judge unless you know the TNR. The overlapping intervals in the first
+    option are about the pass rate, and the pass rate is the number not being gated on. Four of nine against
+    eight of nine is a claim about named items, which is the kind of evidence twenty items can carry.
+
+- id: q2
+  question: >-
+    The system answers `I cannot help with that.` to a question whose retrieved passage says remote work is
+    allowed three days a week. A claim-level judge splits the answer into zero claims and finds zero
+    ungrounded claims. Has the check fixed it?
+  options:
+    - >-
+      Yes, because zero ungrounded claims out of zero claims is a perfect grounding result for that answer.
+    - >-
+      No, because the split step is a model call that would have flagged an answer with no content, and
+      reporting it as grounded hides that the split found nothing to grade.
+    - >-
+      Yes, provided the ratio is written as 0/0 rather than as 100%, so both denominators stay visible in the
+      output.
+    - >-
+      No, because zero claims is a routing signal rather than a grade — the answer has to go to a separate
+      over-refusal check, which is a different question from grounding.
+  correct: 3
+  explanation: >-
+    Claim granularity cannot express "this answer refused something the passage answers"; a refusal is
+    trivially consistent with any passage set, so it passes at every granularity. What the count buys you is
+    noticing that the answer made no claim at all, which is a routing decision. The plain judge scores this
+    item as grounded on four of its five recorded calls, and that is the failure the separate tile exists to
+    catch.
+
+- id: q3
+  question: >-
+    `g-plain` agrees with humans on 3 of 7 `ungrounded` answers on variant B and on 0 of 1 `over_refusal`,
+    giving an overall TNR of 44.4%. What does the per-category view add that the total cannot?
+  options:
+    - >-
+      It shows the judge's false alarms are evenly spread across the categories, so the overall TNR can be
+      re-weighted to match production traffic without changing anything.
+    - >-
+      Nothing, because TNR is already an average of the per-category rates and therefore cannot disagree with
+      them.
+    - >-
+      It shows the judge is perfect on one category and useless on another, so the single number hides two
+      different fixes and one of them may not be a judge problem at all.
+    - >-
+      It shows the 7 ungrounded answers are harder than the 11 grounded ones, so a higher overall TNR would
+      need more labelled failures rather than a better prompt.
+  correct: 2
+  explanation: >-
+    A total is a weighted average over categories with different counts and different fix costs, and the
+    weights are the ones you happened to sample. Here one category sits at 0/1 and another at 3/7; that is two
+    different problems, and the per-category table is the only view that tells them apart. Reporting it is
+    free, because the category is already on every labelled item.
+
+- id: q4
+  question: >-
+    You split each answer into atomic claims and check every claim against the retrieved passages. Variant B
+    carries 38 claims across 20 answers, 15 of them ungrounded. What does that buy you over the answer-level
+    binary?
+  options:
+    - >-
+      A failure list made of sentences rather than answers, so a reviewer fixes one clause instead of re-
+        reading a whole response — at 1.9 claims per answer, roughly double the judge bill.
+    - >-
+      A grounded rate that moves as soon as the prompt improves, because the finer unit reacts to small
+        changes in the wording of an answer.
+    - >-
+      The ability to gate on a claim-level rate instead of an answer-level one, because the smaller unit makes
+      the sample larger and the interval narrower.
+    - >-
+      Coverage of claims an extractor cannot reach, because splitting the text first means no fabricated
+        number can survive the pass.
+  correct: 0
+  explanation: >-
+    Granularity buys localisation, not accuracy: the unit of the failure becomes a clause. The interval does
+    not narrow — 15 of 38 and 9 of 20 are the same twenty items — and the extra unit is exactly what costs the
+    money. The last option is a different metric and a cheaper one, on the systems where an extractor already
+    catches the numbers.
+
+- id: q5
+  question: >-
+    Three grounding judges sit on the menu. `g-plain` is a 1.7B model on the plain binary prompt; `g-claim`
+    is a 3B model on the stepwise prompt; `g-strict` is a 7B model on the stepwise prompt with three shots.
+    Their TNRs on variant B are 44.4%, 77.8% and 88.9%. What does the comparison establish?
+  options:
+    - >-
+      That few-shot examples are the main driver, since the two highest scores are the stepwise entries and
+      both are given examples.
+    - >-
+      That the three entries behave very differently on these twenty answers, but because model and prompt
+      change together the table cannot attribute the gap to either one alone.
+    - >-
+      That model size is the only variable that matters, since the 7B stepwise judge beats the 3B stepwise
+      judge on both TNR and kappa.
+    - >-
+      Nothing at all, because the menu carries prompt labels but not the prompt text, so the three entries
+      cannot be compared to each other at all.
+  correct: 1
+  explanation: >-
+    A table where both columns move at once cannot separate the columns, and the course says so rather than
+    reading intent into it. What the table does isolate is observed behaviour: the plain entry is the only one
+    of the three that passes the refusal item on the variant the presets open on, and it does so on four of
+    five recorded calls. Not shipping the prompt text is a separate and real problem.

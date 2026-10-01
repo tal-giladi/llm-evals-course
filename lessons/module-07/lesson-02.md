@@ -86,7 +86,8 @@ nothing**, and on the full 94 items the same probe reads **+19.1 points** (45.7%
 ### Direction, not just size
 
 A pass-rate difference of 17.5 points on 57 items could be noise, and on this module's own standard the noise
-floor is large — [7.3](lesson-03.md) measures it at 12.3 points for two runs of an *identical* judge. So size
+floor is large — [7.3](lesson-03.md) measures it at 12 to 14 points of pass rate, 95 times in 100, between
+two independent single-sample runs of the *same* judge on the same 57 items. So size
 alone is not enough. The direction is what settles it. Count the items whose verdict changed:
 
 | Judge | Items that flipped | Which way | Paired sign test |
@@ -161,9 +162,9 @@ Two other panels on the same page are part of this lesson:
    floor looks like.
 2. **Count the flips, not the rate.** For each judge, count how many of the 57 items change verdict between A
    and D, and split them by direction. Compare those two counts against the noise floor from [7.3](lesson-03.md)
-   — 12.3 points of pass rate between two runs of the identical judge on these same items. Ten flips for the
-   honest judge is that floor; twelve for the biased judge is eleven one way and one the other, which is a
-   different shape entirely.
+   — 12 to 14 points of pass rate between two single-sample runs of the same judge on 57 items. Ten flips
+   for the honest judge is that floor; twelve for the biased judge is eleven one way and one the other, which
+   is a different shape entirely.
 3. **Check the TNR, not the pass rate.** Take the confusion counts the panel implies and work out how many
    real failures the biased judge catches on A versus on D. Then compute what happens to its kappa. A verdict
    that improves your headline and costs you eight caught failures is not an improvement; say so in the
@@ -187,7 +188,7 @@ answer that nobody is measuring.
 **The quieter break is trusting a single direction of the delta.** Note that the honest judge's number went
 *down* 3.5 points, not up. It is tempting to say "the honest judge is anti-verbose, it slightly prefers
 shorter". It is not. Six of its ten flips went one way and four the other; that is a coin with a small sample,
-and reading a preference into it is the same mistake as reading a preference into 12.3 points of run-to-run
+and reading a preference into it is the same mistake as reading a preference into 12 points of run-to-run
 noise. A null result is a null result, and this module measures exactly how big a null looks.
 
 **The third break is capping the wrong thing.** Truncating the answer to the first 200 characters before

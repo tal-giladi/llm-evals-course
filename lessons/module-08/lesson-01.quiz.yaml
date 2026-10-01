@@ -1,0 +1,118 @@
+- id: q1
+  question: >-
+    Your dashboard leads with `context recall 94%` and a user reports the bot stated a salary band the
+    company does not publish. On the module's own twenty items, retrieval returned something for 17 of 20
+    questions and something *relevant* for 14. What does that 15-point gap establish?
+  options:
+    - >-
+      That a metric which stops at "did the retriever return results" scores a passage about receipts as a
+      success on a salary question, so it measures the retriever rather than the system a user is talking to.
+    - >-
+      That context recall should be replaced by context precision, because precision is the only retrieval
+      metric that survives a change to the chunk size.
+    - >-
+      That the 15 points are retrieval failures the generation stage could have caught, and that an answer-side
+      judge would score them as faults.
+    - >-
+      That neither rate is worth publishing, since both intervals are wide and no ranking can be defended from
+      twenty items.
+  correct: 0
+  explanation: >-
+    The gap is the difference between a candidate coming back and a relevant candidate coming back, and only
+    the second one can support an answer. A judge scores the answer, not the retriever, so it cannot recover
+    the fifteen points either — they are upstream. Both intervals being wide says the estimate is imprecise,
+    not that the distinction is wrong.
+
+- id: q2
+  question: >-
+    Item g04 asks "What is the Data Engineer salary band?", retrieval returned the expense-policy passage about
+    receipts, and all three systems answered `The Data Engineer band starts at 85,000 and tops out at
+    110,000.` Under the module's category vocabulary, what is that trace?
+  options:
+    - >-
+      `ungrounded`, and nothing else — the number appears in no supplied passage, which is the whole
+      definition of the label.
+    - >-
+      `off_topic_drift`, because the answer is about a different subject from the question that was asked.
+    - >-
+      `over_refusal`, because the system had no evidence and a correct system would have declined instead.
+    - >-
+      A retrieval miss first and only then an answer fault, because the passages did not contain the salary
+      band — the generation half is downstream of a retrieval that already failed.
+  correct: 3
+  explanation: >-
+    Labelling it `ungrounded` alone sends the ticket to the wrong team. The expense policy does not contain
+    the salary band, so no amount of grounding would have produced a correct answer; the fix belongs in
+    retrieval. The answer-side label is true but it is not the one that routes the work, which is why the
+    chain in the lesson names a retrieval slice alongside the four shipped answer labels.
+
+- id: q3
+  question: >-
+    On the preset page the panel reads *Ungrounded answers the judge missed (5)* and lists g07, g13, g15,
+    g18 and g20 for variant B with the plain grounding judge. What is in that count?
+  options:
+    - >-
+      Five grounded answers the judge failed, which is why the grounded rate reads 80% rather than 55%.
+    - >-
+      Five answers where the judge and the human disagreed in either direction, of which on this
+        configuration all five are false alarms and none is a missed fault.
+    - >-
+      Five items the judge scored five times each and was inconsistent on, since the run holds five repeats
+      per item.
+    - >-
+      Five items whose passages were empty, which is why they appear in the list but not in the grounded
+        tile.
+  correct: 1
+  explanation: >-
+    The count is `human !== judge`, both directions, under a heading that describes only one of them. On
+    variant B with this judge all five are cases where the judge passed an answer the human failed — the safe
+    direction. A heading you cannot trust to describe a count is the cheapest possible release gate, and it is
+    the reason the lesson reads the confusion table instead of the list.
+
+- id: q4
+  question: >-
+    Answer g02 says `at most 10 unused days` where the retrieved passage says `at most 5 unused days`. You
+    have both strings in the run record. What is the cheapest defensible check?
+  options:
+    - >-
+      Send the question, the passage and the answer to `Qwen3 1.7B · Plain` at $0.02244 a call and gate on
+      the verdict, so the check scales to claims an extractor would miss.
+    - >-
+      Assert the extracted number in the answer equals the extracted number in the passage, which is the
+      check from Module 3 and costs nothing to run on every item.
+    - >-
+      Run the check on a tenth of items each week so the judge cost stays bounded, and treat the rest as
+      covered by the retrieval recall number.
+    - >-
+      Ask a reviewer to confirm both numbers once a week, because a code check on one field cannot see the
+      other claims in the same answer.
+  correct: 1
+  explanation: >-
+    Both strings are already in the run record, so this is a string comparison, and the assertion catches every
+    occurrence of this fault rather than one item a week. The judge is what you spend on the claims an
+    extractor cannot reach — the cost ordering from Module 3 does not change when the system becomes a RAG
+    system.
+
+- id: q5
+  question: >-
+    You take the first 14 items as a dev set. It holds 3 retrieval misses (21.4%); the 6 items you held back
+    hold 3 more (50.0%). What does that say about the dev set?
+  options:
+    - >-
+      It under-represents the failure you are trying to catch by about half, so a metric tuned on it will look
+      better on dev than the product can deliver — size the set for the category, not for the total.
+    - >-
+      The two halves are balanced by construction, because the ratio is a property of the split and not of the
+      items themselves.
+    - >-
+      It shows the dev set is too small for any rate to be meaningful, and the fix is a larger sample rather
+      than a stratified one.
+    - >-
+      It shows retrieval misses belong in a separate eval set, because mixing them with answerable questions
+      always halves the measured rate.
+  correct: 0
+  explanation: >-
+    The counts are balanced; the *rates* are not, and the rate is what a metric reads. Twenty-one percent
+    against fifty percent means a ground rate learned on the dev half will be optimistic by construction.
+    Stratification from Module 4 is the fix: keep the category proportions you expect in production, which
+    this dataset does not have.

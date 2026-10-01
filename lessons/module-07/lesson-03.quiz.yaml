@@ -1,17 +1,17 @@
 - id: q1
   question: >-
-    You are migrating from a Llama-family system to a Qwen-family candidate and validating the change with an
-    LLM judge. What does self-preference risk here, and what is the cheapest fix?
+    You are migrating from a Llama-family system to a Qwen-family candidate and validating the change with a
+    Qwen-family LLM judge. What does self-preference risk here, and what is the cheapest fix?
   options:
     - >-
       Nothing, because the candidate is a different model from the incumbent and the judge only ever sees the
       answers, not which model wrote them.
     - >-
-      The judge may be more generous toward answers written by its own family, so pick a judge from a family
-      other than the candidate's before the migration comparison is read as symmetric.
+      The judge is more generous toward answers written by its own family, so the incumbent's score is an
+      upper bound and you should pick a judge from a family other than the candidate's before reporting.
     - >-
-      The judge will prefer the candidate because it is newer, so run the comparison twice and average the
-      two pass rates before reporting anything.
+      The judge will prefer the candidate because it is newer, so run the comparison twice at different seeds
+      and take the majority before reporting anything.
     - >-
       The risk only applies to pairwise comparisons, so keep the migration study on a binary per-category
       judge and the family question disappears.
@@ -23,74 +23,70 @@
 
 - id: q2
   question: >-
-    A comparison of two candidate models under your judge shows the incumbent at 90% and the candidate at
-    70%. You have measured that two runs of the identical judge on 57 items differ by 12 points. What does
-    that establish?
+    You want to measure self-preference on your own judges. Which comparison isolates it?
   options:
     - >-
-      The 20-point gap is larger than the noise floor, so the incumbent really is better and the migration
-      should not go ahead.
+      Score one system's answers with two same-family judges of different sizes and take the average, so the
+      size effect cancels out.
     - >-
-      The 20-point gap is inside the 12-point floor once you account for the interval, so the study should
-      report no difference between the two systems.
+      Score one system's answers with a small judge and a large judge, and attribute the difference to
+      family, since both come from the same provider.
     - >-
-      The 20-point gap is larger than the floor in size but the wrong test — the floor is measured by
-      re-running one judge, while a family bias is measured by swapping the judge, so you need the swap
-      before either conclusion.
+      Score the same items with the same judge and the same prompt twice, and call the difference between
+      runs a family effect.
     - >-
-      The floor applies only to pass rates, so a 20-point gap in kappa or accuracy should be judged against
-      the raw sample size instead.
-  correct: 2
+      Score the same items with the same judge and prompt under two arms that differ only in the family term,
+      one system from the judge's family and one from another.
+  correct: 3
   explanation: >-
-    The noise floor answers "could this gap be luck?", which is necessary but not sufficient: it does not
-    tell you whether the gap is a bias or the truth. To find out, keep the items fixed and change the
-    judge to one from a different family — if the gap shrinks by more than the floor, the original gap was
-    the judge, not the systems.
+    Only a paired probe holds size, prompt, decoding and item set fixed, leaving family as the only thing that
+    moved. On this lab's own menu the three Qwen-family judges read system C at 35.1%, 26.3% and 15.8%, so
+    any comparison across the menu is measuring size and calling it family.
 
 - id: q3
   question: >-
-    A panel is labelled "self-preference" and reports that the judge passes one system 12.3 points more than
-    another, and a third system 10.5 points less. On which systems did the judge change its mind in the same
-    direction?
+    A family-matched probe moves one system by +10.5 points of pass rate and leaves the other two within 3.5
+    points either way. On the system that moved, the true-negative rate falls from 80.8% to 69.2% and the
+    false alarms rise from 10 to 16. What is the strongest statement that is true?
   options:
     - >-
-      None. The changed items run 12 toward pass on one system and 10 toward fail on another, which is the
-      shape of re-rolling the same judge rather than a property of it.
+      The bias is real in shape and lands where the probe predicted, but at this size the pass-rate change is
+      inside the run-to-run noise floor, so it is a hypothesis rather than a measured effect.
     - >-
-      The first, where 12 items moved toward pass; the other two moved in mixed directions so they are
-      simply noisier samples.
+      The effect is confirmed, because a change of that size in the pass rate cannot be produced by chance on
+      57 items.
     - >-
-      All three, because every difference is larger than the panel's own reported kappa of 0.79.
+      The probe failed, because a family bias should raise the true-negative rate on the matched system rather
+      than lower it.
     - >-
-      The first and third, because the systems involved were written by different model families and family
-      is the only variable that moved.
+      The effect is confirmed, because a falling true-negative rate on one system while the other two improve
+      is the signature of a family prior.
   correct: 0
   explanation: >-
-    A bias has a direction on every system it touches; a re-roll scatters. Three differences of 12.3, 3.5
-    and 10.5 points, with changed items going both ways and sign-test p-values of 0.14, 0.75 and 0.18, are
-    the noise floor of one judge measured against itself — a useful control, and not a measurement of any
-    bias.
+    Two runs of this judge differ by 12 to 14 points of pass rate on 57 items about one time in twenty, and
+    the sign test on the pass-rate change is p = 0.29 — so the shape is right and the size is not yet
+    established. The TNR fall is the reason to keep probing; it is not by itself proof the magnitude is real.
 
 - id: q4
   question: >-
-    Your judge is 3B, your candidate system is 7B, and both come from the same family. Someone proposes
-    upgrading the judge to a 14B model to remove any self-preference. What is the problem with that plan?
+    The same probe gives +26.3 points on the 57 dev items, with fifteen of fifteen changed items moving toward
+    pass. On the 37 held-out items the identical comparison moves five items and lands at +2.7. What do you
+    write in the migration study?
   options:
     - >-
-      A 14B judge will be slower and more expensive, but it is the only change that can separate family from
-      size once the two are confounded in the menu.
+      The +26.3 figure, because the held-out split is only 37 items and the dev set is the larger and more
+      representative sample.
     - >-
-      Self-preference scales with size rather than with family, so the upgrade is directionally right and
-      only the price is wrong.
+      Neither, because a family prior cannot be measured inside a single lab and the result should be
+      discarded until a real judge model is available.
     - >-
-      Nothing is confounded, because the judge menu on this lab contains five distinct families and one can
-      always pick a rung where only size differs.
+      Both figures, with the split named, and a recommendation to change the judge family — since the shape
+      held on both splits while the size held on neither consistently.
     - >-
-      Size and family are confounded across the judge menu, so upgrading within the same family moves both
-      at once and attributes nothing; the fix is a judge from another family, not a bigger one.
-  correct: 3
+      The dev figure at five repeats and the held-out figure at five repeats, averaged, because averaging the
+      two splits is the standard way to report an effect size.
+  correct: 2
   explanation: >-
-    Across this lab's five-rung ladder the biggest kappa step, 0.61 to 0.79, is also the step where the
-    family changes, which is the clearest demonstration that the two move together. A larger judge from the
-    same family keeps the confound and enlarges the bill; a judge from a different family removes it for the
-    price of one config line.
+    The probe predicted where the effect would land and it landed there, so the mechanism is credible; the
+    held-out split is where the magnitude fails to reproduce. Reporting both is the honest position, and the
+    fix that costs nothing — a judge from another family — is available whether or not the size ever settles.

@@ -71,7 +71,15 @@ function presetsFor(sim) {
   const src = readFileSync(file, "utf8");
   const block = src.match(/const PRESETS\s*=\s*\{([\s\S]*?)\n\};/);
   if (!block) return [];
-  return [...block[1].matchAll(/"([a-z0-9-]+)"\s*:/g)].map((m) => m[1]);
+  // Entries are top-level lines inside the block. Keys may be quoted
+  // ("thumbs-down":) or bare (grounding:); the nested object properties
+  // (variant:, panel:) are indented further and must not be picked up.
+  const keys = [];
+  for (const line of block[1].split(/\r?\n/)) {
+    const m = line.match(/^\s{1,4}["']?([A-Za-z0-9_-]+)["']?\s*:\s*[\[{]/);
+    if (m) keys.push(m[1]);
+  }
+  return keys;
 }
 
 /* ------------------------------------------------------------------ *

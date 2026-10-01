@@ -32,9 +32,9 @@ Your nightly gate says a build failed. The previous night's run of the same buil
 model, same items, same temperature, same everything you wrote down. You re-run it and the gate passes.
 
 The team's conclusion is that the gate is flaky and should be widened. The team's conclusion is wrong, and
-the reason is in [7.3](lesson-03.md): the identical judge, run twice on 57 items, differs by **12.3 points**
-of pass rate. A single verdict is one draw from a distribution, and nobody wrote down the width of that
-distribution.
+the reason is in [7.3](lesson-03.md): two independent single-sample runs of this same judge on the same 57
+items differ by a **median of 3.5 points** of pass rate, and by 10 or more points about one time in twenty.
+A single verdict is one draw from a distribution, and nobody wrote down the width of that distribution.
 
 So the fix looks obvious — ask the judge five times and take the majority — and it does work. It also costs
 five times as much, and it has two properties nobody checks: the gain saturates at two or three repeats, and
@@ -280,9 +280,9 @@ with a 1.00–1.00 interval is a real result rather than an artefact of 37 items
 
 ## Reflect
 
-1. Your gate fails overnight, passes on re-run, and you find that the identical judge on 57 items differs by
-   12.3 points between runs. Write the ticket comment that moves this from "the gate is flaky" to "the gate
-   is under-sampled", including the number you would put in it.
+1. Your gate fails overnight, passes on re-run, and you find that this judge on 57 items differs by 3 to 12
+   points of pass rate between runs. Write the ticket comment that moves this from "the gate is flaky" to
+   "the gate is under-sampled", including the number you would put in it.
 2. On this draw, k = 4 reads a higher kappa than k = 5. Write the two sentences that explain this to a
    teammate who thinks you have found a bug in the lab — and say what you would put in the config so that
    nobody has to be told.

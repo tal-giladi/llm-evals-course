@@ -1,0 +1,119 @@
+- id: q1
+  question: >-
+    On variant A the `Answered anyway` tile reads 0 and `Correctly abstained` reads 1. Reading the answers
+    themselves, variant A still answers two of the three questions that returned no passages. What explains
+    the difference?
+  options:
+    - >-
+      The tile is computed over the shipped `should_abstained` category, and those two items are labelled
+      `ungrounded`, so the tile counts a label while the product keeps fabricating.
+    - >-
+      The tile uses a stricter rule than the answers suggest, and the two extra answers contain no
+      verifiable claim, so they do not count as having been answered.
+    - >-
+      The panel lists only the three zero-passage items, and two of them are duplicated questions, so one
+      answer is being counted twice by the tiles.
+    - >-
+      The tile is right and the answers are not, because a passage count of 0 means the passages were
+      truncated for display rather than genuinely absent.
+  correct: 0
+  explanation: >-
+    The count is over a category, not over behaviour, so relabelling the two items would move the tile without
+    moving the product. This is why the lesson asks for two behavioural counters instead: an answer that makes
+    a claim no passage supports, and an answer that makes no claim at all. Both are computable from the run
+    record without a model, and both make the tile and the traces agree.
+
+- id: q2
+  question: >-
+    Adding "if the passages do not answer it, say so" to the prompt moves the abstention tile but leaves the
+    over-refusal count unchanged at 1 of 14 across all three systems. What does that tell you about the change?
+  options:
+    - >-
+      That it was free, so it should be applied everywhere a retriever can return nothing, without further
+      measurement.
+    - >-
+      That the two rates share a denominator and therefore move together, so an unchanged over-refusal count
+      means the prompt had no effect at all.
+    - >-
+      That it converted one fabrication and did not touch the refusal axis, so the tile that improved is not
+      evidence that the system got safer on the axis that was already quiet.
+    - >-
+      That the over-refusal count is a ceiling on the abstention rate, since every refusal is counted in both
+      columns of the panel.
+  correct: 2
+  explanation: >-
+    One item out of twenty changed, and it changed on the side nobody was watching. The two columns have
+    different denominators and opposite fixes, so one moving while the other holds still is the expected
+    result, not a contradiction. It is also why the change needs its own eval set: one item is not a
+    measurement, and the axis it did not move is the one that shows up as a flattening adoption curve.
+
+- id: q3
+  question: >-
+    Your retriever is tuned never to return an empty array, so on every query it returns its nearest chunk.
+    Which failure above does that make impossible to detect, and which one does it make more common?
+  options:
+    - >-
+      It makes the zero-passage fabrication impossible to detect, and it makes the g16 case — a passage
+      returned that does not answer the question — more common, since a low threshold always returns
+        something plausible-looking.
+    - >-
+      It makes both cases equally detectable, because returning something means the grounding judge always has
+        evidence to work with.
+    - >-
+      It removes the need for an abstention instruction entirely, because a model given a passage will almost
+        always use it.
+    - >-
+      It makes over-refusal impossible, because a refusal only happens when there is nothing to answer from.
+  correct: 0
+  explanation: >-
+    The threshold sets what the empty-retrieval branch of the metric can ever fire on, and a retriever tuned
+    never to return nothing leaves that branch empty in production. The hard case is the one it makes more
+    frequent: a wrong-but-confident chunk that looks like evidence. That is why the eval set needs unanswerable
+    questions built from real query logs rather than from whatever your retriever happens to reject.
+
+- id: q4
+  question: >-
+    You want a cheap check that catches both a refusal and a fabrication in one pass. Which comes first?
+  options:
+    - >-
+      A per-claim grounding judge with the passages in the payload, because it separates the two cases better
+        than any string comparison on the same items.
+    - >-
+      A second judge with a one-sentence rubric asking whether the system should have answered at all, run
+        alongside the grounding judge on every item.
+    - >-
+      A human review of every answer with no citation, since the two failures share a surface form and only a
+        reader can tell them apart.
+    - >-
+      A string check: extract the answer's claims and check whether any of their content words appear in the
+        retrieved passages, and route a zero-match answer to a separate abstention metric.
+  correct: 3
+  explanation: >-
+    Both failures share one observable property: nothing in the answer traces to a passage. A claim extractor
+    plus a string lookup finds that with no model call at all, and it separates the two cases only by asking
+    the second, cheap question of what happened next. The judge is the fallback for claims the extractor cannot
+    reach, and the cost ordering from Module 3 does not change here.
+
+- id: q5
+  question: >-
+    Your dashboard shows a single "refusal rate" of 4%. Which sentence describes what that number is?
+  options:
+    - >-
+      It is the share of questions the system declined to answer, which is the metric you want and does not
+        need a second number.
+    - >-
+      It is the share of answers containing no claim, averaged over every item, so it blends a fabrication on
+        an unanswerable question with a refusal on an answerable one.
+    - >-
+      It is the share of questions retrieval could not answer, so it measures the retriever rather than the
+        system the user is talking to.
+    - >-
+      It is the share of answers that the grounding judge failed, since a refusal and a fabrication are the
+        same event from the judge's side.
+  correct: 1
+  explanation: >-
+    The two directions have different denominators and opposite fixes, so one blended number can be moved in
+    either direction by editing a single sentence without the product getting better. It is also the
+    denominator trap from Module 4: a rate whose population grows as your eval set grows is a number you are
+    steering rather than measuring. Publish the two counts with their denominators and let the reader see the
+    direction of each.
