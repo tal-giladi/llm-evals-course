@@ -455,18 +455,27 @@ function twoSidedBinomialP(successes, trials) {
  * ------------------------------------------------------------------ */
 
 /**
- * Given a recorded run per item, estimate what a CI gate would do.
+ * Estimate what a release gate would do, from the recorded judge runs.
  *
- * A gate compares the pass rate of the candidate build against the current
- * one. It fires an alert when the drop is larger than a tolerance — so every
- * gate has two failure modes and the lab prices both:
+ * A gate compares the candidate build's pass rate against the current one on
+ * the same items, and fires when the drop exceeds a tolerance. Every gate
+ * therefore has two failure modes, and the lab prices both:
  *
- *   false alarm      — the build was fine, the gate blocked it anyway
- *   missed regression — the build was broken, the gate let it through
+ *   false alarm        — the build was fine and the gate blocked it anyway
+ *   missed regression  — the build was broken and the gate let it through
  *
- * The knobs are the tolerance, the repeats (noise floor) and the sample
- * size (width of the interval). Everything is estimated from the recorded
- * run-to-run spread, so the numbers move when the learner turns a knob.
+ * `runs` is the recorded judge output: `runs[s][i]` is the verdict of repeat
+ * `s` on item `i`. Each trial draws a *fresh* majority verdict per item by
+ * sampling the recorded repeats, which is what makes the RNG matter and what
+ * makes `repeats` a real knob — more repeats averages away judge noise, so
+ * the gate both fires less spuriously and misses less.
+ *
+ * `regressionCount` items are flipped to fail in the candidate build. It
+ * defaults to a tenth of the set, because that is what a real regression looks
+ * like: a prompt or model change breaking one category of question, not one
+ * unlucky item. A single planted item on a large set is a drop of a percent
+ * and no sane tolerance will ever see it, which is a result worth being able
+ * to show.
  */
 export function simulateGate(runs, opts) {
   const {
@@ -474,49 +483,51 @@ export function simulateGate(runs, opts) {
     repeats = 1,
     n = null,
     seed = 777,
-    regressionIndex = null, // which item index carries a planted regression
+    regressionIndex = 0,
+    regressionCount = null,
+    trials = 400,
   } = opts;
 
-  const items = n ?? runs.length;
+  const numRuns = runs.length;
+  const items = n ?? runs[0].length;
   const rng = mulberry32(seed);
 
-  const drawPassRate = (runIdx) => {
+  const broken = regressionCount ?? Math.max(1, Math.round(items * 0.1));
+  const brokenIdx = new Set();
+  if (regressionIndex !== null && regressionIndex !== false) {
+    for (let k = 0; k < broken && k < items; k++) {
+      brokenIdx.add((regressionIndex + k) % items);
+    }
+  }
+
+  /** One majority verdict vector, drawn item by item from the recorded repeats. */
+  const drawPassRate = (applyRegression) => {
     let ones = 0;
     for (let i = 0; i < items; i++) {
-      const r = runs[(i + runIdx) % runs.length];
-      ones += r[i] ? 1 : 0;
+      if (applyRegression && brokenIdx.has(i)) continue; // counted as a fail
+      let hits = 0;
+      for (let r = 0; r < repeats; r++) {
+        hits += runs[(rng() * numRuns) | 0][i] ? 1 : 0;
+      }
+      if (hits * 2 > repeats) ones++;
     }
     return ones / items;
   };
 
-  // Run-to-run spread from the repeated judge samples we already recorded.
-  const trials = 400;
-  const healthyDrops = [];
+  let firedHealthy = 0, firedBroken = 0;
   for (let t = 0; t < trials; t++) {
-    const a = drawPassRate(0);
-    const b = drawPassRate(t % runs.length);
-    healthyDrops.push(a - b);
-  }
-
-  let fired = 0, missed = 0;
-  const withRegression = regressionIndex !== null;
-  for (let t = 0; t < trials; t++) {
-    const before = drawPassRate(0);
-    const afterRuns = runs.map((r) => r.slice());
-    if (withRegression) {
-      const idx = regressionIndex % items;
-      for (const r of afterRuns) r[idx] = 0;
-    }
-    const after = drawPassRate(t % runs.length);
-    const fires = before - after > tolerance;
-    if (fires) fired++;
-    if (withRegression && !fires) missed++;
+    const before = drawPassRate(false);
+    const afterHealthy = drawPassRate(false);
+    if (before - afterHealthy > tolerance) firedHealthy++;
+    const afterBroken = drawPassRate(true);
+    if (before - afterBroken > tolerance) firedBroken++;
   }
   return {
-    falseAlarmRate: fired / trials,
-    missedRate: withRegression ? missed / trials : null,
+    falseAlarmRate: firedHealthy / trials,
+    missedRate: brokenIdx.size ? 1 - firedBroken / trials : null,
     n: items,
     repeats,
     tolerance,
+    brokenItems: brokenIdx.size,
   };
 }

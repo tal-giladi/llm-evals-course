@@ -1,0 +1,117 @@
+- id: q1
+  question: >-
+    You redraw the 47/47 partition twelve times. The paired difference is +26.6 every time; the unpaired
+    difference runs 21.3 to 40.4. Why can the paired answer not move?
+  options:
+    - >-
+      The paired estimate averages over every item in both arms, and every partition contains all 94, so
+      the number is a property of the item set rather than of a draw.
+    - >-
+      The paired estimate is fixed because the bootstrap is seeded, and a seeded estimator returns the same
+      answer whatever the data are partitioned into.
+    - >-
+      The paired estimate cannot move because the two systems' rates are fixed, while the unpaired version
+      re-runs the judge on each partition and therefore picks up verdict noise.
+    - >-
+      The paired estimate is fixed because it rounds to one decimal place, and a range of 0.1 points is
+      smaller than the rounding step.
+  correct: 0
+  explanation: >-
+    Both systems answer all 94 items in every partition, so the paired difference is a summary of the whole
+    set. The unpaired figure answers each system on 47 items and is therefore a random variable — and the
+    width of that spread is the real cost of splitting, not the variance factor.
+
+- id: q2
+  question: >-
+    A variant passes exactly 9 of 94 items. An unpaired 47/47 split leaves it measured on anywhere from 1 to
+    7 of those passes, and one partition prints a 2.1% pass rate for it. What is the right reading?
+  options:
+    - >-
+      The system got worse in that partition, because a 2.1% pass rate is seven times lower than the 9.6%
+      it reads on all 94 items.
+    - >-
+      The system's true rate on 94 items is 9.6%; the 2.1% is what a rate measured on a single passing
+      item looks like, which is why weak systems need far more items before their rate means anything.
+    - >-
+      The partition was unlucky and should be redrawn until the rate is within a point of 9.6%, because the
+      goal of an A/B test is to produce a stable headline number.
+    - >-
+      The judge is inconsistent, because it passed the same variant on 7 items in one partition and 1 in
+      another without anything changing.
+  correct: 1
+  explanation: >-
+    A rate's denominator is the number of events behind it, and a 47-item split leaves a 9.6% system with
+    one to seven events. Redrawing until the number looks right is the step that turns a measurement into a
+    search, and the instability is in the sample rather than in the judge, which did not re-run at all.
+
+- id: q3
+  question: >-
+    The panel prints `0.000` for a 35-against-10 split and `0.344` for a 7-against-3 split. What is the
+    tile reporting?
+  options:
+    - >-
+      The probability that the two systems really are identical, so 0.000 would mean you can rule that out
+      with 99.9% confidence.
+    - >-
+      The probability that the observed difference is the true difference, which is why 0.344 means only a
+      third of your measurement is trustworthy.
+    - >-
+      The chance of a split at least this lopsided if the two systems were interchangeable on the items
+      where they disagree — a rate under a named null, not a probability that the null is true.
+    - >-
+      The share of items whose verdicts changed, expressed as a probability so that small shares are easier
+      to compare against a threshold.
+  correct: 2
+  explanation: >-
+    A p-value conditions on a hypothesis and reports how surprising the data would be if it held, so it
+    never inverts into a statement about the hypothesis. Presenting it as a confidence level is the most
+    common way a measured result turns into an unearned one, and the tile prints no hypothesis beside it for
+    exactly that reason.
+
+- id: q4
+  question: >-
+    A and A-padded come out +8.1 points with an interval of `0.0 to 16.2` and `p 0.250` on 37 held-out
+    items, with three flips and none against. What does that run license you to say?
+  options:
+    - >-
+      The padded variant is better, because every flip went in its favour and the interval's upper end is
+      above zero.
+    - >-
+      The difference is at least 8 points, because the point estimate is the best available estimate when
+      the interval is inconclusive.
+    - >-
+      Nothing at all should be published, because a p-value above 0.05 means the comparison was invalid and
+      the run should be repeated until it clears the threshold.
+    - >-
+      Nothing directional: three disagreements is not enough for either statistic to say anything, and the
+      lower end sitting at exactly zero is the page declining to claim otherwise.
+  correct: 3
+  explanation: >-
+    Failing to reject is a statement about the size of the evidence, not about the size of the effect, and
+    the point estimate of a noisy difference is not a smaller version of the truth — it is the centre of a
+    range that includes the possibility of no change at all. Repeating a run until it crosses a threshold is
+    how a non-result becomes a result in the release notes.
+
+- id: q5
+  question: >-
+    A runbook records `p = 0.000, significant` for a release comparison and no reviewer asks what the number
+    was computed against. Which failure is most likely to follow?
+  options:
+    - >-
+      The team rejects a real improvement later, because a bare p-value invites a reader to treat anything
+      above 0.05 as proof the change did nothing.
+    - >-
+      A later reviewer reads 0.000 as near-certainty and reports it as the probability that the change is
+      safe, which is a question the statistic was never answering.
+    - >-
+      The team reruns the comparison at a different item count and gets a different p-value, which they take
+      as evidence the first run was wrong rather than as the usual sampling variation.
+    - >-
+      The gate blocks every release, because a significant result on a small slice is usually driven by a
+      handful of items rather than by a real effect.
+  correct: 1
+  explanation: >-
+    A p-value is a probability about data under a hypothesis, and reading it as a probability about the
+    hypothesis is the standard inversion — a value displayed as 0.000 makes it easy, because the
+    denominator is invisible. The null belongs in the same sentence as the number, which is why the lesson
+    treats writing it down as a required fix rather than a nicety.

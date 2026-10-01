@@ -1,0 +1,212 @@
+- id: q1
+  question: >-
+    Your support agent can issue refunds. Over 200 recorded runs, end-state scoring reads a 92% resolution rate
+    and trajectory scoring reads 61%. Nobody on the team can account for the 31 points. What are they?
+  options:
+    - >-
+      Judge error, because the two rates come from different branches of the scoring code and the trajectory
+      branch is the newer of the two.
+    - >-
+      Runs that reached the right resolution after a step the trace marks wrong — an extra lookup, a retry after a
+      timeout, a write that was made and then corrected — and on a refund-capable agent each one is a candidate
+      for a real side effect, so this is the number to explain before you ship.
+    - >-
+      Sampling noise, because 31 points is comfortably inside a typical interval on a set of 200 items.
+    - >-
+      An artefact of partial credit, because the trajectory score records only the first bad step rather than how
+      many steps were wrong.
+  correct: 1
+  explanation: >-
+    The gap is always the runs the two questions disagree about, and it is only informative once you read the
+    traces. On an agent that moves money those traces carry real refunds and real cancellations, which is why the
+    choice between the two scores is a decision about what you are protecting rather than a question about which
+    number is larger.
+
+- id: q2
+  question: >-
+    You add a check that compares the ordered tool names in each run's trace against the expected list, and put
+    `tool correctness 92%` on the dashboard. It fires on a run that issued an extra read call and stays silent on
+    a run that converted 350 g to the wrong unit. What is wrong with the tile?
+  options:
+    - >-
+      Nothing — the check measures tool names, and a wrong unit is a different metric that belongs on its own
+      tile.
+    - >-
+      The check should compare the tool names as an unordered set, because call order is not part of tool
+      correctness.
+    - >-
+      The 92% is a rate over runs that already contains the failures, and the check is silent on every one of
+      them, so the number reports how rarely the check fires rather than how often the agent is right.
+    - >-
+      The ordered comparison is unsound, because a span's parent links do not reliably record the order the calls
+      happened in.
+  correct: 2
+  explanation: >-
+    A check that fires on very little produces a very high pass rate, and the denominator is what hides it: the
+    failing runs sit inside the 92%. Coverage has to be measured against the failures rather than quoted as
+    accuracy, and on the module's corpus an ordered name check flagged none of the ten wrong-end-state runs,
+    because all ten called the right tools with a wrong argument.
+
+- id: q3
+  question: >-
+    Your agent runs come out of the logging pipeline grouped by user session, so the first 60 of them are one
+    customer's week. You take those as dev and the rest as a held-out set. What does that validation measure?
+  options:
+    - >-
+      Nothing useful until both halves are the same size, so rebalance the draw before you read either pass rate.
+    - >-
+      The agent's generalisation, because each run is scored independently of every other run in the set.
+    - >-
+      Judge variance, so you should re-score both halves with a second judge before trusting either number.
+    - >-
+      The difference between that one customer's intent mix and everyone else's, because their tasks and their
+      tool failures are concentrated in the half you tuned on.
+  correct: 3
+  explanation: >-
+    Runs are independent; the sample is not representative. Grouping by session puts one customer's intents, tools
+    and failures into the dev half, which is the same trap as splitting a sorted list in the middle. Shuffle
+    first, check what share of the rare failure class landed on each side, and keep the seed in the config.
+
+- id: q4
+  question: >-
+    To stress-test a booking agent you generate 200 simulated users. Each is shown the agent's first reply and
+    asked what they would say next, and you then ask a model whether the agent's reply handled the user's intent.
+    What have you built?
+  options:
+    - >-
+      A reasonable first pass, because the simulator was given the same policy document the agent itself sees, so
+      the two stay aligned.
+    - >-
+      A valid multi-turn eval, because a simulated user is deterministic once its prompt and temperature are
+      pinned.
+    - >-
+      A closed loop, because a model writes the user, defines the intent and judges the reply, so nothing in the
+      number is anchored to a real user and more repeats will not fix that.
+    - >-
+      A lightweight user study, because each simulated user forms its intent only after seeing a real agent
+      reply.
+  correct: 2
+  explanation: >-
+    Repeats narrow sampling variance and do nothing about an instrument's bias, so this is not a sample-size
+    problem and more simulated users make it worse rather than better. The way out is the one this module keeps
+    proposing: label a small set of real turns by hand, measure the simulator against those labels, and read the
+    agent's score only afterwards.
+
+- id: q5
+  question: >-
+    Your per-step metric scores a run 0.00 whether the agent was wrong on its only step or wrong on the last of
+    three, and the dashboard shows that 0.00 next to a run it gave 1.00. What do you add?
+  options:
+    - >-
+      The first bad step's index and text on every failing run, because the score alone cannot tell a run that
+      never worked from one that worked and then broke.
+    - >-
+      A higher threshold on the per-step score, so partially correct runs stop being reported as complete
+      failures.
+    - >-
+      A replacement of the per-step metric with binary trajectory scoring, which has no partial credit to
+      misreport.
+    - >-
+      An interval on the per-step mean, so the mean of per-run ratios can be compared against the pooled step
+      ratio.
+  correct: 0
+  explanation: >-
+    Partial credit tells you a run failed; only an index tells you where, and the index is what turns a number
+    into a ticket with an owner. Adding an interval would not help either: the value is a mean of per-run ratios
+    rather than a proportion of successes, which is why the lab prints a dash in that column instead of a number.
+
+- id: q6
+  question: >-
+    Your nightly agent eval covers 200 runs averaging four tool calls each. End-state scoring needs one verdict
+    per run and trajectory scoring needs one verdict per step. What changes?
+  options:
+    - >-
+      From 200 verdicts to 400, a factor of two, because the final answer span is scored apart from the tool
+      calls.
+    - >-
+      Nothing, because one trajectory verdict reads the whole run in a single call and the step count does not
+      enter into it.
+    - >-
+      From 200 verdicts to 800, which makes the nightly job too expensive to run at any judge price.
+    - >-
+      From 200 verdicts to 800, a factor of four, touching every tool call in every run, while a name-and-count
+      comparison over those same 800 spans needs no model at all.
+  correct: 3
+  explanation: >-
+    The multiplier is the mean number of steps per run, and it is why trajectory scoring is a decision rather
+    than an upgrade. The useful move is to spend it in cost order — name, count and schema comparisons first, a
+    judge only for what is left — and to price that judge on your own prompts, since the volume ratio is the part
+    you can read straight off your own traces today.
+
+- id: q7
+  question: >-
+    On 40 runs your agent scores 75.0% by end state and 50.0% by trajectory, and the two Wilson intervals
+    overlap. A stakeholder asks whether the 25 points is a real difference or 40 items being too few.
+  options:
+    - >-
+      It must be real, because both rates were computed on the same 40 runs and so cannot be independent samples
+      of anything.
+    - >-
+      Pair the two scores run by run: 10 runs disagree and none disagrees the other way, giving −25.0 points
+      with an interval of −40.0% to −12.5%, while the two marginal intervals overlap and cannot settle it alone.
+    - >-
+      It is real, because 25 points is far larger than the few points of run-to-run noise between two repeats of
+      the same judge.
+    - >-
+      It is not evidence, because the two Wilson intervals overlap and an overlap means the difference is inside
+      the noise.
+  correct: 1
+  explanation: >-
+    Overlapping marginal intervals tell you each rate carries the run-to-run difficulty; pairing removes that
+    difficulty and leaves only the runs that actually disagree, here all in one direction. Forty items still bounds
+    the conclusion — it resolves a 25-point gap on this corpus, not a five-point one — but the gap you measured is
+    not an artefact of the sample size.
+
+- id: q8
+  question: >-
+    On 40 runs, twenty have a bad step, and the first bad step is a `search_recipe` call in five of them. In three
+    of those five the tag was one the task never mentioned — `tags=main` for a request about a side, `tags=main`
+    for a request about tacos, `tags=vegetarian` for a gluten-free main. What should the team fix first?
+  options:
+    - >-
+      The query construction that turns a request into search tags, because it is the first bad step in a quarter
+      of all failures and three of those five tags could not have come from any reading of the task.
+    - >-
+      The conversion tool, because a wrong unit is more embarrassing to a user than a wrong search and urgency
+      should decide the order of the work.
+    - >-
+      The final answer prompt, because a better closing message would make the run acceptable even when an
+      earlier step was wrong.
+    - >-
+      The first tool call specifically, since step 1 is the most common first bad step and a lint there catches
+      the largest single group of failures.
+  correct: 0
+  explanation: >-
+    The index plus the step's own text is what makes this decidable: five failures point at one tool, and three of
+    them carry a tag no reading of the task supports, which is a construction bug rather than a matter of taste.
+    Choosing by embarrassment instead of by count, or by position alone, is how a team spends a sprint on a tool
+    that is not where the failures are.
+
+- id: q9
+  question: >-
+    A teammate quotes this course's agent lab as evidence that a quarter of agent runs reach the right answer by a
+    wrong route, and a reader assumes it describes a deployed assistant in production. What is the correction?
+  options:
+    - >-
+      The figure is fine as published, because every statistic on the page is computed in the browser from real
+      recorded verdicts.
+    - >-
+      The figure understates the problem, because runs that ended correctly by a wrong route are counted as
+      end-state passes and should be counted as failures everywhere.
+    - >-
+      The 25.0% is computed on 40 generated educational runs whose end states were authored for teaching, so it is
+      an exact count of that corpus and not a measurement of any deployed system.
+    - >-
+      The figure only supports a claim about three-step runs, because a run with one or two steps has no room for
+      a wrong route.
+  correct: 2
+  explanation: >-
+    The arithmetic on the page is real and exactly reproducible, and that is what makes it a teaching artifact
+    rather than a field measurement: the runs, the spans and the end states were written to make one specific point
+    about end-state scoring. Quote it as what it is, a property of forty generated runs, and the argument it
+    supports carries over to a real system unchanged.

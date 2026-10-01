@@ -1,0 +1,228 @@
+- id: q1
+  question: >-
+    On the module's default preset a candidate passes 27 of 94 items and its baseline passes 52 of 94. The
+    Difference tile reads `+26.6 pts` with a 95% interval of `12.8 to 39.4`, and the panel lists 10 fixed
+    and 35 broke. A reviewer says the candidate "improved by 27 points". What is the correct reading?
+  options:
+    - >-
+      The candidate is 26.6 points worse, and the reviewer's direction is wrong because the Difference tile
+      is computed as baseline minus candidate.
+    - >-
+      The candidate is 27 points better on the items that flipped, and the reviewer used the fixed count
+      instead of the difference.
+    - >-
+      The candidate is 27 points worse, but 35 broke against 10 fixed means the change should be blocked
+      regardless of the sign on the tile.
+    - >-
+      The candidate and the baseline are indistinguishable, because a 26.6-point gap on 94 items is inside
+      ordinary variation for this metric.
+  correct: 0
+  explanation: >-
+    The tile is A minus B, so a positive number names the baseline, and the callout sentence above it names
+    the other system — which is why swapping the two dropdowns is the one-minute check that reveals a sign's
+    orientation. Thirty-five broken items against ten fixed is a separate and equally important fact, but it
+    tells you about the items rather than about the direction of the headline.
+
+- id: q2
+  question: >-
+    You redraw an unpaired 47/47 split twelve times for the same two systems on the same 94 items. The
+    unpaired difference runs 10.6 to 34.0 points. Which statement about that range belongs in a runbook?
+  options:
+    - >-
+      That the systems' difference is somewhere between 11 and 34 points, which is the honest interval the
+      split design produces.
+    - >-
+      That the paired comparison, which stays at 19.2 across all twelve draws, is the estimate to publish
+      and the range is the price of the split design rather than uncertainty in the systems.
+    - >-
+      That the mean of the twelve values, 20.2 points, is the best single estimate of the effect.
+    - >-
+      That the range shrinks as more partitions are drawn, so a hundred partitions would collapse it to the
+      paired figure.
+  correct: 1
+  explanation: >-
+    Each partition is a different experiment, so the spread is variation between experiments rather than
+    uncertainty about one measurement, and averaging the partitions produces a number that was never measured
+    on a set of items. The paired figure is a summary of all 94 items and does not depend on which way they
+    were cut.
+
+- id: q3
+  question: >-
+    A p-value of `0.000` from a 35-against-10 split is copied into a stakeholder deck as "99.9% confident
+    the new prompt is better". What is wrong with that sentence?
+  options:
+    - >-
+      Nothing, provided the split is also printed, since a very small p-value does mean the candidate is
+      very unlikely to be identical to the baseline.
+    - >-
+      It rounds too aggressively, so `0.000` should be printed as `0.00025` before anyone repeats it.
+    - >-
+      It is fine on this pair and wrong in general, because a p-value is only comparable across designs that
+      used the same test.
+    - >-
+      It reads the p-value as the probability that the null is true, which is the direction the statistic
+      never points; the p-value is the rate of this lopsidedness under interchangeability.
+  correct: 3
+  explanation: >-
+    A p-value conditions on a hypothesis and reports how surprising the data would be if it held, so it
+    never inverts into a statement about the hypothesis. `0.000` is also three decimals of formatting rather
+    than three decimals of knowledge, which is why the null belongs in the same sentence as the number.
+
+- id: q4
+  question: >-
+    A gate panel prints `False alarms 0.0%` and `Missed regressions 100.0%`, and all nine grid rows sum to
+    100% at every tolerance. What is the fastest way to describe what the panel is measuring?
+  options:
+    - >-
+      A well-calibrated two-sided test, since complementary rates are what a correct simulator should
+      produce for a gate with two-sided error.
+    - >-
+      One event labelled twice: the simulator writes its planted regression into a copy of the runs that the
+      pass-rate calculation never reads, so both columns describe the healthy build.
+    - >-
+      A gate with an unusually wide tolerance, which is why it fires on nothing at all.
+    - >-
+      A broken grid, because the item-count knob on the panel does not change the headline tiles either.
+  correct: 1
+  explanation: >-
+    Two failure modes on two different builds cannot sum to one by construction, and passing a planted
+    regression index of 0, 7 or none leaves the false-alarm rate identical to the last decimal place. The
+    honest deliverable from a panel like this is a written specification, not a rate anybody should paste
+    into a runbook.
+
+- id: q5
+  question: >-
+    Your gate compares two builds on 94 items with 3 repeats and the paired 95% interval on a real
+    27-point difference is `12.8 to 39.4`. You set the tolerance to 5 points. An engineer is paged roughly
+    every third night by a blocked release that changed nothing. What is the diagnosis?
+  options:
+    - >-
+      The item set has drifted and needs refreshing, since a stable set should produce a stable difference.
+    - >-
+      The tolerance is 38% of the measurement's own half-width, so the gate fires on ordinary
+      run-to-run variation; the fix is more items or a larger tolerance, and the trade has to be written
+      down either way.
+    - >-
+      The judge is unstable and should be replaced, since three repeats should remove run-to-run variation
+      entirely.
+    - >-
+      The gate is correct and the engineer should re-run the eval, because the interval is only about the
+      average difference and not about individual nightly runs.
+  correct: 1
+  explanation: >-
+    A threshold is interpretable only against the width of the quantity it gates, and here the two are the
+    same order of magnitude. More items shrinks the width and a larger tolerance stops firing; what is not
+    available is a setting that improves both rates at once, which is why the two error rates belong in the
+    same paragraph as the threshold.
+
+- id: q6
+  question: >-
+    A release raises the overall pass rate by 0.3 points and raises over-refusals from 6 to 11. Both
+    differences sit inside their intervals. What does the runbook have to contain?
+  options:
+    - >-
+      `Overall: +0.3 points, within the interval, so the change ships; the refusal increase is noise on a
+      six-item base and is noted for later.`
+    - >-
+      `Over-refusals rose by 83%, which is a large relative movement and therefore fails regardless of the
+      absolute count.`
+    - >-
+      `Overall: inconclusive on 94 items. Slice: 11 over-refusals against a floor of 8, so the gate fails on
+      the safety slice while the headline rate is unchanged.`
+    - >-
+      `Overall: inconclusive. Slice: inconclusive. The change may ship pending a larger item set.`
+  correct: 2
+  explanation: >-
+    A pass rate is a sum over a population, and a refusal and a correct answer are the same value in it, so
+    the headline cannot move while the product changes character. The release decision needs both gates
+    reported side by side, with the slice's own denominator and its own threshold, which is the four-number
+    specification the module ends on.
+
+- id: q7
+  question: >-
+    Two candidate systems both refuse 6 of 94 items and share no refusal item. Your slice gate passes both.
+    Which addition makes the gate worth having?
+  options:
+    - >-
+      A second judge, since two systems agreeing on a count usually means the metric is measuring something
+      else.
+    - >-
+      A tighter threshold, so the gate can separate two systems the count cannot distinguish.
+    - >-
+      The refusal item ids in the gate's output, so the gate constrains behaviour rather than a coincidence
+      of totals.
+    - >-
+      The slice rate as a percentage instead of a count, since percentages compare more easily across
+      item-set sizes.
+  correct: 2
+  explanation: >-
+    The count cannot separate two behaviours that happen to total the same, and the ids can. Changing the
+    rendering from a count to a rate makes the number comparable across item-set sizes but does not add a
+    single bit of information about which items were refused.
+
+- id: q8
+  question: >-
+    On the safety panel one variant's row reads `0 over-refusals, 0 wrong, 0%` — the best row on the page —
+    and its human pass rate is 0 of 94. What belongs in its place on the dashboard?
+  options:
+    - >-
+      `Not measured: 0 of 94 items carry a human label for this variant`, because a zero with nothing behind
+      it and a zero from a real finding look identical once they are rendered as a number.
+    - >-
+      The row as it is, with a footnote that the variant is padded, since the padding explains the missing
+      labels.
+    - >-
+      The judge's pass rate for the variant in place of the human labels, since the judge has labels on all
+      94 items and the human set does not.
+    - >-
+      Nothing, because a row of zeros on a safety slice is always good news and never needs investigating.
+  correct: 0
+  explanation: >-
+    Zero events is the output of a measurement that found nothing and of a measurement that looked nowhere,
+    and a dashboard cannot tell them apart. Substituting the judge's rate hides the problem rather than
+    naming it, because the missing thing is a human label, not a verdict.
+
+- id: q9
+  question: >-
+    Over-refusals are 6 of 94 for one system and 10 of 94 for another, with Wilson intervals of 3.0–13.2%
+    and 5.9–18.5%, and the exact two-sided sign test on the paired refusal split gives 0.424. What is the
+    defensible move?
+  options:
+    - >-
+      Set the slice threshold between them, so the gate separates the systems as the raw counts suggest it
+      should.
+    - >-
+      Drop the slice, since a metric whose intervals overlap cannot support a release decision.
+    - >-
+      Keep the slice as a floor on a named denominator — `over-refusals ≤ 12 of 94` — and say in the
+      specification that it is a floor rather than a detector, because the counts are one and seven events.
+    - >-
+      Report the difference of four refusals as a 4.3-point regression, since counts and rates are the same
+      unit on this panel.
+  correct: 2
+  explanation: >-
+    Six and ten on 94 items are one and seven events, and an interval spanning a factor of two cannot
+    separate them. A floor on a named denominator catches a slice that grows as the item set grows, which is
+    the failure worth catching, and the specification says plainly what it cannot see.
+
+- id: q10
+  question: >-
+    Your move `Items` knob from 94 to 40 on the A/B panel and every number stayed exactly the same; doing it
+    on the gate panel left the tiles reading `Items 94`. What is the rule this teaches?
+  options:
+    - >-
+      Knobs should be moved one at a time, since a change in one control can mask the effect of another.
+    - >-
+      The panels always run on the whole set and the knobs are for highlighting, so a runbook should quote
+      94 and note the knob as presentational.
+    - >-
+      Controls in this lab are advisory, so the configuration you type is the configuration that is
+      recorded even when the underlying sample does not change.
+    - >-
+      A control that does not change the quantity it labels is worse than no control, because it supplies
+      false provenance for every number printed beside it.
+  correct: 3
+  explanation: >-
+    A knob that does not move the measurement invites a runbook to describe a run that never happened, and
+    nothing on the page corrects the reader afterwards. Quoting the size the number was actually computed
+    over — and saying so — is what keeps the record honest.

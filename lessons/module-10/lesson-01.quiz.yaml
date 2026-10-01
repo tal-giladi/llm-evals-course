@@ -1,0 +1,118 @@
+- id: q1
+  question: >-
+    On the module's default preset the two systems pass 52 of 94 and 27 of 94 items, the difference tile
+    reads `+26.6 pts` and the panel lists 10 fixed, 35 broke. What is the relationship between those three
+    numbers?
+  options:
+    - >-
+      The difference is exactly `(broke − fixed) / n`, so the two pass rates and the tile are the same
+      measurement twice, and the flip list is the only part that names which items moved.
+    - >-
+      The difference is the average of the two pass rates, and the flip list is a separate sample run on a
+      second set of items to confirm the direction.
+    - >-
+      The difference is the 95% interval width, and the flip list is truncated to the first fourteen rows
+      the panel can render.
+    - >-
+      The difference is the sign-test p-value rescaled to points, which is why it agrees with the fixed and
+      broke counts to one decimal place.
+  correct: 0
+  explanation: >-
+    25 of 94 is 26.6 points, and 25 is also 52 − 27 and 35 − 10. One underlying count is being reported in
+    three forms, so only the list carries information the other two have thrown away — and the truncation
+    the panel prints is only safe because the missing-row count is stated rather than hidden.
+
+- id: q2
+  question: >-
+    A candidate scores `+4.3 pts` against its baseline, the 95% interval runs `-2.1 to 10.6`, and the sign
+    test prints `0.344` on a 7-against-3 split. What does this run support?
+  options:
+    - >-
+      The candidate is better, because the point estimate is positive and every statistic points the same
+      way once you drop the negative end of the interval.
+    - >-
+      Nothing directional: the interval contains zero and the sign test agrees, so the run supports a
+      recorded non-result rather than a release decision.
+    - >-
+      A decision to ship, because ten disagreements is enough for a sign test and it failed to reject.
+    - >-
+      A decision to block, because an interval that reaches 2.1 points below zero is evidence the candidate
+      is worse at least some of the time.
+  correct: 1
+  explanation: >-
+    Both statistics are answers to the same question and both say no: the plausible range of the difference
+    includes zero, and the split of disagreements is what a coin would produce. "We cannot distinguish these
+    two systems on these 94 items" is a result you can put in a release note, and it is more useful six
+    months later than a rounded sign.
+
+- id: q3
+  question: >-
+    On the default preset the panel says `10 fixed, 35 broke`, the ten fixed items are shown in full and
+    fourteen of the thirty-five broken items are shown with a `…and 31 more` line. Which reading is right?
+  options:
+    - >-
+      The truncation is not acceptable because the panel under-reports the change, and the fixed list
+      deserves the first reading because it is the good news for the release.
+    - >-
+      The truncation is acceptable, but only because the Export button writes the full list, so nobody needs
+      to read the rows the panel actually shows.
+    - >-
+      The truncation is acceptable because the count is printed, and the broke list deserves the first
+      reading because every broken item was a working answer that someone will now file a ticket about.
+    - >-
+      Both lists matter equally, so the correct action is to average the two into a single 26.6-point figure
+      before deciding anything about the release.
+  correct: 2
+  explanation: >-
+    A visible count turns a truncation into a disclosure. The asymmetry between the two halves is about
+    cost, not sentiment: a fixed item was already broken and nobody will ever hear about it, while a broken
+    item turns into a support ticket today and is attributed to this release. Export does not rescue the
+    panel — almost nobody exports.
+
+- id: q4
+  question: >-
+    The Difference tile is computed as A minus B, and the preset opens with A on 55.3% and B on 28.7%. A
+    teammate reads the callout above the tiles, which says the interval is above zero and therefore B is
+    better. What is actually on the page?
+  options:
+    - >-
+      The callout is right and the tiles are wrong, because the pass rates are measured before the votes
+      are combined and the difference is measured after.
+    - >-
+      Both are right, because "better" here means "more efficient" and the panel is reporting cost rather
+      than pass rate on this preset.
+    - >-
+      Neither can be relied on, because a signed difference has no fixed orientation on this panel and the
+      runbook must therefore quote the two pass rates instead.
+    - >-
+      A positive difference means A passes more items, so on this preset the callout names the wrong system
+      and swapping the two dropdowns is the one-minute check that reveals which way a signed number runs.
+  correct: 3
+  explanation: >-
+    Twenty-five of 94 items separate the two pass rates, so the positive tile belongs to A, the system at
+    55.3%. A sign error like this does not break the page — it produces a launch — which is why the swap
+    check and the orientation belong in the same sentence as the number rather than in a footnote.
+
+- id: q5
+  question: >-
+    You move the `Items` knob from 94 to 40 and the two pass rates, the difference and the sign-test p all
+    stay exactly where they were. You want to report a 40-item comparison. What happened?
+  options:
+    - >-
+      The panel's item set is fixed at all 94 whatever the knob says, so every number on it is a 94-item
+      number and a runbook quoting 40 is describing a run that was never performed.
+    - >-
+      The bootstrap only resamples the items it was given and 40 of 94 happens to give the same counts, so
+      the coincidence is real and the run is reproducible either way.
+    - >-
+      The knob sets the number of items per repeat, so at 94 it was sampling 94 times and at 40 it samples
+      the same 40 items four times.
+    - >-
+      The knob is disabled on the paired setting and only affects the unpaired split, which is why nothing
+      moved on this preset.
+  correct: 0
+  explanation: >-
+    The sampling call behind this panel asks for the "all" strategy, which returns the whole item list
+    whatever size it is given. That makes a knob that looks like it sizes the comparison into a control
+    that does not change the quantity, which is worse than having none: it supplies false provenance for
+    every number on the page.

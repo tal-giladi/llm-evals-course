@@ -1,0 +1,114 @@
+- id: q1
+  question: >-
+    Two systems both refuse 6 of 94 handbook questions, and the sets of items they refuse have no item in
+    common. A gate reads `over-refusals ≤ 6`. What has that gate established?
+  options:
+    - >-
+      That the two products behave identically on safety, since the gate passes both and the counts agree.
+    - >-
+      That both systems are equally cautious, since they refuse the same number of questions on the same
+      denominator.
+    - >-
+      Nothing about behaviour: the gate passed two systems with identical counts and disjoint contents, so
+      it certifies a coincidence rather than a property.
+    - >-
+      That the refusal slice is too noisy to gate on, so the slice threshold should be widened until it can
+      separate them.
+  correct: 2
+  explanation: >-
+    A threshold on a count constrains a single number, and a single number cannot distinguish two different
+    behaviours that happen to produce it. What makes the gate meaningful is the item list — the difference
+    between always refusing the same six and never refusing the same one twice is invisible at the count and
+    obvious in the ids.
+
+- id: q2
+  question: >-
+    Over-refusals are 6 of 94 for one system and 10 of 94 for another, with Wilson intervals of 3.0–13.2%
+    and 5.9–18.5%. The exact two-sided sign test on the paired refusal split gives 0.424. What follows?
+  options:
+    - >-
+      Nothing directional: the intervals overlap and the paired split is 9 against 5, so the counts are not
+      evidence that the systems differ on this slice.
+    - >-
+      The 10-refusal system refuses significantly more often, because four extra refusals on 94 items is a
+      large enough difference to act on.
+    - >-
+      The slice gate should be set to 8 of 94, which splits the two systems and therefore detects the
+      difference the interval says is not there.
+    - >-
+      The slice should be dropped, because a metric whose intervals overlap cannot be used to gate a
+      release.
+  correct: 0
+  explanation: >-
+    Six and ten on 94 items are one and seven events, and an interval that spans a factor of two cannot
+    separate them. The response to a wide interval is a looser threshold on a count and a larger slice —
+    both cheap — rather than deleting the only measurement that would have caught a caution regression.
+
+- id: q3
+  question: >-
+    A variant's row on the safety panel reads `0 over-refusals, 0 wrong, 0%`, which is the best row on the
+    page. Its human pass rate is 0 of 94. What is the row actually reporting?
+  options:
+    - >-
+      A panel bug, since the judge passes 51.1% of this variant's answers and a passing answer cannot be a
+      refusal.
+    - >-
+      A system with no human labels on any of its 94 items, so every count on the row is zero because
+      nothing was measured rather than because nothing was found.
+    - >-
+      A system that is safe and wrong in ways the slice does not cover, because inventing a policy and
+      answering correctly both count as not-refusing.
+    - >-
+      A system whose refusals have been reclassified as `wrong_fact`, which is why the second column is
+      also zero.
+  correct: 1
+  explanation: >-
+    Zero events is the output of a measurement that looked nowhere as readily as one that found nothing, and
+    a dashboard cannot tell them apart — which is why the honest rendering is *not measured, 0 of 94 items
+    labelled* rather than a row of zeros. A number that cannot fail is a number that will eventually be
+    trusted.
+
+- id: q4
+  question: >-
+    Of a baseline system's six over-refusals, exactly one appears on the A/B panel's `broke` list. What does
+    that tell you about using the flip list to catch refusal regressions?
+  options:
+    - >-
+      That refusals are under-reported by about five sixths, so the list should be supplemented by a count
+      over the whole item set rather than a delta between two runs.
+    - >-
+      The list is truncated at fourteen rows and the other five would appear if the truncation were lifted.
+    - >-
+      That the judge cannot detect refusals, since it passed 48 of this baseline variant's 94 answers.
+    - >-
+      Nothing, because five of the six are items the baseline also failed and therefore never changed
+      verdict, so a pass/fail flip list is structurally blind to them.
+  correct: 3
+  explanation: >-
+    The five items are missing because no verdict moved, not because the list was shortened, so no amount of
+    scrolling finds them. A pass/fail flip list reports differences and a slice reports state, and a
+    regression on something the baseline was already bad at is exactly the case where the first cannot help.
+
+- id: q5
+  question: >-
+    You are adding a safety slice as a second gate. Why is its threshold looser, in counts, than the overall
+    gate's tolerance in percentage points?
+  options:
+    - >-
+      Because a slice rate is a proportion of a smaller denominator, so the same number of points is a
+      larger relative movement and needs a wider absolute tolerance.
+    - >-
+      Because the overall gate already covers the slice, and a looser threshold stops the two gates from
+      firing on the same change twice.
+    - >-
+      Because slice metrics are computed with a different, less accurate method that needs more slack to
+      avoid false alarms.
+    - >-
+      Because a slice count moves only when that slice moves, so a single-item change in a six-item count
+      swings it by seventeen percent and the tolerance has to allow for that.
+  correct: 3
+  explanation: >-
+    A total moves when anything moves; a six-item count moves when one of those six items changes, which is
+    a seventeen-percent swing on the smallest slices you would gate. Setting the slice threshold to the
+    same absolute tolerance as the total reproduces exactly the false alarms the overall gate was already
+    tuned to remove.

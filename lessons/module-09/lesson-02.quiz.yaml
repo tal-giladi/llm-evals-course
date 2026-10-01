@@ -1,0 +1,95 @@
+- id: q1
+  question: >-
+    Run `a22`'s task is *Convert 350 g of flour to cups* and its single tool step is `convert_units(350 g→oz)`.
+    Which check should catch it?
+  options:
+    - >-
+      A per-step judge rubric, because whether ounces is acceptable depends on what the recipe author intended
+      and only a model can read that intent.
+    - >-
+      An assertion comparing the unit in the recorded call against the unit the task names, which is one string
+      comparison and fails the same way every night.
+    - >-
+      No check, because the run scored as a pass under end-state scoring and that is the number the dashboard
+      reports.
+    - >-
+      A lookup in a flour density table, because converting grams to cups always needs a density before any unit
+      can be checked.
+  correct: 1
+  explanation: >-
+    The task string names the target unit and the span carries a different one, which is the whole 3.1 case
+    case: decidable, so it is an assertion. The density lookup is for a real conversion, not for noticing that
+    the agent asked for the wrong unit, and the end-state score never sees either. Asking a model here buys a
+    slower, less certain answer to a question you can answer exactly.
+
+- id: q2
+  question: >-
+    A tool check that compares only the **set** of tool names a run called, ignoring order and count, passes all
+    40 runs, with a Wilson interval of 91.2%–100.0%. What does that number tell you?
+  options:
+    - >-
+      The agent's tool selection is solved, so the remaining work on this agent belongs to the answer side rather
+      than the action side.
+    - >-
+      The check is broken, because a check that passes every single run is almost always reading the wrong field
+      of the span.
+    - >-
+      Every tool the agent used was one the task needed, so the faults in these runs must be in the numbers it
+      passed to those tools.
+    - >-
+      Very little. It fires on none of the 20 runs with a wrong step, so the perfect score reports that the check
+      never fired rather than that it works.
+  correct: 3
+  explanation: >-
+    Every task in this corpus needs only the tools the agent actually used, so the set-only comparison is true on
+    all 40 runs including all ten that ended in the wrong state. A check that never fires produces a perfect
+    score, and a perfect score with no failures in its denominator is indistinguishable from a check that works —
+    which is why coverage has to be measured against the failures, not quoted as accuracy.
+
+- id: q3
+  question: >-
+    A trajectory failure survives the name, count, schema and reference checks, because whether it was wrong
+    depends on what the tool would have returned and the eval record does not hold the tool's output. What now?
+  options:
+    - >-
+      Judge that step, and measure the judge's agreement on a labelled handful of steps like it before you let it
+      gate anything.
+    - >-
+      Drop the failure from the eval, since a step nobody can score cannot contribute to a rate and unscored
+      steps are just noise.
+    - >-
+      Add a fifth tool-name check, since a fault that survives four checks is probably another tool-selection
+      error that the first check misread.
+    - >-
+      Mark the run as passing, because a step that cannot be shown to be wrong is not evidence that the run
+      failed.
+  correct: 0
+  explanation: >-
+    This is the boundary between the 3.4 cost ordering and the rest of the ladder: the answer depends on
+    state the eval does not hold, so it is a judgement, and a judgement is an instrument with its own error rate.
+    The fix for that is not to skip the step and not to guess — it is to label a handful by hand and measure the
+    judge against them, which is what the TPR and TNR procedure is for.
+
+- id: q4
+  question: >-
+    Your dashboard reports `tool correctness 85.0% (70.9%–92.9%)`, from an ordered tool-list check over 40 runs.
+    What is wrong with quoting the number that way?
+  options:
+    - >-
+      Nothing, but the gate should use the lower end of the interval, since 70.9% is the conservative reading of
+      the same 34 runs.
+    - >-
+      Ordered comparison is not a sound check, because a span's parent field does not reliably record the order
+      in which the calls happened.
+    - >-
+      The denominator is the problem. Twenty of the 40 runs already end wrong, and the ordered tool list is
+      correct on all ten of those, so the check stays silent on 14 of the 20 failures it appears to measure.
+    - >-
+      The rate is computed over runs when it should be computed over the 91 `execute_tool` spans, because a run
+      with three calls carries three chances to be right.
+  correct: 2
+  explanation: >-
+    The 85.0% is true and it hides the thing you built the check to find: the ten runs that reached the wrong end
+    state all called the right tools the right number of times, with a wrong argument. The span order is fine —
+    it comes from the parent links a trace reader follows, and per-call coverage is what the
+    91-comparison count is for, not a different denominator.

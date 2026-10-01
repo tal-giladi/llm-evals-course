@@ -1,0 +1,94 @@
+- id: q1
+  question: >-
+    Twenty of the 40 runs have a bad step, and the first bad step falls on position 1 in 7 of them, position 2 in
+    10 and position 3 in 3. Your colleague proposes a CI lint on the agent's first tool call. What does it catch?
+  options:
+    - >-
+      Seven of the twenty failures, 35.0% with an interval of 18.1%–56.7%, which is the largest single position
+      and still a minority of the failures you would be shipping past.
+    - >-
+      All twenty failures, because an agent that gets a step wrong always gets its very first step wrong before
+      recovering.
+    - >-
+      Nothing useful, because the step index only records where the run stopped being scored and carries no
+      information about the calls themselves.
+    - >-
+      Seventeen of the twenty failures, because a wrong first call usually forces a wrong second call as well.
+  correct: 0
+  explanation: >-
+    The distribution is 7 / 10 / 3 over the twenty failing runs, so the first position is the largest but a
+    minority, and with ten of the faults at position 2 the interval on seven out of twenty runs from 18% to 57%.
+    An index is a position, not a cause — position 2 is a scaling call in three of those ten and something else in
+    the rest, so a single lint routes only part of the work.
+
+- id: q2
+  question: >-
+    The per-step metric scores `a22` (one step, wrong) and `a33` (three steps, third one wrong) both at 0.00, and
+    the panel prints no interval for that row. What is the honest reading?
+  options:
+    - >-
+      The metric is broken, because a run that got two thirds of the way should not score the same as one that
+      never started.
+    - >-
+      Both runs really did fail completely, and the 0.00 is a correct summary of each of them taken on its own.
+    - >-
+      The interval is omitted because the score is a mean of 40 per-run ratios rather than a proportion of 40
+      successes, and the same runs also give 62 of 91 = 68.1% pooled — a different question.
+    - >-
+      The 0.00 is a rounding artefact, because per-run ratios are only ever reported to two decimal places.
+  correct: 2
+  explanation: >-
+    Partial credit collapses "never worked" and "worked and then broke" into the same number, and only the step
+    index separates them — `a33` got the search and the first conversion right. The missing interval is not a bug
+    either: a Wilson interval describes a proportion of independent trials, and a mean of ratios over 40 runs is a
+    different object, which is exactly what the `—` in the interval column is telling you.
+
+- id: q3
+  question: >-
+    Your failure list shows a step index and the text of the step. Run `a34` has its first bad step recorded as the
+    `search_recipe(tags=main)` at position 1, while the ordered tool check from lesson 09.2 fires on the extra
+    `read_recipe` at position 3. What does the list need?
+  options:
+    - >-
+      Nothing further, because the first bad step is by definition the only fault in a run and position 3 is
+      downstream of it.
+    - >-
+      Only the run id, because the step index already identifies the fault and a second field would be
+      redundant.
+    - >-
+      The end state, so the reader can tell whether the user was harmed even when the index points at an early
+      step.
+    - >-
+      The whole step list alongside the index, because the first bad step is a location and not a description of
+      everything that went wrong in the run.
+  correct: 3
+  explanation: >-
+    The first bad step is the first one. A run can go wrong twice, as `a34` does, and a list carrying only the
+    first index will file that ticket against the search layer when the tool check is pointing at the read tool.
+    Showing the whole step list costs a few bytes per run and stops the two views of the same run from looking like
+    two views of the same fault.
+
+- id: q4
+  question: >-
+    You build the step taxonomy by reading the 20 failing runs and get five labels: `scale_quantities` 5,
+    `convert_units` 5, `search_recipe` 5, `set_timer` 3, `read_recipe` 2. Then you validate on a held-out half of
+    the corpus and the same five labels appear, with `read_recipe` absent from dev and appearing twice in the
+    held-out half. What has the validation shown?
+  options:
+    - >-
+      That the agent fails at a given step more often than at any other, since the held-out half reproduced the
+      distribution.
+    - >-
+      That the taxonomy covers the population of failures, which is a claim about label coverage and does not need
+      an interval.
+    - >-
+      That the per-step metric's mean is stable across splits, so it can safely be used as a release gate.
+    - >-
+      That the hand labels are correct, because agreeing with the held-out distribution is what validates a label.
+  correct: 1
+  explanation: >-
+    A held-out split can tell you whether your label set reaches the failures you have not seen, and it does here:
+    one tool was missing from dev entirely and turned up twice in the tail. It cannot tell you anything about a
+    rate — the mean first-bad-step position moved from 2.00 to 1.60 on ten failures per half, which is far too
+    small a difference to act on — and it does not validate the labels themselves, since the dataset supplied
+    those indices.

@@ -1,0 +1,121 @@
+- id: q1
+  question: >-
+    Run `a39` is *Scale the French onion soup to 4*. The agent calls `scale_quantities(4→8)` and then
+    `scale_quantities(8→4)`, and the task ends correctly. Your scaling tool appends to an order draft rather
+    than overwriting it, so the doubled draft is still on file. Which scoring catches this?
+  options:
+    - >-
+      Trajectory scoring, because the end state is right and only the per-step check can see the extra write the
+      agent made on the way there.
+    - >-
+      End-state scoring, because the corrected order is what the user eventually receives and the intermediate
+      write was undone before the run finished.
+    - >-
+      Neither one, because a side effect that was undone leaves no evidence in either the final state or the
+      recorded spans.
+    - >-
+      End-state scoring with a stricter threshold, because a higher bar would exclude runs that corrected
+      themselves partway through.
+  correct: 0
+  explanation: >-
+    The whole run is recorded: two `scale_quantities` calls, and the first is the one the dataset marks as bad.
+    End-state scoring looks only at the final number, so the doubled-then-corrected draft is invisible to it —
+    which is exactly why a wrong-route run is the case end-state scoring exists to miss. Thresholds do not help,
+    because the end state here is genuinely correct.
+
+- id: q2
+  question: >-
+    On 40 runs, end-state scoring reads 75.0% (Wilson 59.8%–85.8%) and trajectory scoring reads 50.0% (Wilson
+    35.2%–64.8%). The intervals overlap. A colleague says the 25-point gap is not evidence. What is missing?
+  options:
+    - >-
+      Nothing is wrong with the analysis, because two rates on the same 40 runs can never be separated from each
+      other at this sample size.
+    - >-
+      The two rates are not estimates of the same quantity, so no interval test between them could ever be
+      meaningful however many runs you add.
+    - >-
+      The pairing. Both scores exist on the same runs, and 10 runs disagree in one direction and 0 in the other,
+      which gives a difference of −25.0 points with an interval of −40.0% to −12.5%.
+    - >-
+      A larger held-out set, because the overlap between two marginal intervals always means the underlying runs
+      need to be re-drawn before the gap can be reported.
+  correct: 2
+  explanation: >-
+    Overlapping marginal intervals tell you the two rates each carry the run-to-run difficulty; they do not
+    settle a comparison between two scores read off the same runs. Pairing removes that difficulty, and the ten
+    discordant pairs all go the same way, so the interval on the difference clears zero. The sample size still
+    bounds what you can resolve — it just does not prevent pairing.
+
+- id: q3
+  question: >-
+    An eval set of 40 agent runs arrives as a file. You take the first 20 as dev and the last 20 as held-out,
+    because that is the order they are stored in. Dev end-state reads 20 of 20; the held-out half reads 10 of 20.
+    What has gone wrong?
+  options:
+    - >-
+      Nothing, because 20 of 20 on dev is exactly what a clean agent looks like and the held-out number is just
+      sampling noise.
+    - >-
+      Twenty runs is too small for a Wilson interval on a rate near 1, so both halves are unusable and you need
+      to rerun with 100 items.
+    - >-
+      The held-out half is smaller in effect than dev because it contains the failures, so the comparison is
+      biased toward whichever method looks better on fewer items.
+    - >-
+      - >-
+      The runs are stored in blocks by outcome, so an in-order split puts every pass in dev and every failure in
+      the tail — the dev half contains zero of the ten wrong-route runs, and your gate has never seen them.
+  correct: 3
+  explanation: >-
+    A prefix is not a sample, and nothing on the page tells you a run list is sorted by outcome. Here the dev half
+    holds none of the ten runs that reached the right answer by a wrong route, so the metric you tuned on was
+    measuring a population the held-out half does not contain. A reproducible random draw with the seed in the
+    config fixes it.
+
+- id: q4
+  question: >-
+    You publish end-state 75.0% and trajectory 50.0% on the same 40 runs, and a stakeholder asks for one number.
+    You average them and report 62.5%. What have you done?
+  options:
+    - >-
+      Nothing wrong, because the two rates are two noisy estimates of one underlying success probability and
+      their average is the better estimator of it.
+    - >-
+      Reported a number that describes no run, tool call or user — the mean of two scores computed over two
+      different questions, with no single proportion behind it to put an interval on.
+    - >-
+      Nothing wrong, because the two scoring methods agree on 30 of the 40 runs and averaging rewards that
+      agreement.
+    - >-
+      Produced a number that needs a bootstrap before it can be quoted, because averaging two rates always
+      requires resampling.
+  correct: 1
+  explanation: >-
+    There is no proportion of 40 successes that 62.5% corresponds to, so no interval can describe it. The two
+    scores answer different questions — what the user ended up with, and what the agent did on the way — and the
+    useful move is to publish the pair with its denominators or to pick one and say what you are protecting.
+
+- id: q5
+  question: >-
+    Your agent can write to a production database. On 40 runs, end-state scoring reads 75.0% and trajectory
+    scoring reads 50.0%. Which sentence belongs in the config next to the release gate?
+  options:
+    - >-
+      We gate on trajectory scoring, because the side effects on the way to the answer are what we are
+      protecting. End-state scoring is reported on every run and does not gate.
+    - >-
+      We gate on end-state scoring, because the user only sees the final answer and trajectory scoring is too
+      noisy to gate on at 40 runs.
+    - >-
+      We gate on whichever of the two is higher this quarter, so the gate tracks the agent instead of the
+      requirement.
+    - >-
+      We gate on 62.5%, the average of the two, because a single number is easier to put in front of a
+      stakeholder.
+  correct: 0
+  explanation: >-
+    The gate follows from what the agent can do, not from which number is larger: if the agent writes, the route
+    is the risk, and if it only reads, the end state is the whole story. What makes the choice durable is that it
+    is written down with a target in it, so the next argument about the number starts from the requirement
+    rather than from the last quarter's result.

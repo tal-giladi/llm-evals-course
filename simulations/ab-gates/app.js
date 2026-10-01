@@ -60,11 +60,11 @@ function verdict(itemId, variant) {
 }
 
 function chosen() {
-  const ids = D.dev_ids.concat(D.test_ids);
-  // Sample the item objects, not indices, so the contract of sampleItems
-  // (it groups on item.slice) is never accidentally violated.
+  // "all" short-circuits in sampleItems and returns every index, which made
+  // the Items knob inert. Draw a real sample so the knob does something.
   return sampleItems(
-    D.items, Math.min(state.n, D.items.length), "all", state.seed
+    D.items, Math.min(state.n, D.items.length),
+    state.n >= D.items.length ? "all" : "random", state.seed
   ).map((i) => D.items[i].id);
 }
 
@@ -121,10 +121,12 @@ function abPanel() {
       metricTile({ label: "Sign test p", value: paired.pValue.toFixed(3), note: paired.pValue < 0.05 ? "significant" : "not significant" }),
     ]),
     el("div", { class: "callout" }, [
+      // paired.delta is A − B, so a positive interval means A is the better
+      // system. Reading this as "B is better" was backwards.
       paired.ci.lo > 0
-        ? "The whole interval is above zero: B is better on this set, not just on one lucky draw."
+        ? `The whole interval is above zero: ${label(state.a)} is the better system on this set, not just on one lucky draw.`
         : paired.ci.hi < 0
-          ? "The whole interval is below zero: B is worse on this set."
+          ? `The whole interval is below zero: ${label(state.b)} is the worse system on this set.`
           : el("span", [
               el("strong", { text: "The interval crosses zero. " }),
               "On these items you cannot tell the two systems apart. That is a real answer, and it is the " +

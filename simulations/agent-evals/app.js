@@ -4,8 +4,8 @@
 // done the right thing. End-state scoring is cheap and blind; trajectory
 // scoring is expensive and can catch a run that should have been blocked.
 //
-// Half the runs in this dataset end correctly by a wrong route, which is
-// the case an end-state metric scores as a pass.
+// A quarter of this dataset (10 of 40 runs) ends correctly by a wrong
+// route, which is the case an end-state metric scores as a pass.
 
 import { wilson, pct, pctInterval } from "../common/stats.js";
 import { TraceViewer, el, clear, knob, radioGroup, button, metricTile,
@@ -18,7 +18,9 @@ const PRESETS = {
   "end-state":   { mode: "end" },
   "trajectory":  { mode: "trajectory" },
   "steps":       { mode: "steps" },
-  "trace":       { mode: "trace" },
+  // The trace view is the same scoring as trajectory — it exists so lesson
+  // 09.4 can open straight onto the runs that fail, with the spans on screen.
+  "trace":       { mode: "trajectory" },
 };
 
 const presetName = getPreset() || "end-state";

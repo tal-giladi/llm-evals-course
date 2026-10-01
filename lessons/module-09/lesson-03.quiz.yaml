@@ -1,0 +1,84 @@
+- id: q1
+  question: >-
+    You open the agent-eval lab looking for a multi-turn set to extend. What is actually in the 40 run records?
+  options:
+    - >-
+      Forty multi-turn conversations, each with two to three user messages and a transcript stored per turn.
+    - >-
+      Forty single-shot runs: one task string per run, exactly one `chat` span per run, and no field a second user
+      turn could be stored in, so none of the 40 runs is multi-turn.
+    - >-
+      Forty runs carrying a conversation field, where the viewer simply renders only the first user turn of each.
+    - >-
+      Forty runs whose `steps` field lists conversation turns, so a full transcript can be reconstructed from it.
+  correct: 1
+  explanation: >-
+    Counted over all 40 runs the minimum and maximum number of `chat` spans are both 1, the user contributes one
+    message each, and the run record has eight fields of which none holds a message. That is the honest state of
+    this lab: it is a single-turn trajectory eval, completely and accurately, and no preset adds a turn that is
+    not in the data.
+
+- id: q2
+  question: >-
+    You replace the fixed user with a model that plays the customer, and the pass rate falls from 80% to 50%
+    overnight. What is the honest position?
+  options:
+    - >-
+      Two hypotheses fit the drop — the agent regressed, or the simulator asked for something stricter than the
+      old script did — and only measuring the simulator against hand-written labels can tell them apart.
+    - >-
+      The agent regressed, because a 30-point drop is far wider than any sampling noise on the same item set.
+    - >-
+      Neither, because once a simulator's prompt is fixed its generated turns are ground truth by construction.
+    - >-
+      The simulator is at fault by default, because simulated users are noisier than recorded transcripts in
+      every published benchmark.
+  correct: 0
+  explanation: >-
+    You changed two things at once and the score is downstream of both. The way out is the module-6 procedure:
+    label a small set of real turns by hand, run the simulator against those labels, and read TPR and TNR before
+    reading the agent's score. Repeats do not help here, because the variance being averaged away is sampling
+    variance and the error that matters is the instrument's bias.
+
+- id: q3
+  question: >-
+    A conversation is your eval item and you have to fix the label unit. Which sentence is the defensible one?
+  options:
+    - >-
+      Label the conversation as a whole, because a conversation is only correct or incorrect once you have read
+      all of it.
+    - >-
+      Label each user turn, because those are the items the simulator generates and each one is independently
+      checkable.
+    - >-
+      Label the final state only, because the side effects are the only thing a real user can actually be harmed
+      by.
+    - >-
+      Label each agent reply inside the conversation, with the denominator stated, because a reply has a position
+      in the trajectory and a position is what routes a failure to an owner.
+  correct: 3
+  explanation: >-
+    A per-reply label attaches to a step index, which is what turns a number into something you can debug and
+    hand to whoever owns that tool. Labelling the conversation as a whole gives you one verdict and no place to
+    start, and labelling user turns grades the simulator rather than the system under test.
+
+- id: q4
+  question: >-
+    You hand-write ten real transcripts, replay them turn by turn, and tune the agent until it passes all ten.
+    What has the set become?
+  options:
+    - >-
+      A regression suite, because it is deterministic and it runs in a second without a model in the loop.
+    - >-
+      A test of your transcripts, because the transcripts are now the thing the agent is measured against.
+    - >-
+      A script the agent has been fitted to, whose diversity is exactly the diversity of the ten conversations
+      you happened to write.
+    - >-
+      A baseline for the simulator, because a deterministic set is the only valid reference for a stochastic one.
+  correct: 2
+  explanation: >-
+    Playback is deterministic, which is why it feels safe and why it stops measuring anything once the agent has
+    seen it: every variation you did not write is a variation you are not testing. The set stays valuable as the
+    labelled reference the simulator is measured against, and only as that, with the held-out transcripts kept out
+    of every tuning session.
