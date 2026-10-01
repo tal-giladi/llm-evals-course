@@ -2,6 +2,7 @@
 - [Glossary](glossary.md)
 - [Course map](COURSE-MAP.md)
 - [Readings](references/README.md)
+- [Capstone](projects/capstone.md)
 
 - Part 1 — Look at it (browser only, no install)
 - **Module 1 — Why evals**
@@ -86,7 +87,7 @@
   - [49 · The GenAI semantic conventions](lessons/module-12/lesson-02.md)
   - [50 · Instrumenting the support bot by hand](lessons/module-12/lesson-03.md)
   - [51 · Auto-instrumentation, and when to stop trusting it](lessons/module-12/lesson-04.md)
-  - [52 · Reading traces: cost, latency, sessions, PII](lessons/module-12/lesson-05.md)
+  - [52 · Reading traces: cost, latency, sessions, and PII](lessons/module-12/lesson-05.md)
   - [Module 12 quiz](assessments/module-12-quiz.md)
 
 - **Module 13 — Regression suites in CI**
@@ -99,7 +100,7 @@
   - [57 · Sampling production traces](lessons/module-14/lesson-01.md)
   - [58 · Guardrails versus evals](lessons/module-14/lesson-02.md)
   - [59 · Drift in the input mix, and the alert band](lessons/module-14/lesson-03.md)
-  - [60 · Trace, labelled failure, new test case](lessons/module-14/lesson-04.md)
+  - [60 · Trace → labelled failure → new test case](lessons/module-14/lesson-04.md)
   - [Module 14 quiz](assessments/module-14-quiz.md)
 
 - Optional, and safe to skip
@@ -109,5 +110,3 @@
   - [63 · Annotation at scale, and inter-annotator agreement](lessons/module-15/lesson-03.md)
   - [64 · Evaluating a model migration](lessons/module-15/lesson-04.md)
   - [Module 15 quiz](assessments/module-15-quiz.md)
-- **Capstone**
-  - [Your own feature, end to end](projects/capstone.md)

@@ -7,8 +7,8 @@ Open decisions and handoff items. Working file — not imported.
 **Ready to import.** The Academy's own dry-run checker reports `0 problems`:
 
 ```
-Eval Lab: LLM Evals & Observability by Experiment: 13 modules, 47 lessons,
-58 quiz files, 321 questions (A-D 75/86/84/76), 0 problems
+Eval Lab: LLM Evals & Observability by Experiment: 17 modules, 64 lessons,
+79 quiz files, 444 questions (A-D 105/119/115/105), 0 problems
 ```
 
 - Repo: `tal-giladi/llm-evals-course` (suggested; public, hidden until launch)

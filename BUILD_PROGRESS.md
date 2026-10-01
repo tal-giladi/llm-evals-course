@@ -4,83 +4,63 @@ Working file. Not imported into the Academy.
 
 ## Goal
 
-Build the **fundamentals path (Modules 1–10, 43 lessons)** of the course described in
-`plan.md`, import-ready per `tals-academy/docs/new-course-instructions.md` (binding), so that
-`npm run check-course` reports `0 problems`.
+Build the full course described in `plan.md` — Modules 1–15 plus the capstone — import-ready
+per `tals-academy/docs/new-course-instructions.md` (binding).
 
-Modules 11–15 (production path: Python, Docker, tracing UI, CI, online monitoring) are
-**deferred** — see `TODO_FOR_TAL.md`.
+**COMPLETE.** 15 modules · 64 lessons · 64 lesson quizzes · 15 module quizzes · 9 simulations ·
+4 lab folders · 1 capstone. The Academy dry-run import check reports **`0 problems`**:
+17 modules, 64 lessons, 79 quiz files, 444 questions.
 
-## Decisions taken (2026-10-01, with Tal)
+## Decisions taken with Tal (2026-10-01)
 
-| # | Decision |
+| Question | Decision |
 |---|---|
-| Name | `Eval Lab: LLM Evals & Observability by Experiment` (plan §12.1) |
-| Data | Seeded **educational model** generates the judge-run records; every simulation is labelled "educational model". Real recordings replace the data files later without touching the engine. |
-| Scope of this pass | Modules 1–10 (browser-only fundamentals path) |
-| Production path | M11–M15 deferred; plan §12.6/§12.7/§12.8 still open |
-| Tiers | Tier A embedded simulations for every lesson. Tier B standalone playground (live WebLLM/Ollama judges) deferred with M11+. |
+| Name | `Eval Lab: LLM Evals & Observability by Experiment` |
+| Judge data | **Ship the seeded educational model.** No real recordings; every lab and lesson says so, and every statistic is computed for real from those verdicts |
+| Production path | Built in full: M11 Python, M12 tracing, M13 CI, M14 online, M15 optional |
+| Tracing UI (plan §12.6) | MLflow Tracing — Apache-2.0, no Docker. JSONL is the default; MLflow is the optional path |
+| Eval framework (plan §12.7) | Plain pytest, with a framework shown alongside |
+| Python package (plan §12.8) | `labs/common/evallab`, vendored into each module zip |
+| Live model | Optional everywhere. **No lesson requires an API key or a model download** |
+| Capstone | The learner's own feature; the eval design review is the deliverable |
 
 ## Units
 
-- [x] Repo spine (`BUILD_PROGRESS.md`, `curriculum/`, `.gitignore`, status logs)
-- [x] Lab kit — statistics engine (`simulations/common/stats.js`)
-- [x] Lab kit — code evaluators (`simulations/common/codemetrics.js`)
-- [x] Lab kit — shared UI + trace viewer (`simulations/common/ui.js`, `sim.css`)
-- [x] Build pipeline (`build/generate.mjs`) + generated datasets
-- [x] All nine simulations (judge-lab, tour, error-analysis, code-checks, eval-set, rag-evals, agent-evals, ab-gates, device-check)
-- [x] Browser smoke test (`build/smoke.mjs`) — all 9 labs clean in Edge
-- [x] Dataset verification (`build/verify.mjs`) — all checks pass
-- [x] Lesson/quiz validator (`build/check-lessons.mjs`)
-- [x] Shared docs: `README.md`, `_sidebar.md`, `glossary.md`, `templates/`, `references/`, `COURSE-MAP.md`, `TODO_FOR_TAL.md`
-- [x] Writing brief for agents (`curriculum/AGENT-BRIEF.md`)
-- [x] Module 1 — Why evals (4 lessons)
-- [x] Module 2 — Error analysis (4)
-- [x] Module 3 — Code-based checks (4)
-- [x] Module 4 — Building the eval set (4)
-- [x] Module 5 — Designing an LLM judge (5)
-- [x] Module 6 — Validating the judge (5)
-- [x] Module 7 — Judge biases, models and cost (5)
-- [x] Module 8 — Evaluating RAG answers (4)
-- [x] Module 9 — Evaluating agents and conversations (4)
-- [x] Module 10 — Comparing systems and release gates (4)
-- [x] Module quizzes M1–M10 (`assessments/`)
-- [x] Final QA — `npm run check-course` reports 0 problems
+- [x] Repo spine, `.gitignore`/`.gitattributes` (LF), status logs
+- [x] Lab kit: `simulations/common/stats.js` and `codemetrics.js`
+- [x] Lab kit: accessible UI kit (`ui.js`, `sim.css`) and the 9 simulations
+- [x] Dataset pipeline (`build/generate.mjs`, `build/lib/`) and the JSON twin for Python
+- [x] Modules 1–10 — the browser-only fundamentals path
+- [x] `evallab` Python package: parity-tested port, gate, tracing, online
+- [x] Modules 11–15 — the production path
+- [x] Four lab folders, each with a starter that fails on its named TODO and a solution that passes
+- [x] The capstone brief
+- [x] Shared docs: README, COURSE-MAP, glossary, templates, references, TODO_FOR_TAL
+- [x] `curriculum/module-plans-11-15.md` and `curriculum/AGENT-BRIEF.md`
 
-**COMPLETE.** 13 modules, 47 lessons, 58 quiz files, 321 questions, 9 simulations. The Academy dry-run
-import check reports `0 problems`. All five build commands pass (erify, ix-quiz-yaml,
-check-lessons, smoke, and `pytest`).
+## Commands
 
-## Who is working on what right now
+```
+node build/generate.mjs        # rebuild every dataset from build/lib/*
+node build/verify.mjs          # the data supports the claims the lessons make
+node build/parity-fixtures.mjs # regenerate the JavaScript-vs-Python fixtures
+node build/fix-quiz-yaml.mjs   # repair quiz YAML the importer would drop
+node build/check-lessons.mjs   # 64 lessons: format, links, presets, quiz rules
+node build/smoke.mjs           # 9 simulations in a real browser
+py -m pytest -q                # 186 Python tests
+```
 
-*(main session = the orchestrator; one sub-agent max, per instructions §9)*
+All five checks pass. The lab **starters** are meant to fail — 64 tests fail there, each on its
+named TODO. That is the exercise, not a broken build.
 
-- main session: lab kit → data pipeline → `judge-lab` → shared docs.
-- sub-agent: idle.
+The authority on importability is the Academy's own checker:
 
-## Resume procedure
-
-1. `git status` — see what is uncommitted.
-2. Read this file.
-3. Read `curriculum/status/module-NN.log` for each module; skip `lesson-MM done` entries.
-4. Check `_sidebar.md` for which lessons exist.
-5. Continue the first unchecked unit above.
-
-## Rules being followed
-
-- Instructions file is binding; `plan.md` loses to it on any conflict.
-- One lesson at a time to completion: `lesson-MM.md` **and** `lesson-MM.quiz.yaml`.
-- After each lesson append `lesson-MM done` to `curriculum/status/module-NN.log`; after the module, `module done`.
-- Commit to git after every finished module.
-- Never more than two writing agents. Agents never touch `_sidebar.md`, `glossary.md`, `README.md`, `simulations/`, `datasets/`, `templates/` — shared files are the main session's job.
+```
+cd C:/Users/TalGiladi/OneDrive/repos/tals-academy
+npm run check-course -- ../course-creator/llm-evals-course
+```
 
 ## Open questions
 
-- Plan §12.6 (tracing UI), §12.7 (eval framework), §12.8 (Python package) — deferred with M11–M15.
-- Plan §12.5 (who labels our datasets) — our educational-model labels are synthetic; real labelling pass is Tal's call.
-- Plan §12.9 (Hebrew judging set) — not in this pass.
-- Plan §12.2/§12.3 (shared lab kit with rag-course, Academy network access) — this pass vendors a standalone copy into `simulations/common/`; sharing is not decided.
-
-
-
-
+None blocking. `TODO_FOR_TAL.md` records the known simplifications and the deliberate sharp edges
+left in the labs on purpose, and the decisions a later revision might revisit.
