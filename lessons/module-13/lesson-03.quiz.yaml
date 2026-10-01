@@ -1,0 +1,117 @@
+- id: q1
+  question: >-
+    The gate blocks 13.8% of healthy builds at one repeat. The team widens the tolerance to 10 points and
+    the false alarms stop. What does that change cost on the same 57 dev items?
+  options:
+    - >-
+      Nothing measurable, because a healthy build's pass rate never moves further than the noise the gate
+      was already absorbing.
+    - >-
+      A 12-item break costs 12.28 points there, so the gate goes quiet on a regression it was previously
+      catching.
+    - >-
+      About 4 points of the suite's pass rate, since the wider tolerance stops the judge scoring borderline
+      answers as failures.
+    - >-
+      One extra judge call per item, because a threshold this wide needs a second sample before it can
+      compare two pass rates.
+  correct: 1
+  explanation: >-
+    Sweeping the tolerance on those items gives `[T,T,T,T,F,F]` at 0.5, 2, 5, 10, 20 and 30 points, so a
+    10-point threshold has already stopped seeing the 12.28-point drop. Inside the gate a widened tolerance
+    and a hidden regression produce the same line of output, which is why the planted regression has to be
+    a test.
+
+- id: q2
+  question: >-
+    A run is set to 2 repeats to halve its cost. The suite's pass rate falls from 53.2% to 42.6% on the same
+    94 items and nothing in the product changed. Why?
+  options:
+    - >-
+      Two repeats cannot express a majority on a binary verdict, so the judge returns an error that the
+      runner counts as a failure.
+    - >-
+      The cache key includes the repeat count, so the second sample is served from the previous run's
+      verdicts and the run is partly duplicated.
+    - >-
+      A judge at low temperature is only calibrated for odd sample counts and silently falls back to its
+      first verdict without scoring the second.
+    - >-
+      `majority_vote` breaks a tie toward fail, so two of two is a failure and 2 repeats is the strictest
+      setting available.
+  correct: 3
+  explanation: >-
+    With two samples the only possible outcomes are 2-0 and 1-1, and 1-1 is not a majority, so the rule
+    sends it to fail. That is why every even repeat count is the strictest one you can ship and why the
+    cheapest saving available is the one nobody should take.
+
+- id: q3
+  question: >-
+    A developer adds `s05` to the quarantine list with the reason "flaky" and their own name, and leaves
+    the review date out because the fix is not scheduled yet. What happens, and why is that the right
+    behaviour?
+  options:
+    - >-
+      The entry is accepted with an empty date, which `overdue` treats as never, so the check stays off the
+      list permanently.
+    - >-
+      The entry is accepted, and the gate drops `s05` from the pass rate, so the flaky item stops moving the
+      number.
+    - >-
+      `add` raises, because a reason, an owner and a review date are all required to keep an entry from
+      being a deleted test in disguise.
+    - >-
+      The entry is accepted and the gate still scores `s05`, so the run keeps reporting it until somebody
+      notices the empty date.
+  correct: 2
+  explanation: >-
+    The constructor refuses any entry missing one of the three, with the message that an entry without all
+    three is a deleted test wearing a badge. A date is the part that stops the list becoming a landfill:
+    `overdue(today)` is how it says the promise was not kept.
+
+- id: q4
+  question: >-
+    With 9 of 94 items on the quarantine list and a 9-item break planted, `run_gate` still blocks and the
+    reason string is unchanged. What does that tell you about how the list is wired into the decision?
+  options:
+    - >-
+      The gate drops quarantined items from the paired comparison, so it would have stayed quiet if all 9
+      were already listed.
+    - >-
+      The gate names the quarantined ids it ran and decides over every pair it was given, so the list
+      changes what the report says and not what it decides.
+    - >-
+      The gate refuses to run at all when the list is non-empty and falls back to a fixed baseline pass
+      rate.
+    - >-
+      The gate blocks on any change once the list is non-empty, so a healthy build with a quarantined item
+      also goes red.
+  correct: 1
+  explanation: >-
+    `quarantined` is computed by intersecting the ids the run actually used with the list, and the drop is
+    then taken over every pair. Keeping the decision independent is what stops a list somebody wrote on a
+    tired Tuesday from arguing the gate out of a real regression.
+
+- id: q5
+  question: >-
+    Repeats go from 1 to 3 on the dev split at a 5-point tolerance. False alarms fall from 23.5% to 18.2%
+    and the miss rate against a 3-item break goes from 54.8% to 58.8%. What does the miss column say about
+    the extra two thirds of the cost you paid?
+  options:
+    - >-
+      It bought a quieter measurement of the same drop, and a proportional regression stays exactly as
+      detectable at one sample as at three.
+    - >-
+      It bought nothing, because the false-alarm rate is the only rate a threshold on a pass rate can ever
+      move.
+    - >-
+      It bought a smaller miss rate that 57 items are too few to show, and a third run would reveal it over
+      400 pairs.
+    - >-
+      It shows the miss rate still falling, but slowly, so about ten repeats would be needed before the
+      improvement was worth buying.
+  correct: 0
+  explanation: >-
+    Averaging shrinks the spread around a measurement, 5.87 points to 4.85 at three repeats, and leaves the
+    size of the signal alone. A change that breaks 3 of 57 items costs 5.26 points whether it is measured
+    once or three times, which is why more items is the cheaper purchase.

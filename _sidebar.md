@@ -88,3 +88,9 @@
   - [51 · Auto-instrumentation, and when to stop trusting it](lessons/module-12/lesson-04.md)
   - [52 · Reading traces: cost, latency, sessions, PII](lessons/module-12/lesson-05.md)
   - [Module 12 quiz](assessments/module-12-quiz.md)
+
+- **Module 13 — Regression suites in CI**
+  - [53 · The suite in GitHub Actions](lessons/module-13/lesson-01.md)
+  - [54 · Caching judge calls](lessons/module-13/lesson-02.md)
+  - [55 · Flaky evals: repeats, tolerances, quarantine](lessons/module-13/lesson-03.md)
+  - [56 · The eval budget, and the report on the pull request](lessons/module-13/lesson-04.md)

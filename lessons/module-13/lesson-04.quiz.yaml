@@ -1,0 +1,114 @@
+- id: q1
+  question: >-
+    A suite is 94 items at 3 repeats, under `Budget(max_calls=282, max_usd=10.70)`. A run comes back with
+    `over_calls` false and `over_usd` true. What does that pair tell you?
+  options:
+    - >-
+      The run stayed the size it was configured to be and the price sheet moved underneath it, so nobody
+      edited the suite.
+    - >-
+      The suite grew by a repeat and the price per call also moved, so both edits need reviewing together
+      before the run is believed.
+    - >-
+      The run used fewer than 282 calls, so the dollar ceiling was set from a stale price and is the one
+      number to fix.
+    - >-
+      Neither ceiling is trustworthy, because a dollar figure and a call count cannot both be true for the
+      same run.
+  correct: 0
+  explanation: >-
+    `max_calls` is a property of the suite and `max_usd` is a property of a price sheet on a particular
+    day, which is why both are written down. Only `max_usd` crossing means nobody edited the configuration
+    and the bill still moved, which is the case nobody currently investigates.
+
+- id: q2
+  question: >-
+    The budget is checked once, after the suite has finished every call, instead of before each one. What
+    changes about the run?
+  options:
+    - >-
+      Nothing in the reported numbers, but the run is slower because the check is no longer inside the
+      per-item loop.
+    - >-
+      The run reports its real spend and fails the check, so a breach is still visible and still blocks the
+      merge.
+    - >-
+      The run stops at the first call past the limit, which is the only ordering that cannot overshoot by
+      one call.
+    - >-
+      The breach is discovered after the money is spent, so the ceiling reports a number rather than
+      preventing it.
+  correct: 3
+  explanation: >-
+    Checking at the end has already spent the money and has only decided not to admit it. The run with the
+    ceiling at 40 stops at exactly 40 calls and reports `"ok": false`; checked at the end it would have
+    called 282 of them and then apologised.
+
+- id: q3
+  question: >-
+    A budget is charged for cache hits as well as misses, and the suite runs entirely warm: 282 hits and 0
+    calls. What happens in practice?
+  options:
+    - >-
+      Nothing, because a hit is a lookup and the runner skips the ceiling for lookups automatically on a
+      warm run.
+    - >-
+      The run passes at $0.00 and records a hit rate of 1.0, which is the behaviour a warm run is supposed
+      to have.
+    - >-
+      The run reports 282 calls against the ceiling, fails, and the cheapest fix anybody reaches for is to
+      remove the cache.
+    - >-
+      The run fails and the ceiling is raised, which keeps the cache and prices every lookup at the
+      provider's rate.
+  correct: 2
+  explanation: >-
+    A hit is a lookup, not a call, and the ordering that makes this work is cache first, budget second.
+    Getting it wrong fails every warm run, on exactly the runs where the cache was saving the most, and
+    the response people reach for is to delete the lever rather than to fix the order.
+
+- id: q4
+  question: >-
+    A pull request is blocked, but the job fails at the gate step and the comment is posted in a later
+    step. What does the engineer get, and what do they do next?
+  options:
+    - >-
+      The comment and a red X, so they read the drop, the interval and the spec before deciding what to do
+      about it.
+    - >-
+      A red X and no comment, so they re-run the suite locally, where it passes and the gate stops being
+      believed.
+    - >-
+      A red X and the failing step's output, so they read the log, find the drop in it and decide from
+      that.
+    - >-
+      Nothing until the whole workflow finishes, so the author sees the comment and the merge button at the
+      same moment.
+  correct: 1
+  explanation: >-
+    That is why the gate step carries `continue-on-error` and the failure is a later step: a red X with no
+    explanation is an instruction to re-run, and re-running is how a required check quietly stops being a
+    check. Post the reason first, block the merge second.
+
+- id: q5
+  question: >-
+    The comment on a blocked pull request prints a drop of `-12.3` points against a 5-point tolerance, and
+    nothing else. What has the reader been given?
+  options:
+    - >-
+      A measurement of this run together with the threshold it was compared against, which is what a gate
+      reports.
+    - >-
+      A regression check, since any drop larger than the tolerance is by definition the change the gate
+      exists to catch.
+    - >-
+      A number, not a decision: without the named regression and the two accepted rates, nobody can say
+      whether it worked.
+    - >-
+      Two separate results, because the drop and the tolerance are each a measurement and the reader is
+      expected to compare them.
+  correct: 2
+  explanation: >-
+    The spec block is what turns a threshold crossing into something a reader can argue with: what
+    regression the gate was built to catch, what false-alarm rate was accepted, and how wide the
+    measurement was. It is the per-run version of the rule in the eval design review template.
