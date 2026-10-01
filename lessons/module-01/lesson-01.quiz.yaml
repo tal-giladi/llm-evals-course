@@ -4,7 +4,8 @@
     in front of a release gate. What do you say?
   options:
     - Raise the sample to 200 items so the pass rate settles before the judge is trusted.
-    - Do not gate on it yet: it fails only one real failure in six, so most regressions would ship anyway.
+    - >-
+      Do not gate on it yet: it fails only one real failure in six, so most regressions would ship anyway.
     - Lower the pass threshold until the judge's rate matches the human rate on the same items.
     - Gate on the kappa instead, because a negative kappa is still a number and a number can be a gate.
   correct: 1
@@ -20,7 +21,8 @@
   options:
     - The second system is worse, because a smaller point estimate usually means a stricter check.
     - You must collect at least 500 more items before either number may be quoted at all.
-    - The two systems are indistinguishable on this run: 3.5 points is inside both intervals.
+    - >-
+      The two systems are indistinguishable on this run: 3.5 points is inside both intervals.
     - The intervals overlap, so the better system is the one whose author wrote the eval set.
   correct: 2
   explanation: >-

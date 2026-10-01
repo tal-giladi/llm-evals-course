@@ -213,17 +213,41 @@ function checkQuiz(path) {
     if (!Array.isArray(q.options) || q.options.length !== 4) {
       fail(path, `${q.id} has ${q.options?.length ?? 0} options; exactly 4 required`);
     } else {
+      // The Academy drops a question unless every option is a non-empty
+      // string, so a value that parsed as a map (from a ": " in the source)
+      // has to fail here too rather than pass as a length-4 array.
+      q.options.forEach((o, k) => {
+        if (typeof o !== "string") {
+          fail(path, `${q.id} option ${k} parsed as ${typeof o}, not a string — it contains ": " and needs a >- block scalar`);
+        } else if (!o.trim()) {
+          fail(path, `${q.id} option ${k} is empty`);
+        }
+      });
+      if (typeof q.question !== "string" || !q.question.trim()) {
+        fail(path, `${q.id} question is not a non-empty string`);
+      }
+      if (typeof q.explanation !== "string" || !q.explanation.trim()) {
+        fail(path, `${q.id} explanation is not a non-empty string`);
+      }
       const uniq = new Set(q.options.map((o) => String(o).trim().toLowerCase()));
       if (uniq.size !== 4) fail(path, `${q.id} has duplicate options`);
       if (uniq.size > 0 && /^(all|none) of the above/i.test(String(q.options[0]).trim())) {
         fail(path, `${q.id} uses "all/none of the above"`);
       }
+      // The Academy enforces option-length balance twice, and the stricter
+      // rule is the one in the actual importer
+      // (tals-academy/src/lib/importer/quiz-files.ts):
+      //   len(correct) > longestWrong * 1.5 && len(correct) - longestWrong > 30
+      // The looser 1.8x + 20 rule in scripts/quiz-files.ts is only the
+      // dry-run helper, so match the importer or the course will be rejected
+      // on a question our own check called fine.
+      const len = (s) => String(s).trim().length;
       const correct = q.options[q.correct];
       if (correct !== undefined) {
-        const others = q.options.filter((_, k) => k !== q.correct).map((o) => String(o).length);
-        const longestWrong = Math.max(...others);
-        if (String(correct).length > longestWrong * 1.6) {
-          notes.push(`${path}: ${q.id} correct option is much longer than the others`);
+        const longestWrong = Math.max(...q.options.filter((_, k) => k !== q.correct).map(len));
+        if (len(correct) > longestWrong * 1.5 && len(correct) - longestWrong > 30) {
+          fail(path, `${q.id} correct option is ${len(correct)} chars against a longest wrong option of ${longestWrong} ` +
+            `(importer limit: >${(longestWrong * 1.5).toFixed(0)} and more than 30 longer)`);
         }
       }
     }
@@ -269,10 +293,26 @@ for (let m = 1; m <= 10; m++) {
       data.forEach((q, i) => {
         if (!Array.isArray(q.options) || q.options.length !== 4) {
           fail(`module-${id}-quiz.quiz.yaml`, `${q.id} needs exactly 4 options`);
+        } else {
+          q.options.forEach((o, k) => {
+            if (typeof o !== "string" || !o.trim()) {
+              fail(`module-${id}-quiz.quiz.yaml`, `${q.id} option ${k} is not a non-empty string (a ": " in the source?)`);
+            }
+          });
+          if (typeof q.explanation !== "string" || !q.explanation.trim()) {
+            fail(`module-${id}-quiz.quiz.yaml`, `${q.id} has no explanation`);
+          }
+          const len2 = (s) => String(s).trim().length;
+          const correct = q.options[q.correct];
+          if (correct !== undefined) {
+            const longestWrong = Math.max(...q.options.filter((_, k) => k !== q.correct).map(len2));
+            if (len2(correct) > longestWrong * 1.5 && len2(correct) - longestWrong > 30) {
+              fail(`module-${id}-quiz.quiz.yaml`, `${q.id} correct option is much longer (${len2(correct)} vs ${longestWrong})`);
+            }
+          }
         }
         if (![0, 1, 2, 3].includes(q.correct)) fail(`module-${id}-quiz.quiz.yaml`, `${q.id} correct out of range`);
         else positions.push(q.correct);
-        if (!q.explanation) fail(`module-${id}-quiz.quiz.yaml`, `${q.id} has no explanation`);
       });
       if (new Set(positions).size < 3) {
         notes.push(`module-${id}-quiz.quiz.yaml: correct answers spread over only ${new Set(positions).size} positions`);

@@ -30,8 +30,25 @@ function walk(dir) {
 }
 
 // A plain scalar is unsafe if it contains ": " or " #", or ends with ":".
+// Note this does not always make YAML *throw*: `Do not gate on it: it fails
+// 6 of 6 times` parses happily as a one-key map, and the Academy then drops
+// the whole question as "options must be 4 non-empty strings". So the damage
+// is silent either way, which is why this runs on every file, not just the
+// ones that fail to parse.
 function unsafe(text) {
   return /:\s/.test(text) || /\s#/.test(text) || /:$/.test(text.trim());
+}
+
+/** Mirrors the Academy's per-question rules. */
+function healthy(data) {
+  return Array.isArray(data) && data.length > 0 && data.every(
+    (q) => q && q.id
+      && typeof q.question === "string" && q.question.trim()
+      && Array.isArray(q.options) && q.options.length === 4
+      && q.options.every((o) => typeof o === "string" && o.trim())
+      && Number.isInteger(q.correct) && q.correct >= 0 && q.correct <= 3
+      && typeof q.explanation === "string" && q.explanation.trim()
+  );
 }
 
 function fixFile(path) {
@@ -99,41 +116,46 @@ function fixFile(path) {
     console.log(`  SKIP ${path.replace(ROOT + "\\", "")}: repair did not parse (${e.message.split("\n")[0]})`);
     return false;
   }
-  const wellFormed = Array.isArray(newData) && newData.length > 0 && newData.every(
-    (q) => q && q.id && Array.isArray(q.options) && q.options.length === 4 &&
-           Number.isInteger(q.correct) && q.correct >= 0 && q.correct <= 3 && q.explanation
-  );
-  if (!wellFormed) {
+  if (!healthy(newData)) {
     console.log(`  SKIP ${path.replace(ROOT + "\\", "")}: repair did not produce a well-formed quiz`);
     return false;
   }
 
+  // Where the original did parse, the only acceptable change is quoting: same
+  // question ids, same correct indices, same option texts. An option that
+  // parsed as a map has to come back as the string it was written as, so
+  // compare against a reconstruction of what the author wrote.
   let oldData = null;
   try { oldData = yaml.load(before); } catch { oldData = null; }
-  if (oldData) {
-    const shape = (d) => JSON.stringify(d.map((q) => ({
-      id: q.id,
-      correct: q.correct,
-      n: q.options.length,
-      optText: q.options.map((o) => String(o).replace(/\s+/g, " ").trim()),
-      q: String(q.question || "").replace(/\s+/g, " ").trim(),
-      e: String(q.explanation || "").replace(/\s+/g, " ").trim(),
-    })));
-    if (shape(oldData) !== shape(newData)) {
-      console.log(`  SKIP ${path.replace(ROOT + "\\", "")}: repair changed the data, not just the quoting`);
-      return false;
+  if (Array.isArray(oldData) && oldData.length === newData.length) {
+    const norm = (v) => String(v).replace(/\s+/g, " ").trim();
+    for (let i = 0; i < oldData.length; i++) {
+      const o = oldData[i], n = newData[i];
+      const oldOpts = (o.options || []).map((x) =>
+        x && typeof x === "object" ? Object.entries(x).map(([k, val]) => `${k}: ${val}`).join(" ") : norm(x));
+      if (o.id !== n.id || o.correct !== n.correct) {
+        console.log(`  SKIP ${path.replace(ROOT + "\\", "")}: repair changed id or correct index`);
+        return false;
+      }
+      if (oldOpts.length === n.options.length && oldOpts.some((t, k) => t !== norm(n.options[k]))) {
+        console.log(`  SKIP ${path.replace(ROOT + "\\", "")}: repair changed option text`);
+        return false;
+      }
     }
   }
   writeFileSync(path, after, "utf8");
   return true;
 }
 
-let fixed = 0;
+let fixed = 0, failed = 0;
 for (const f of walk(join(ROOT, "lessons")).concat(walk(join(ROOT, "assessments")))) {
-  let parsed = true;
-  try { yaml.load(readFileSync(f, "utf8")); } catch { parsed = false; }
-  if (parsed) continue;
+  let data = null;
+  try { data = yaml.load(readFileSync(f, "utf8")); } catch { /* needs repair */ }
+  if (healthy(data)) continue;          // already fine, or a file to hand-check
   if (fixFile(f)) { console.log(`  fixed ${f.replace(ROOT + "\\", "")}`); fixed++; }
-  else console.log(`  UNFIXED ${f.replace(ROOT + "\\", "")}`);
+  else { console.log(`  UNFIXED ${f.replace(ROOT + "\\", "")}`); failed++; }
 }
-console.log(fixed ? `\nRepaired ${fixed} quiz file(s).\n` : "\nNothing to repair.\n");
+console.log(fixed || failed
+  ? `\nRepaired ${fixed} quiz file(s), ${failed} still need hand repair.\n`
+  : "\nNothing to repair.\n");
+if (failed) process.exitCode = 1;

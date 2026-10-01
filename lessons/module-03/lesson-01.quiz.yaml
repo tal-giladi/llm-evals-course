@@ -26,7 +26,8 @@
     A check reads 100.0% on a system that is exactly right 20 times out of 20, and 100.0% on a
     system that is exactly right 6 times out of 20. What does that pair of numbers tell you?
   options:
-    - Nothing about either system: the check gives them the same number, so it cannot separate them.
+    - >-
+      Nothing about either system: the check gives them the same number, so it cannot separate them.
     - The first system is better, because a perfect score is stronger evidence than a partial one.
     - The check is correct and conservative, since it rejected nothing and so admitted no false alarm.
     - The second system needs a different prompt, because no single check can score both systems.

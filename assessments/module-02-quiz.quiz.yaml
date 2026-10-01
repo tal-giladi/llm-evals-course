@@ -22,7 +22,8 @@
     - A fair gate, because 27 of 94 traces is 28.7% of traffic and that is above any sane threshold.
     - A gate that is too strict for this product, and the threshold should be relaxed to 10% first.
     - How often the post-check fires, which is a property of the check rather than of the answers.
-    - The 20 failures the check was never written for: wrong facts, refusals and invented policies.
+    - >-
+      The 20 failures the check was never written for: wrong facts, refusals and invented policies.
   correct: 3
   explanation: >-
     A check that tests one property is an alarm for that property. This one flagged 27 of the 47 failures
